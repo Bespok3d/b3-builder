@@ -1,0 +1,26 @@
+name: Bespok3d build
+description: Build a plugin source dir into a gated, class-aware, signed .b3 plus its index atom, over the one b3-builder core.
+author: Bespok3d
+branding:
+  icon: package
+  color: purple
+inputs:
+  kind:
+    description: monorepo-bundle (pack an opt-in bundle into one index) or co-repo (per-plugin atoms plus a sub-list)
+    required: false
+    default: co-repo
+  source:
+    description: the plugin source root (the repo dir to build from)
+    required: false
+    default: .
+  out:
+    description: output directory for the .b3 set and the registry index
+    required: false
+    default: dist
+  channel:
+    description: release or dev bundling (monorepo-bundle only)
+    required: false
+    default: release
+runs:
+  using: node20
+  main: dist/action/main.js

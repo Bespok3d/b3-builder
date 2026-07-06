@@ -1,0 +1,10 @@
+# Build output and installed deps, never committed.
+dist/
+node_modules/
+
+# Local caches / OS cruft.
+.DS_Store
+*.tsbuildinfo
+
+# The golden fixtures under test/golden/ ARE committed (they are the reproduction target for the
+# equivalence harness); nothing under test/ is ignored.

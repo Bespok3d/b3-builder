@@ -1,0 +1,27 @@
+{
+  "name": "tun-module",
+  "title": "TUN kernel module",
+  "version": "0.1.0",
+  "description": "Loads the Linux `tun` kernel module so the printer has a working /dev/net/tun. Mesh-VPN plugins (ZeroTier needs it; Tailscale runs lighter with it) build a virtual network interface on top of it. The Snapmaker U1's stock kernel ships tun neither built in nor as a module, so this plugin carries a `tun.ko` cross-built against the exact running kernel (6.1.99 aarch64) and insmods it at boot, before the services that need it. Nothing to configure: install it (or install a VPN plugin that requires it) and /dev/net/tun is there.",
+  "tagline": "Adds /dev/net/tun to the printer, the base a mesh VPN builds on.",
+  "category": "system",
+  "channel": "testing",
+  "publisher": "PLACEHOLDER",
+  "printer_specific": true,
+  "published_at": "2026-07-05",
+  "updated_at": "2026-07-05",
+  "requires": {
+    "capabilities": [
+      "kernel-modules"
+    ]
+  },
+  "provides": [
+    "tun"
+  ],
+  "require": [],
+  "conflicts": [],
+  "doc_url": "https://github.com/Bespok3d/networking/blob/main/tun-module/doc/README.md",
+  "download_url": "tun-module-0.1.0.b3",
+  "config": [],
+  "changelog_url": "tun-module/doc/CHANGELOG.md"
+}

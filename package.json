@@ -1,0 +1,45 @@
+{
+  "name": "@bespok3d/builder",
+  "version": "0.0.1",
+  "description": "The Bespok3d plugin build system: turn a plugin source dir into a gated, class-aware, signed .b3 plus its index atom, the same way locally (a bespok3d build CLI) and in CI (a reusable GitHub Action) over one importable core.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "bespok3d": "dist/cli/main.js"
+  },
+  "main": "./dist/core/index.js",
+  "types": "./dist/core/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "action.yml",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "rule-zero": "node scripts/rule-zero-guard.mjs",
+    "test": "vitest run",
+    "capture-golden": "tsx test/capture-golden.ts",
+    "check": "bash scripts/check.sh"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/adm-zip": "^0.5.8",
+    "@types/node": "^22.19.1",
+    "adm-zip": "^0.5.16",
+    "eslint": "^10.4.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.59.4",
+    "vitest": "^2.1.9"
+  }
+}
