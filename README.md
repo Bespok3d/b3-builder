@@ -241,7 +241,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: Bespok3d/b3-builder@v1
+      - uses: Bespok3d/b3-builder@main
         with:
           unit: repo
           bake: 'true'
