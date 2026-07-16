@@ -5,7 +5,7 @@ branding:
   icon: package
   color: purple
 
-# The one reusable CI face over the same publisher core the `bespok3d build` CLI runs (R5). A plugin
+# The one reusable CI face over the same publisher core the `b3-builder build` CLI runs (R5). A plugin
 # repo pulls its whole pipeline from this Action instead of hand-copying a release.yml: build (bake the
 # per-class payloads) then test then pack then release (a GitHub release + asset per plugin) then index
 # (finalize each catalog entry's download_url with the real release URL) then register (reference the

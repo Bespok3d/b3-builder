@@ -1,7 +1,7 @@
 # b3-builder: instructions for AI assistants
 
 You are working in b3-builder, the Bespok3d plugin build system: the drop-in that turns a plugin source
-dir into a gated, class-aware, signed `.b3` plus its index atom, the same way locally (a `bespok3d build`
+dir into a gated, class-aware, signed `.b3` plus its index atom, the same way locally (a `b3-builder build`
 CLI) and in CI (a reusable GitHub Action) over one importable core. This file is the contract for any LLM
 or agent that touches this repo. Contributors here use AI assistance, so the rules and the design intent
 are written down and enforced in the gate, not left implicit. Read them and uphold them; the human
@@ -132,7 +132,7 @@ declares nothing to bake and packs clean.
 ### The reusable CI Action (R5, packet 8; `action.yml` + `src/action/`)
 
 `action.yml` is a **composite** GitHub Action that wraps the tool with the GitHub-specific orchestration a
-plugin repo's release needs: build + pack + index (one `bespok3d build`), then test, then release (a GitHub
+plugin repo's release needs: build + pack + index (one `b3-builder build`), then test, then release (a GitHub
 release + `.b3` asset per plugin), then finalize each sub-list entry's `download_url` with the real release
 asset URL, then register the sub-list in the index-of-lists. It exists so every repo pulls one `uses:`
 instead of hand-copying a `release.yml`.
@@ -149,7 +149,7 @@ instead of hand-copying a `release.yml`.
 - **Both git pushes are push-race hardened** (5-attempt rebase-retry). Do not weaken them back to a bare push.
 - **`exclude-dirs` is caller curation, not a variant concept.** A repo with a dev-only variant dir that
   holds a `manifest.json` but must never publish (e.g. `fluidd-bleeding-edge`) passes `exclude-dirs` in
-  its own `release.yml`; the Action threads it to `bespok3d build --exclude <dir>` AND skips it in the
+  its own `release.yml`; the Action threads it to `b3-builder build --exclude <dir>` AND skips it in the
   release loop. Discovery filters it in ONE place (`sourcesFor(request)` in `build/discovery.ts`), so
   every step (bake, pack, index, gate) skips the same dirs and cannot drift. The core learns only WHICH
   dirs to skip, never that one is a "dev variant": no `bundle.dev.json` / channel / variant knowledge

@@ -5,14 +5,14 @@ import { parseArgs } from 'node:util'
 import { describeError, publisherRequest, runPipeline } from '../core/index.js'
 import type { BuildRequest, BuildUnit } from '../core/index.js'
 
-// The `bespok3d build` CLI: a thin face over the one publisher core. It parses the invocation into a
+// The `b3-builder build` CLI: a thin face over the one publisher core. It parses the invocation into a
 // BuildRequest and runs the pipeline, then reports what was produced. Its unit is a plugin dir (build
 // one .b3 + atom) or a repo of plugin dirs (a .b3 + atom each, plus one assembled sub-list); the unit is
 // auto-detected from whether the source dir itself holds a manifest.json, or set explicitly with
 // --unit. Publisher/org identity (--atom-repo, and --list-name/--list-publisher for a repo) is passed
 // in, never baked.
 const USAGE =
-  'usage: bespok3d build --source <dir> --out <dir> --atom-repo <owner/repo> [--unit plugin|repo] [--list-name <name>] [--list-publisher <name>] [--exclude <dir>]... [--skip-unchanged] [--bake]'
+  'usage: b3-builder build --source <dir> --out <dir> --atom-repo <owner/repo> [--unit plugin|repo] [--list-name <name>] [--list-publisher <name>] [--exclude <dir>]... [--skip-unchanged] [--bake]'
 
 function requestFromArgs(args: string[]): BuildRequest {
   const { values } = parseArgs({
@@ -65,7 +65,7 @@ async function main(argv: string[]): Promise<number> {
 main(process.argv).then(
   (code) => process.exit(code),
   (error: unknown) => {
-    process.stderr.write(`bespok3d build failed: ${describeError(error)}\n`)
+    process.stderr.write(`b3-builder build failed: ${describeError(error)}\n`)
     process.exit(1)
   },
 )

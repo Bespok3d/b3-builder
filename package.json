@@ -1,13 +1,13 @@
 {
   "name": "@bespok3d/builder",
   "version": "0.0.1",
-  "description": "The Bespok3d plugin build system: turn a plugin source dir into a gated, class-aware, signed .b3 plus its index atom, the same way locally (a bespok3d build CLI) and in CI (a reusable GitHub Action) over one importable core.",
+  "description": "The Bespok3d plugin build system: turn a plugin source dir into a gated, class-aware, signed .b3 plus its index atom, the same way locally (a b3-builder CLI) and in CI (a reusable GitHub Action) over one importable core.",
   "type": "module",
   "engines": {
     "node": ">=20"
   },
   "bin": {
-    "bespok3d": "dist/cli/main.js"
+    "b3-builder": "dist/cli/main.js"
   },
   "main": "./dist/core/index.js",
   "types": "./dist/core/index.d.ts",
@@ -23,6 +23,7 @@
     "README.md"
   ],
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
