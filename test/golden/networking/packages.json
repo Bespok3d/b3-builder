@@ -1,0 +1,400 @@
+{
+  "tailscale-0.1.1.b3": {
+    "entries": [
+      {
+        "path": "doc/CHANGELOG.md",
+        "sha256": "1403a027e2ba1d5be995433292d44d92cc1136fe0119a477effbc241ac522b3a"
+      },
+      {
+        "path": "doc/README.md",
+        "sha256": "ac6cb130c1dfa3465b95e80af9234c8df6e3f957c0d175a7c9f9f2dd5748f7ab"
+      },
+      {
+        "path": "files/authkey.tmpl",
+        "sha256": "1af6eaa460c33070c748255b11d6a96453af9ee1016deb224246fd0313171a33"
+      },
+      {
+        "path": "files/bin/tailscale-aarch64",
+        "sha256": "d5626ec51dc8de2da07976e27c8fd02dae99fae421b5f5f416c135a9fb9c266a"
+      },
+      {
+        "path": "files/bin/tailscaled-aarch64",
+        "sha256": "a595b290bc114f921b3211fbf760f8157bc39e57ceccb38a6b00d45b144b41f5"
+      },
+      {
+        "path": "files/bin/ts-run",
+        "sha256": "b9a3d0eb4209960a49c5b302ede795ab000963e98a93feb46d695e05bee5abe3"
+      },
+      {
+        "path": "files/cfg/moonraker/tailscale-trusted.cfg",
+        "sha256": "b9d5aa6fe63d1e9e6a2643e47b86bd39247b2b91c1df26c092fb217db27a341e"
+      }
+    ],
+    "manifest": {
+      "name": "tailscale",
+      "title": "Tailscale",
+      "version": "0.1.1",
+      "description": "Joins the printer to your Tailscale mesh network (tailnet), so you can reach Fluidd/Mainsail, the camera, and SSH from anywhere without opening a port on your router. Bring your own account: generate an auth key at login.tailscale.com/admin/settings/keys, then paste it below. The printer authorizes itself the way any Tailscale device does; it appears in your tailnet's device list like a laptop or phone. Bespok3d hosts no coordination service and never sees your auth key or traffic. Runs tailscaled as a managed service on top of the tun-module base (a real /dev/net/tun the tailscale0 network interface needs).",
+      "tagline": "Reach your printer from anywhere over your Tailscale network.",
+      "category": "system",
+      "channel": "experiment",
+      "printer_specific": false,
+      "changelog": "doc/CHANGELOG.md",
+      "published_at": "2026-07-05",
+      "updated_at": "2026-07-05",
+      "source": "https://github.com/bespok3d-org/plugin-networking",
+      "publisher": "PLACEHOLDER",
+      "provides": [
+        {
+          "service": "tailscale"
+        }
+      ],
+      "require": [
+        {
+          "service": "tun",
+          "cardinality": "one"
+        }
+      ],
+      "conflicts": [],
+      "requires": {
+        "capabilities": [
+          "klipper-generic"
+        ],
+        "variables": [
+          {
+            "name": "TS_AUTHKEY",
+            "description": "An auth key from your tailnet's admin console (login.tailscale.com/admin/settings/keys), starting with tskey-auth-.",
+            "required": true
+          }
+        ]
+      },
+      "permissions": [
+        "system-bin",
+        "managed-service",
+        "moonraker-config",
+        "restart"
+      ],
+      "config": [
+        {
+          "key": "TS_AUTHKEY",
+          "label": "Tailscale auth key",
+          "type": "text",
+          "placeholder": "tskey-auth-...",
+          "hint": "From your tailnet's admin console (login.tailscale.com/admin/settings/keys, then Generate auth key; a brand-new account lands on an 'add a device' wizard first, open the keys page directly). Turn on Reusable: a reusable key lets you reinstall without generating a new one, and one reusable key can join several printers (each appears as its own device). Bring your own account; Bespok3d hosts nothing.",
+          "required": true,
+          "scope": "global",
+          "userEditable": true
+        }
+      ],
+      "install": {
+        "data": [
+          "tailscale"
+        ],
+        "templates": [
+          {
+            "from": "files/authkey.tmpl",
+            "to": "authkey"
+          }
+        ],
+        "place": [
+          {
+            "class": "system-bin",
+            "name": "tailscaled",
+            "variants": [
+              {
+                "when": {
+                  "arch": "aarch64"
+                },
+                "src": "files/bin/tailscaled-aarch64"
+              }
+            ]
+          },
+          {
+            "class": "system-bin",
+            "name": "tailscale",
+            "variants": [
+              {
+                "when": {
+                  "arch": "aarch64"
+                },
+                "src": "files/bin/tailscale-aarch64"
+              }
+            ]
+          },
+          {
+            "class": "system-bin",
+            "src": "files/bin/ts-run"
+          },
+          {
+            "class": "moonraker-config",
+            "src": "files/cfg/moonraker/tailscale-trusted.cfg",
+            "name": "tailscale-trusted.cfg"
+          }
+        ],
+        "service": [
+          {
+            "name": "tailscale",
+            "command": "$BESPOK3D/bin/ts-run",
+            "args": [
+              "$BESPOK3D/var/lib/tailscale",
+              "$BESPOK3D_PLUGINS/tailscale/authkey"
+            ],
+            "autostart": true
+          }
+        ],
+        "restart": [
+          "moonraker"
+        ]
+      },
+      "conflict_resolutions": [],
+      "files": [
+        {
+          "path": "files/authkey.tmpl",
+          "sha256": "1af6eaa460c33070c748255b11d6a96453af9ee1016deb224246fd0313171a33",
+          "mode": "644"
+        },
+        {
+          "path": "files/bin/tailscale-aarch64",
+          "sha256": "d5626ec51dc8de2da07976e27c8fd02dae99fae421b5f5f416c135a9fb9c266a",
+          "mode": "755"
+        },
+        {
+          "path": "files/bin/tailscaled-aarch64",
+          "sha256": "a595b290bc114f921b3211fbf760f8157bc39e57ceccb38a6b00d45b144b41f5",
+          "mode": "755"
+        },
+        {
+          "path": "files/bin/ts-run",
+          "sha256": "b9a3d0eb4209960a49c5b302ede795ab000963e98a93feb46d695e05bee5abe3",
+          "mode": "755"
+        },
+        {
+          "path": "files/cfg/moonraker/tailscale-trusted.cfg",
+          "sha256": "b9d5aa6fe63d1e9e6a2643e47b86bd39247b2b91c1df26c092fb217db27a341e",
+          "mode": "644"
+        }
+      ]
+    }
+  },
+  "tun-module-0.1.0.b3": {
+    "entries": [
+      {
+        "path": "doc/CHANGELOG.md",
+        "sha256": "337d9903526c096800da5ce918009f1f8a3c91cb20021dcb4d926aefc11434bb"
+      },
+      {
+        "path": "doc/README.md",
+        "sha256": "c6cd7391c3664a23aac3de13d096aba2fec721c07099021c063bdeb529bbdff3"
+      },
+      {
+        "path": "files/modules/tun-6.1.99.ko",
+        "sha256": "5d4649035f12563831b9c529e5dc6dd13e220b624c19cd217cc54d19c217df69"
+      }
+    ],
+    "manifest": {
+      "name": "tun-module",
+      "title": "TUN kernel module",
+      "version": "0.1.0",
+      "description": "Loads the Linux `tun` kernel module so the printer has a working /dev/net/tun. Mesh-VPN plugins (ZeroTier needs it; Tailscale runs lighter with it) build a virtual network interface on top of it. The Snapmaker U1's stock kernel ships tun neither built in nor as a module, so this plugin carries a `tun.ko` cross-built against the exact running kernel (6.1.99 aarch64) and insmods it at boot, before the services that need it. Nothing to configure: install it (or install a VPN plugin that requires it) and /dev/net/tun is there.",
+      "tagline": "Adds /dev/net/tun to the printer, the base a mesh VPN builds on.",
+      "category": "system",
+      "channel": "testing",
+      "printer_specific": true,
+      "changelog": "doc/CHANGELOG.md",
+      "published_at": "2026-07-05",
+      "updated_at": "2026-07-05",
+      "source": "https://github.com/bespok3d-org/plugin-networking",
+      "publisher": "PLACEHOLDER",
+      "provides": [
+        {
+          "service": "tun"
+        }
+      ],
+      "require": [],
+      "conflicts": [],
+      "requires": {
+        "capabilities": [
+          "kernel-modules"
+        ],
+        "variables": []
+      },
+      "permissions": [
+        "kernel-module"
+      ],
+      "config": [],
+      "install": {
+        "place": [
+          {
+            "class": "kernel-module",
+            "name": "tun.ko",
+            "variants": [
+              {
+                "when": {
+                  "kernel_release": "6.1.99"
+                },
+                "src": "files/modules/tun-6.1.99.ko"
+              }
+            ]
+          }
+        ],
+        "kmodule": [
+          {
+            "name": "tun",
+            "module": "tun.ko",
+            "device_nodes": [
+              "/dev/net/tun c 10 200"
+            ],
+            "autoload": true
+          }
+        ]
+      },
+      "stop": [],
+      "endpoints": [],
+      "conflict_resolutions": [],
+      "files": [
+        {
+          "path": "files/modules/tun-6.1.99.ko",
+          "sha256": "5d4649035f12563831b9c529e5dc6dd13e220b624c19cd217cc54d19c217df69",
+          "mode": "644"
+        }
+      ]
+    }
+  },
+  "zerotier-0.1.1.b3": {
+    "entries": [
+      {
+        "path": "doc/CHANGELOG.md",
+        "sha256": "21e1953dafec930a5d2e0d7639ec9a59d789763a16a919210c001ffd3c2918ab"
+      },
+      {
+        "path": "doc/README.md",
+        "sha256": "8f1691808ef7d9db674ad4f0a7d71851507c182dce0846888c5db49ab6078a7d"
+      },
+      {
+        "path": "files/bin/zerotier-one-aarch64",
+        "sha256": "f1931b2b15e980e8472d86f8fb08265e3822c83477aaba81ee8d34e79407f8b9"
+      },
+      {
+        "path": "files/bin/zt-run",
+        "sha256": "6bfcda7a6db7ab9a4bd36a0f2c10026fc5158021c995f089eb47061f84dc6334"
+      },
+      {
+        "path": "files/network-id.tmpl",
+        "sha256": "d6eaba871af53dfd29a96cab1ebd020787b4f1e912a9afa4d3a62f6f764ceb71"
+      }
+    ],
+    "manifest": {
+      "name": "zerotier",
+      "title": "ZeroTier",
+      "version": "0.1.1",
+      "description": "Joins the printer to a ZeroTier mesh network, so you can reach Fluidd/Mainsail, the camera, and SSH from anywhere without opening a port on your router. Bring your own account: create a free network at my.zerotier.com, then paste its 16-hex-digit network id below. The printer authorizes itself the way any ZeroTier device does; approve it in ZeroTier Central like you would a laptop or phone. Bespok3d hosts no coordination service and never sees your network id or traffic. Runs zerotier-one as a managed service on top of the tun-module base (a real /dev/net/tun the ZeroTier virtual network interface needs).",
+      "tagline": "Reach your printer from anywhere over a ZeroTier mesh network.",
+      "category": "system",
+      "channel": "testing",
+      "printer_specific": false,
+      "changelog": "doc/CHANGELOG.md",
+      "published_at": "2026-07-05",
+      "updated_at": "2026-07-05",
+      "source": "https://github.com/bespok3d-org/plugin-networking",
+      "publisher": "PLACEHOLDER",
+      "provides": [
+        {
+          "service": "zerotier"
+        }
+      ],
+      "require": [
+        {
+          "service": "tun",
+          "cardinality": "one"
+        }
+      ],
+      "conflicts": [],
+      "requires": {
+        "capabilities": [
+          "klipper-generic"
+        ],
+        "variables": [
+          {
+            "name": "ZT_NETWORK_ID",
+            "description": "The 16 hex digit ZeroTier network id to join, from your ZeroTier Central account (my.zerotier.com).",
+            "required": true
+          }
+        ]
+      },
+      "permissions": [
+        "system-bin",
+        "managed-service"
+      ],
+      "config": [
+        {
+          "key": "ZT_NETWORK_ID",
+          "label": "ZeroTier network id",
+          "type": "text",
+          "placeholder": "a09acf02338597c4",
+          "hint": "16 hex digits, from your ZeroTier Central account (my.zerotier.com). Bring your own network; Bespok3d hosts nothing. After install, approve the printer's device in ZeroTier Central.",
+          "required": true,
+          "scope": "global",
+          "userEditable": true
+        }
+      ],
+      "install": {
+        "data": [
+          "zerotier"
+        ],
+        "templates": [
+          {
+            "from": "files/network-id.tmpl",
+            "to": "network-id"
+          }
+        ],
+        "place": [
+          {
+            "class": "system-bin",
+            "name": "zerotier-one",
+            "variants": [
+              {
+                "when": {
+                  "arch": "aarch64"
+                },
+                "src": "files/bin/zerotier-one-aarch64"
+              }
+            ]
+          },
+          {
+            "class": "system-bin",
+            "src": "files/bin/zt-run"
+          }
+        ],
+        "service": [
+          {
+            "name": "zerotier",
+            "command": "$BESPOK3D/bin/zt-run",
+            "args": [
+              "$BESPOK3D/var/lib/zerotier",
+              "$BESPOK3D_PLUGINS/zerotier/network-id"
+            ],
+            "autostart": true
+          }
+        ]
+      },
+      "conflict_resolutions": [],
+      "files": [
+        {
+          "path": "files/bin/zerotier-one-aarch64",
+          "sha256": "f1931b2b15e980e8472d86f8fb08265e3822c83477aaba81ee8d34e79407f8b9",
+          "mode": "755"
+        },
+        {
+          "path": "files/bin/zt-run",
+          "sha256": "6bfcda7a6db7ab9a4bd36a0f2c10026fc5158021c995f089eb47061f84dc6334",
+          "mode": "755"
+        },
+        {
+          "path": "files/network-id.tmpl",
+          "sha256": "d6eaba871af53dfd29a96cab1ebd020787b4f1e912a9afa4d3a62f6f764ceb71",
+          "mode": "644"
+        }
+      ]
+    }
+  }
+}

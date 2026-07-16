@@ -19,6 +19,34 @@ If you are a non-Claude tool, `AGENTS.md` points you here.
 - The core is an importable library so a downstream TARGET (the app's in-app package builder, later) can
   consume it. Building that consumer is a SEPARATE effort, NOT this repo's work. Do not add it here.
 
+### THE HARD BOUNDARY (LAW; re-introducing any of this is WRONG regardless of convenience)
+
+b3-builder's unit is a plugin dir, or a repo of plugin dirs. A plugin dir builds to one `.b3` + its atom;
+a repo of plugin dirs builds to a `.b3` + atom each, plus one assembled leaf sub-list. It **never**
+contains, reads, or reasons about:
+
+- bundle curation (`bundle.json` / `bundle.dev.json`), dev/release channels, dev variants, `+dev`
+  build-tags, any "official"/combined catalog, or doc-staging into app directories;
+- org/publisher identity: the atom doc_url repo, the sub-list name, and the sub-list publisher are ALWAYS
+  parameters passed in, with NO baked default. (The npm/Action distribution metadata, `@bespok3d/builder`
+  and the `bespok3d` bin and the Action slug, is exempt: that is packaging identity, not an output
+  default. A plugin manifest's `channel` catalog FIELD is also legitimate and stays.)
+
+The Bespok3d app is ONE consumer among several (a publisher's CLI, a plugin repo's Action, the app's
+dev/release builds, the future Create-tab dev tools). The app's local-index / offline-bundle loader is APP
+machinery and must never leak in. See ADR-0041 (The hard boundary) and
+`../Bespok3d/doc/build-system-consolidation.md` (the consumer model). The relay's Correction record
+(`~/.claude/plans/relay-build-system-consolidation.md`) is authoritative.
+
+### No compat layer (relay packet 4 deleted it)
+
+`src/compat/` (the temporary legacy monorepo-bundle quarantine: offline bundle assembly, dev channels,
+the "official" catalog, doc-staging, the `--kind`/`--channel` CLI surface) was relocated into the app's
+own build glue (`../Bespok3d/scripts/app-bundle.mjs`, which imports this core as a library) and deleted
+in relay packet 4. Do NOT re-add any of that vocabulary to `src/core/`, `src/cli/`, or `src/action/`. A
+grep of `src` for `monorepo|bundle\.json|bundle\.dev|BundleChannel|coerceChannel|--channel|\+dev|Official|doc-stage|Bespok3d`
+must be clean.
+
 ## Read these first
 
 - [README.md](README.md): what the tool is, the pipeline, the current scaffold status, the golden harness.
@@ -52,24 +80,99 @@ The one core runs five ordered steps, and every face (CLI, Action, and one day t
 same pipeline: `bake` then `pack` then `index` then `sign` then `gate`. Each step lives in `src/core/steps/`
 and names its owning relay packet in its own header comment. The order is GPG-aware from day one: the
 `sign` step exists as a seam so R4 (real signing) slots in without reshaping the pipeline. Today `sign` is
-an honest no-op (signing is decorative until the TRUST perimeter lands); it is the ONLY step allowed to
-return the context unchanged. Every other unfinished step THROWS `NotPortedError` rather than pass an empty
-result through, so the scaffold fails loudly and the harness stays honestly red.
+an honest no-op (signing is decorative until the TRUST perimeter lands); it is now the ONLY step that
+returns the context unchanged. The `gate` step (R2, packet 6) is the class-aware refuse-to-pack gate (see
+below).
+
+### The bake dispatch (R1, packet 5; `src/core/bake/`)
+
+`bake` runs the right baker per artifact class, absorbing the per-plugin `build.sh` zoo. It is an OPT-IN
+mode (`request.bake`), like skip-unchanged: a real publisher / CI build turns it on to build payloads from
+source; a build over an already-baked tree (the golden rail, the app glue) leaves it off and `bake` is a
+passthrough. A plugin that declares no bake step is a passthrough even with baking on.
+
+- **Two declaration sources, one dispatcher** (`bake/dispatch.ts`): the presence-driven Python bake
+  (ADR-0036 fixes it as a `requirements.txt` FILE, never a manifest field) plus the manifest's `bake`
+  field, a list keyed on `class` (`go`, `download`, `docker-c`, `docker-ko`), parsed in `bake/manifest-bake.ts`.
+- **The runner seam** (`bake/runner.ts`): a baker never calls `spawnSync` directly. It takes an injectable
+  `CommandRunner`, so a real build runs the command and a unit test injects a fake runner that records the
+  invocation and simulates its output. This is what proves each baker constructs the exact command the
+  legacy `build.sh` runs WITHOUT executing docker / pip / go in the gate. Docker builds are multi-minute
+  QEMU jobs; they cannot run in a hermetic gate, so the per-class tests assert command-equivalence to the
+  legacy scripts + the baker's own staging/verify logic against a fixture output. The `download` class,
+  cheap and hermetic, is tested for REAL (curl `file://` + tar + sha verify) against a local fixture.
+- **The kernel axis (`docker-ko`) is modeled distinctly from an arch tuple**: a `kernel { release, vermagic }`
+  block, and the bake asserts vermagic at build time ONLY. A vermagic match is necessary but NOT sufficient
+  (ADR-0039); this bake never claims the module works. The on-device capability exercise is the pilot's job
+  (packet 7), never this step's.
+- **A baker that needs a toolchain says so**: the Docker classes preflight `docker info` and, if the daemon
+  is down, throw a clear "Docker is required for the docker-c / docker-ko bake and is not running. Please
+  start Docker and retry.", not the raw socket error the legacy scripts surface.
+
+### The refuse-to-pack gate (R2, packet 6; `src/core/bake/assert-baked.ts`)
+
+`gate` is the one class-aware check that every payload a plugin's manifest DECLARES was actually baked, so
+an unbaked payload can never be packed into a broken `.b3`. It generalizes the shell packer's Python-only
+`ensure_baked` / `check_baked_deps` / `check_baked_kmodule` (now retired from `../Bespok3d/scripts/pack-plugins.sh`)
+to every class: class 2 off the requirements files (`files/wheels` / `files/site-packages` non-empty),
+classes 3 to 6 off the `bake` field (each step's output exists; a docker-ko plugin declares one step per
+vermagic variant, so iterating the steps generalizes the kmodule placement check). A binary-only plugin
+declares nothing to bake and packs clean.
+
+- **It checks OUTPUT EXISTENCE, never whether a bake ran.** A plugin baked out-of-band and a `--bake`
+  build both pass; only a genuinely unbaked one fails. Do NOT couple the gate to the bake mode.
+- **It never claims a `.ko` works** (a vermagic string is not a gate, ADR-0039). It asserts only that the
+  variant file was baked; the on-device capability exercise is the pilot's job (packet 7), never this step.
+- **Two callers, one check.** The pipeline runs `gate` LAST, so a CLI / Action consumer never publishes an
+  unbaked `.b3`. Because the check only inspects the source tree, the app's bundle glue (`app-bundle.mjs`,
+  a library consumer that packs via `packIfChanged`, not the full pipeline) imports the same exported
+  `assertBaked` + `bakePlugin` and bakes-then-gates before it packs. Between the two, no path can ship an
+  unbaked payload. This is where the retired shell `ensure_baked`'s two jobs (bake, then gate) now live.
+
+### The reusable CI Action (R5, packet 8; `action.yml` + `src/action/`)
+
+`action.yml` is a **composite** GitHub Action that wraps the tool with the GitHub-specific orchestration a
+plugin repo's release needs: build + pack + index (one `bespok3d build`), then test, then release (a GitHub
+release + `.b3` asset per plugin), then finalize each sub-list entry's `download_url` with the real release
+asset URL, then register the sub-list in the index-of-lists. It exists so every repo pulls one `uses:`
+instead of hand-copying a `release.yml`.
+
+- **The core stays GitHub-agnostic.** Creating GitHub releases and pushing to the index-of-lists are the
+  Action's orchestration, NOT the core's. Never add release / registry-push / gh / octokit logic to
+  `src/core/`. The `download_url` finalize lives in `src/action/inject-release-urls.ts` (the Action face,
+  tested) precisely because a release asset URL is a CI artifact the core must never bake in: the core
+  writes the placeholder filename (`co-repo-index` `buildAtoms`) and the Action fills the real value.
+- **Org identity + tokens arrive ONLY via Action inputs** (`atom-repo`, `list-name`, `list-publisher`,
+  `list-ref-name`, `main-index-repo`, `main-index-token`), never a baked default. This is the same hard
+  boundary the CLI honors, applied to the CI face. A hardcoded `Bespok3d/...` anywhere in the Action logic
+  is WRONG; it belongs in the CALLER's `release.yml`.
+- **Both git pushes are push-race hardened** (5-attempt rebase-retry). Do not weaken them back to a bare push.
+- **`exclude-dirs` is caller curation, not a variant concept.** A repo with a dev-only variant dir that
+  holds a `manifest.json` but must never publish (e.g. `fluidd-bleeding-edge`) passes `exclude-dirs` in
+  its own `release.yml`; the Action threads it to `bespok3d build --exclude <dir>` AND skips it in the
+  release loop. Discovery filters it in ONE place (`sourcesFor(request)` in `build/discovery.ts`), so
+  every step (bake, pack, index, gate) skips the same dirs and cannot drift. The core learns only WHICH
+  dirs to skip, never that one is a "dev variant": no `bundle.dev.json` / channel / variant knowledge
+  enters the tool (the hard boundary). Do NOT replace this with a `dev_only` manifest field, which would
+  bake the variant concept into discovery.
+
+Every other unfinished step (only `sign`, deferred to R4 / packet 10) is a passthrough until its packet lands.
 
 ## The golden-equivalence harness (the rail; do not weaken it)
 
 The core is ported behind a rail that proves byte-for-byte reproduction of the current build output BEFORE
-anything depends on it. `test/golden/` holds fixtures snapshotted from the legacy scripts (the monorepo
-bundled index + the full `.b3` content set, and the networking co-repo's atoms + sub-list).
-`test/equivalence.test.ts` builds a candidate via the core and compares. The meaning of "byte-for-byte" is
-in `test/harness.ts` and the README: JSON artifacts match by parsed content in the canonical serialization;
-a `.b3` matches by the content hash of every payload / doc file plus its parsed manifest (a zip's framing
-is non-deterministic, so the invariant is content, not zip bytes).
+anything depends on it. `test/golden/` holds fixtures snapshotted from the legacy scripts. `test/equivalence.test.ts`
+(the PUBLISHER rail) builds one plugin dir and a repo of plugin dirs (the networking co-repo) via the clean
+core with identity passed in. (The monorepo-bundle rail, the app's own concern, relocated to
+`../Bespok3d/scripts/test/` in packet 4 alongside `app-bundle.mjs`.) The meaning of "byte-for-byte" is in
+`test/harness.ts` and the README: JSON artifacts match by parsed content in the canonical serialization; a
+`.b3` matches by the content hash of every payload / doc file plus its parsed manifest (a zip's framing is
+non-deterministic, so the invariant is content, not zip bytes).
 
 - The golden is REAL captured output, never hand-written or faked. `npm run capture-golden` re-snapshots it
   from the current plugin trees; re-run and REVIEW the recapture if a plugin source changes.
-- The rail is expected RED until packet 2 ports `pack` + `index`. When it goes green, promote `vitest` into
-  the must-pass gate in `scripts/check.sh`.
+- The rail is green as of packet 2 (`pack` + `index` are ported) and is part of the must-pass gate in
+  `scripts/check.sh`, not a reported-only status.
 - Do NOT make the rail pass by weakening the comparison or by faking output. Byte-equivalence is measured
   against the real legacy output; that is the whole point.
 
@@ -93,8 +196,8 @@ is non-deterministic, so the invariant is content, not zip bytes).
   staged in the local working tree only; the per-repo commit and push are the maintainer's.
 - **Never fake acceptance.** No stub that makes the rail green without the real port; no shadow copy of a
   working generator. If the real port is not achievable in your packet, report BLOCKED.
-- **GPG is deferred (R4, packet 8) but the `sign` seam stays present.** Do not fold real signing into the
-  earlier packets; do keep every packet GPG-aware (the seam exists, do not remove it).
+- **GPG is deferred (R4, packet 10, LAST) but the `sign` seam stays present.** Do not fold real signing
+  into the earlier packets; do keep every packet GPG-aware (the seam exists, do not remove it).
 - **The kernel axis (R3) is different.** For a `.ko`, verification is an on-device capability exercise,
   NEVER a vermagic string and never a bare insmod (both are necessary but not sufficient). The bake step
   may assert vermagic at bake time; it may not claim the module works without a device exercise.

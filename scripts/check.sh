@@ -5,9 +5,9 @@ set -euo pipefail
 # the model) so a contributor's LLM is steered by the same rules everywhere, enforced not implied.
 #
 # The gate (must be green): RULE ZERO (the em / en-dash ban), eslint, a TypeScript typecheck over src
-# AND test, and a real emit build. The equivalence RAIL (vitest) is reported separately and is
-# EXPECTED RED until packet 2 ports the core: the gate does not fail on it and does not mask it. When
-# packet 2 turns the rail green, promote vitest into the must-pass gate above.
+# AND test, a real emit build, and the golden-equivalence rail (vitest): packet 2 ported the core's
+# pack + index steps, so the rail is no longer a reported-only status, it is must-pass like everything
+# else here.
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_DIR"
@@ -36,23 +36,15 @@ run_check() {
 }
 
 echo "b3-builder gate (node $(node --version))"
-run_check "RULE ZERO dash ban" node scripts/rule-zero-guard.mjs
-run_check "eslint"             npx --no-install eslint .
-run_check "typecheck"          npx --no-install tsc --noEmit
-run_check "build"              npx --no-install tsc -p tsconfig.build.json
+run_check "RULE ZERO dash ban"     node scripts/rule-zero-guard.mjs
+run_check "eslint"                 npx --no-install eslint .
+run_check "typecheck"              npx --no-install tsc --noEmit
+run_check "build"                  npx --no-install tsc -p tsconfig.build.json
+run_check "equivalence rail"       npx --no-install vitest run
 
 echo ""
 echo "  $PASS passed, $FAIL failed"
 if [ "$FAIL" -ne 0 ]; then
   printf "%b" "$FAILURES" >&2
   exit 1
-fi
-
-echo ""
-echo "Equivalence rail (packet 2 target; EXPECTED RED until the core is ported):"
-if npx --no-install vitest run > /tmp/b3builder_rail_out 2>&1; then
-  echo "  vitest: GREEN. The core now reproduces the golden; promote vitest into the gate above."
-else
-  echo "  vitest: RED (expected: pack / index steps not yet ported; see packet 2)."
-  echo "  Run 'npm test' to see the equivalence assertions this rail arms."
 fi

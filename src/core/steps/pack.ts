@@ -1,15 +1,24 @@
-import type { PipelineContext } from '../types.js'
-import { NotPortedError } from '../errors.js'
+import type { BuildRequest, PackedPackage, PipelineContext } from '../types.js'
+import { packPlugin } from '../build/archive.js'
+import { sourcesFor } from '../build/discovery.js'
+import { packIfChanged } from '../build/skip-unchanged.js'
+import { builderVersion } from '../version.js'
+import type { PluginSource } from '../build/plugin-source.js'
 
-// Step 2 of 5: pack each discovered plugin into a .b3. Owner: packet 2.
-//
-// Port pack-plugins.sh's pack path into here: build_files_array (LC_ALL=C sorted, the root Python-dep
-// declarations included, modes normalized to 644 or 755), the checksummed manifest injection, the zip
-// (files/ + doc/ + the dep declarations + the manifest), and the content-hash / auto-bump / prune /
-// bundle / channel-variant semantics EXACTLY. It fills context.packages with the produced .b3 set.
-//
-// It throws until then so the golden-equivalence harness is honestly red: the scaffold never packs an
-// empty archive that would read as a passing build.
-export async function pack(_context: PipelineContext): Promise<PipelineContext> {
-  throw new NotPortedError('pack', 'packet 2 (extract the core: port pack-plugins.sh)')
+// Step 2 of 5: pack each discovered plugin dir into a .b3 over the shared archive.packPlugin. A normal
+// build always repacks; an opt-in skip-unchanged build reuses an existing .b3 whose fingerprint is
+// unchanged (see build/skip-unchanged.ts), so a caller iterating a large plugin set repacks only what
+// actually changed. Pruning stale .b3 across repeated invocations is a caller concern this
+// per-invocation core does not own.
+export async function pack(context: PipelineContext): Promise<PipelineContext> {
+  const { request } = context
+  const sources = sourcesFor(request)
+  const version = request.skipUnchanged === true ? builderVersion() : ''
+  const packages = sources.map((source) => packSource(source, request, version))
+  return { ...context, packages }
+}
+
+function packSource(source: PluginSource, request: BuildRequest, version: string): PackedPackage {
+  if (request.skipUnchanged === true) return packIfChanged(source.manifest, source.dir, request.outputDir, version)
+  return packPlugin(source.manifest, source.dir, request.outputDir)
 }

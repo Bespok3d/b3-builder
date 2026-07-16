@@ -1,6 +1,6 @@
 import type { PipelineContext } from '../types.js'
 
-// Step 4 of 5: GPG-sign the packed .b3 set and the registry index (R4). Owner: packet 8 (LAST; may
+// Step 4 of 5: GPG-sign the packed .b3 set and the registry index (R4). Owner: packet 10 (LAST; may
 // spin into its own TRUST relay).
 //
 // This step is the reason signing is part of the ONE pipeline from day one instead of bolted on

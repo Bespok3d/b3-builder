@@ -31,11 +31,13 @@
     "capture-golden": "tsx test/capture-golden.ts",
     "check": "bash scripts/check.sh"
   },
+  "dependencies": {
+    "adm-zip": "^0.5.16"
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/adm-zip": "^0.5.8",
     "@types/node": "^22.19.1",
-    "adm-zip": "^0.5.16",
     "eslint": "^10.4.0",
     "tsx": "^4.19.2",
     "typescript": "^5.8.3",

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
-import { dirname, join, relative } from 'node:path'
+import { readFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import AdmZip from 'adm-zip'
 import type { JsonObject, JsonValue, PackedPackage } from '../src/core/index.js'
@@ -13,7 +13,6 @@ import type { JsonObject, JsonValue, PackedPackage } from '../src/core/index.js'
 const HERE = dirname(fileURLToPath(import.meta.url))
 export const REPO_DIR = dirname(HERE)
 export const WORKSPACE_DIR = dirname(REPO_DIR)
-export const BESPOK3D_DIR = join(WORKSPACE_DIR, 'Bespok3d')
 export const NETWORKING_DIR = join(WORKSPACE_DIR, 'plugins', 'networking')
 export const GOLDEN_DIR = join(REPO_DIR, 'test', 'golden')
 
@@ -84,29 +83,6 @@ export function describePackages(packages: PackedPackage[]): Record<string, Arch
     seen.add(packed.filename)
   })
   return Object.fromEntries(packages.map((packed) => [packed.filename, describeArchive(packed.path)]))
-}
-
-function filesUnder(dir: string): string[] {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const full = join(dir, entry.name)
-    return entry.isDirectory() ? filesUnder(full) : [full]
-  })
-}
-
-// Every file under each `<name>/doc/` tree staged beside the bundled index, as
-// { "<name>/doc/<relpath>": sha256 }. This loose doc tree is what the app reads for a bundled plugin's
-// doc_url / changelog_url; it is a monorepo-build output DISTINCT from the doc/ copy inside each .b3,
-// so the rail covers it too (otherwise a port could match every .b3 and the index yet stage no docs).
-export function describeStagedDocs(root: string): Record<string, string> {
-  const plugins = readdirSync(root, { withFileTypes: true }).filter((entry) => entry.isDirectory())
-  const pairs = plugins.flatMap((plugin) => stagedDocPairs(root, plugin.name))
-  return Object.fromEntries(pairs)
-}
-
-function stagedDocPairs(root: string, pluginName: string): Array<[string, string]> {
-  const docDir = join(root, pluginName, 'doc')
-  if (!existsSync(docDir)) return []
-  return filesUnder(docDir).map((absPath) => [relative(root, absPath), sha256Hex(readFileSync(absPath))])
 }
 
 function atomName(atom: JsonObject): string {

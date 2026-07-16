@@ -1,19 +1,22 @@
 import type { PipelineContext } from '../types.js'
+import { sourcesFor } from '../build/discovery.js'
+import { assertBaked } from '../bake/assert-baked.js'
 
-// Step 5 of 5: the one class-aware refuse-to-pack gate (R2). Owner: packet 4.
+// Step 5 of 5: the one class-aware refuse-to-pack gate (R2). Owner: packet 6.
 //
-// Generalize pack-plugins.sh's ensure_baked / check_baked_deps / check_baked_kmodule so EVERY
-// artifact class's "was it baked?" is enforced centrally here, not per-plugin build.sh or per-repo
-// CI; a python-less binary-only plugin is VALID; the daemon's test_plugin_packaging invariant is
-// rehomed here (kept green); R6 (CI-time-only baking) is enforced uniformly.
+// For every discovered plugin source, assert every payload its manifest DECLARES was baked (the logic and
+// the per-class rules live in bake/assert-baked.ts): class 2 off the requirements files, classes 3 to 6
+// off the manifest `bake` field. A binary-only plugin declares nothing to bake and passes clean. The gate
+// checks OUTPUT EXISTENCE, not whether a bake ran, so an out-of-band bake and a --bake build both pass;
+// only a genuinely unbaked plugin fails the build. It generalizes pack-plugins.sh's ensure_baked /
+// check_baked_deps / check_baked_kmodule, which understood only class 2 (and the kmodule placement).
 //
-// SHAPE NOTE for packet 4: the requirement names this the refuse-to-PACK gate, yet the pipeline runs
-// it LAST (bake -> pack -> index -> sign -> gate), so today it is positioned as a final class-aware
-// verification that FAILS the build (nothing ships) when a payload was not baked. pack-plugins.sh
-// enforces the same invariant BEFORE it zips. Packet 4 decides whether to keep the check here as a
-// post-pack build-failing gate or also assert pre-pack; either way the invariant is what matters.
-//
-// Passthrough until packet 4 (packet 1 does not yet gate anything).
+// Position: LAST, so a pipeline consumer (the CLI, the Action) never publishes an unbaked .b3. The check
+// only inspects the source tree, so the app's bundle glue (app-bundle.mjs, a library consumer that packs
+// via packIfChanged, not this pipeline) calls the same assertBaked BEFORE it packs; between the two, no
+// path can ship an unbaked payload.
 export async function gate(context: PipelineContext): Promise<PipelineContext> {
+  const { request } = context
+  sourcesFor(request).forEach(assertBaked)
   return context
 }
