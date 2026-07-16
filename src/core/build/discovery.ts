@@ -1,7 +1,6 @@
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { BuildRequest, BuildUnit } from '../types.js'
-import { isCollection } from './entry.js'
 import { sourceFromDir } from './plugin-source.js'
 import type { PluginSource } from './plugin-source.js'
 
@@ -23,14 +22,12 @@ export function sourcesFor(request: BuildRequest): PluginSource[] {
 }
 
 // A repo of plugin dirs. An excluded dir is skipped outright (caller curation, e.g. a dev-only variant
-// that must never publish). A kind:collection member (e.g. all-the-tags/all-the-tags) is also excluded:
-// it ships no files/ to pack, and the sub-list schema has no collections bucket. Unifying a repo's
-// bespoke collection-atom shape into the core is later scope (the pilot migration), so for now a
-// collection in a repo is simply not published as an atom.
+// that must never publish). A kind:collection dir (e.g. all-the-tags/all-the-tags) IS discovered: it is
+// a published source like any other, it just has no payload, so the pack step is the one place that
+// passes over it (see steps/pack.ts) while the registry step routes it into collections[].
 export function discoverRepoSources(sourceDir: string, exclude: string[] = []): PluginSource[] {
   const excludedDirs = new Set(exclude)
   return readdirSync(sourceDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && !excludedDirs.has(entry.name) && existsSync(join(sourceDir, entry.name, 'manifest.json')))
     .map((entry) => sourceFromDir(join(sourceDir, entry.name)))
-    .filter((source) => !isCollection(source.manifest))
 }

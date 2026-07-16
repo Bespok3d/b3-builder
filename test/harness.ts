@@ -18,6 +18,7 @@ const GOLDEN_DIR = join(REPO_DIR, 'test', 'golden')
 // fluidd, an atom repo that registers into someone else's index.
 export const NETWORKING_DIR = join(WORKSPACE_DIR, 'plugins', 'networking')
 export const FLUIDD_DIR = join(WORKSPACE_DIR, 'plugins', 'fluidd-plugin')
+export const ALL_THE_TAGS_DIR = join(WORKSPACE_DIR, 'plugins', 'all-the-tags')
 
 export interface ArchiveEntry {
   path: string

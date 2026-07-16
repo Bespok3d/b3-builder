@@ -8,6 +8,7 @@ import { asArray, asBool, asObject, asString, copyIfPresent, fieldPresent } from
 // doc_url are caller-specific and live outside the generic core.
 
 const OPTIONAL_ENTRY_KEYS = ['icon', 'min_daemon_version', 'homepage', 'macros', 'config']
+const COLLECTION_ENTRY_KEYS = ['icon', 'homepage']
 
 function serviceName(provided: JsonValue): string {
   return typeof provided === 'string' ? provided : asString(asObject(provided).service)
@@ -100,4 +101,19 @@ export function buildAtomEntry(manifest: JsonObject, downloadUrl: string, docUrl
 
 export function isCollection(manifest: JsonObject): boolean {
   return asString(manifest.kind) === 'collection'
+}
+
+// A collection is install-orchestration metadata: it names member plugin ids plus version constraints,
+// ships no files/ to pack and therefore no .b3, so it carries no download_url and none of the
+// plugin-only catalog fields (requires/provides/conflicts/endpoints, and the payload-shaped
+// min_daemon_version/macros/config). The atom keeps `kind` purely so the list assembler can route it
+// into collections[]; the published entry drops it again.
+export function buildCollectionAtom(manifest: JsonObject, docUrl: string): JsonObject {
+  const entry = baseCatalogFields(manifest)
+  entry.kind = 'collection'
+  entry.members = asArray(manifest.members)
+  entry.doc_url = docUrl
+  copyIfPresent(entry, manifest, COLLECTION_ENTRY_KEYS)
+  applyChangelogUrl(entry, manifest)
+  return entry
 }

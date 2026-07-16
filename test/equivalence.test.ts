@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { publisherRequest, runPipeline } from '../src/core/index.js'
 import type { JsonObject } from '../src/core/index.js'
-import { FLUIDD_DIR, NETWORKING_DIR, describePackages, goldenPath, loadJson, sortAtomsByName } from './harness.js'
+import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, describePackages, goldenPath, loadJson, sortAtomsByName } from './harness.js'
 
 // The golden-equivalence rail for the PUBLISHER core: build a single plugin dir and a repo of plugin
 // dirs via the clean pipeline (publisher/org identity passed in), and assert each reproduces the
@@ -66,6 +66,33 @@ describe('publisher equivalence rail', () => {
     expect(sortAtomsByName(artifacts.atoms)).toEqual(sortAtomsByName(loadGoldenAtoms()))
     expect(artifacts.subList).toEqual(loadJson(goldenPath('networking', 'index.json')))
     expect(describePackages(artifacts.packages)).toEqual(loadJson(goldenPath('networking', 'packages.json')))
+  }, 60_000)
+
+  // The one repo that publishes a collection alongside its plugins, and the only rail case covering the
+  // collection axis. A collection dir holds a manifest like any other source, so it is discovered and it
+  // reaches the list, but it has no payload: no .b3 is packed for it and its entry carries no
+  // download_url. The golden is the index.json the legacy assemble-list committed into that repo, frozen
+  // here BEFORE the migration replaces that file with this tool's own output (asserting against a file
+  // this tool later writes would prove nothing).
+  //
+  // Scoped to collections[] on purpose. That repo's committed index.json predates a version bump in its
+  // own source (rfid-openprinttag 0.1.0 to 0.1.1), so its plugins[] is real legacy output of an OLDER
+  // tree and asserting today's build against it would be asserting the bump away. The plugin-entry path
+  // is the same code the networking and fluidd cases above already pin against a golden that IS current.
+  it('a repo with a collection: the collection entry reproduces the golden and packs no .b3', async () => {
+    const outputDir = mkdtempSync(join(tmpdir(), 'b3-collections-'))
+    const artifacts = await runPipeline({
+      unit: 'repo',
+      sourceDir: ALL_THE_TAGS_DIR,
+      outputDir,
+      identity: { atomRepo: 'Bespok3d/material-tags', listName: 'Material Tags', listPublisher: 'PLACEHOLDER' },
+    })
+    const golden = loadJson(goldenPath('all-the-tags', 'index.json'))
+    const subList = artifacts.subList as JsonObject
+    const packedNames = artifacts.packages.map((packed) => packed.filename)
+    expect(subList.collections).toEqual(golden.collections)
+    expect(packedNames.filter((filename) => filename.startsWith('all-the-tags-'))).toEqual([])
+    expect(packedNames).toHaveLength((subList.plugins as JsonObject[]).length)
   }, 60_000)
 
   // A repo that publishes no list of its own builds its atoms and .b3 files and stops there: the atoms
