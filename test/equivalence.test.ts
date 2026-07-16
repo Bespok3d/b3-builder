@@ -4,13 +4,21 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { publisherRequest, runPipeline } from '../src/core/index.js'
 import type { JsonObject } from '../src/core/index.js'
-import { NETWORKING_DIR, describePackages, goldenPath, loadJson, sortAtomsByName } from './harness.js'
+import { FLUIDD_DIR, NETWORKING_DIR, describePackages, goldenPath, loadJson, sortAtomsByName } from './harness.js'
 
 // The golden-equivalence rail for the PUBLISHER core: build a single plugin dir and a repo of plugin
 // dirs via the clean pipeline (publisher/org identity passed in), and assert each reproduces the
 // committed golden (the legacy generate-atom / assemble-list / pack.sh output) byte-for-byte.
 // "byte-for-byte" means: the atoms and sub-list match by content (deep-equal, canonical JSON), and each
 // .b3 matches by payload content hashes plus its parsed manifest (see harness ArchiveDescription).
+//
+// The golden is FROZEN. It was captured from the legacy scripts while they still existed, and those
+// scripts are deleted repo by repo as each migrates onto this tool, so there is no recapture path and
+// there must not be one: the rail's whole claim is "identical to what the legacy scripts produced",
+// which a regenerated golden cannot make. The rail builds from the live sibling plugin trees, so a
+// source change there (a version bump, an edited payload) turns it red. That is REAL information, not
+// a cue to re-snapshot: never weaken the comparison, hand-edit a fixture, or fake output to green it.
+// Reconciling a genuine source change against the frozen golden is a maintainer decision.
 
 const NETWORKING_IDENTITY = {
   atomRepo: 'Bespok3d/networking',
@@ -75,6 +83,25 @@ describe('publisher equivalence rail', () => {
     expect(artifacts.subList).toBeNull()
     expect(existsSync(join(outputDir, 'index.json'))).toBe(false)
     expect(describePackages(artifacts.packages)).toEqual(loadJson(goldenPath('networking', 'packages.json')))
+  }, 60_000)
+
+  // A real atom repo, on its own legacy golden: fluidd publishes no list, so this is the atoms-only
+  // shape end to end. `fluidd-bleeding-edge` is caller curation, not a variant the tool knows about: it
+  // carries a manifest but its payload is local-only and gitignored, so the legacy CI never packed it
+  // and the migrated release.yml passes it as exclude-dirs. Excluding it here is what that caller does.
+  it('the fluidd atom repo: its .b3 and atom reproduce the golden, no sub-list', async () => {
+    const outputDir = mkdtempSync(join(tmpdir(), 'b3-fluidd-'))
+    const artifacts = await runPipeline({
+      unit: 'repo',
+      sourceDir: FLUIDD_DIR,
+      outputDir,
+      identity: { atomRepo: 'Bespok3d/fluidd-plugin' },
+      exclude: ['fluidd-bleeding-edge'],
+    })
+    expect(artifacts.atoms).toEqual([loadJson(goldenPath('fluidd', 'fluidd.atom.json'))])
+    expect(artifacts.subList).toBeNull()
+    expect(existsSync(join(outputDir, 'index.json'))).toBe(false)
+    expect(describePackages(artifacts.packages)).toEqual(loadJson(goldenPath('fluidd', 'packages.json')))
   }, 60_000)
 
   // A repo build that discovers no plugin dirs must not throw ENOENT writing index.json into an output

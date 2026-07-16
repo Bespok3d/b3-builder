@@ -29,7 +29,6 @@
     "lint": "eslint .",
     "rule-zero": "node scripts/rule-zero-guard.mjs",
     "test": "vitest run",
-    "capture-golden": "tsx test/capture-golden.ts",
     "check": "bash scripts/check.sh"
   },
   "dependencies": {
@@ -40,7 +39,6 @@
     "@types/adm-zip": "^0.5.8",
     "@types/node": "^22.19.1",
     "eslint": "^10.4.0",
-    "tsx": "^4.19.2",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.59.4",
     "vitest": "^2.1.9"

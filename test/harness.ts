@@ -5,16 +5,19 @@ import { fileURLToPath } from 'node:url'
 import AdmZip from 'adm-zip'
 import type { JsonObject, JsonValue, PackedPackage } from '../src/core/index.js'
 
-// Shared machinery for the golden-equivalence harness, used by BOTH the capture tool (which writes
-// the golden from the current legacy scripts) and the equivalence test (which builds a candidate via
-// the b3-builder core and compares). One implementation of "describe a .b3 by its content" keeps the
-// captured golden and the compared candidate measured the same way.
+// Shared machinery for the golden-equivalence harness: one implementation of "describe a .b3 by its
+// content", so the frozen golden (captured from the legacy scripts when they still existed) and the
+// candidate the core builds today are measured the same way.
 
 const HERE = dirname(fileURLToPath(import.meta.url))
-export const REPO_DIR = dirname(HERE)
-export const WORKSPACE_DIR = dirname(REPO_DIR)
+const REPO_DIR = dirname(HERE)
+const WORKSPACE_DIR = dirname(REPO_DIR)
+const GOLDEN_DIR = join(REPO_DIR, 'test', 'golden')
+
+// The two source repos the rail builds: networking, a repo that publishes its own sub-list, and
+// fluidd, an atom repo that registers into someone else's index.
 export const NETWORKING_DIR = join(WORKSPACE_DIR, 'plugins', 'networking')
-export const GOLDEN_DIR = join(REPO_DIR, 'test', 'golden')
+export const FLUIDD_DIR = join(WORKSPACE_DIR, 'plugins', 'fluidd-plugin')
 
 export interface ArchiveEntry {
   path: string
@@ -93,12 +96,6 @@ function atomName(atom: JsonObject): string {
 // side are ordered identically before a deep-equal (a name-array comparison is order-sensitive).
 export function sortAtomsByName(atoms: JsonObject[]): JsonObject[] {
   return [...atoms].sort((earlier, later) => atomName(earlier).localeCompare(atomName(later)))
-}
-
-// The canonical JSON serialization the whole system uses (2-space, trailing newline): the exact form
-// generate-index.mjs writes, so a committed golden JSON file round-trips byte-identically.
-export function serialize(value: unknown): string {
-  return `${JSON.stringify(value, null, 2)}\n`
 }
 
 export function loadJson(path: string): JsonObject {

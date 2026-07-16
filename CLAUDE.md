@@ -160,17 +160,24 @@ Every other unfinished step (only `sign`, deferred to R4 / packet 10) is a passt
 
 ## The golden-equivalence harness (the rail; do not weaken it)
 
-The core is ported behind a rail that proves byte-for-byte reproduction of the current build output BEFORE
+The core is ported behind a rail that proves byte-for-byte reproduction of the legacy build output BEFORE
 anything depends on it. `test/golden/` holds fixtures snapshotted from the legacy scripts. `test/equivalence.test.ts`
-(the PUBLISHER rail) builds one plugin dir and a repo of plugin dirs (the networking co-repo) via the clean
-core with identity passed in. (The monorepo-bundle rail, the app's own concern, relocated to
-`../Bespok3d/scripts/test/` in packet 4 alongside `app-bundle.mjs`.) The meaning of "byte-for-byte" is in
-`test/harness.ts` and the README: JSON artifacts match by parsed content in the canonical serialization; a
-`.b3` matches by the content hash of every payload / doc file plus its parsed manifest (a zip's framing is
-non-deterministic, so the invariant is content, not zip bytes).
+(the PUBLISHER rail) builds, via the clean core with identity passed in, one plugin dir plus two real repos:
+networking (a repo that publishes its own sub-list) and fluidd (an atom repo, no list, `fluidd-bleeding-edge`
+excluded exactly as its migrated `release.yml` does). (The monorepo-bundle rail, the app's own concern,
+relocated to `../Bespok3d/scripts/test/` in packet 4 alongside `app-bundle.mjs`.) The meaning of
+"byte-for-byte" is in `test/harness.ts` and the README: JSON artifacts match by parsed content in the
+canonical serialization; a `.b3` matches by the content hash of every payload / doc file plus its parsed
+manifest (a zip's framing is non-deterministic, so the invariant is content, not zip bytes).
 
-- The golden is REAL captured output, never hand-written or faked. `npm run capture-golden` re-snapshots it
-  from the current plugin trees; re-run and REVIEW the recapture if a plugin source changes.
+- **The golden is FROZEN, and there is no recapture path.** It is real output captured from the legacy
+  scripts while they still existed; the migration deletes those scripts repo by repo, so the capture tool
+  is retired. The rail's claim is "identical to what the legacy scripts produced", and a regenerated
+  golden cannot make that claim. Never hand-write, fake, or re-snapshot a fixture.
+- **The rail builds from the LIVE sibling plugin trees** (`../plugins/networking`, `../plugins/fluidd-plugin`),
+  so a source change there (a version bump, an edited payload) turns it red. That is real information: the
+  build output moved. Reconciling it against the frozen golden is a maintainer decision, never a quiet
+  fixture edit. It also means a fresh standalone clone with no sibling plugins cannot run this rail.
 - The rail is green as of packet 2 (`pack` + `index` are ported) and is part of the must-pass gate in
   `scripts/check.sh`, not a reported-only status.
 - Do NOT make the rail pass by weakening the comparison or by faking output. Byte-equivalence is measured

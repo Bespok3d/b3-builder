@@ -1,0 +1,43 @@
+{
+  "name": "fluidd",
+  "title": "Fluidd",
+  "version": "0.1.4",
+  "description": "Swaps SM's outdated Fluidd for the current upstream release. You get input-shaper graphs, integrated config/G-code editors, tool-colour preview, modern mesh viz. Uninstall restores the SM-shipped copy automatically; no nginx config touched.",
+  "tagline": "Modern Fluidd v1.37.2: replaces the stock SM build.",
+  "category": "ui",
+  "channel": "stable",
+  "publisher": "PLACEHOLDER",
+  "printer_specific": true,
+  "published_at": "2025-10-12",
+  "updated_at": "2026-07-03",
+  "requires": {
+    "capabilities": [
+      "klipper-generic"
+    ]
+  },
+  "provides": [
+    "fluidd-ui"
+  ],
+  "require": [],
+  "conflicts": [],
+  "doc_url": "https://github.com/Bespok3d/fluidd-plugin/blob/main/fluidd/doc/README.md",
+  "download_url": "fluidd-0.1.4.b3",
+  "homepage": "https://github.com/bespok3d-org/plugin-fluidd",
+  "config": [
+    {
+      "key": "FLUIDD_PORT",
+      "label": "Fluidd port",
+      "type": "http-port",
+      "default": "80",
+      "hint": "Auto-assigned. Make Fluidd primary to serve it on port 80.",
+      "userEditable": true
+    }
+  ],
+  "changelog_url": "fluidd/doc/CHANGELOG.md",
+  "endpoints": [
+    {
+      "label": "Fluidd",
+      "path": "/"
+    }
+  ]
+}
