@@ -51,14 +51,18 @@ the `--bake` flag.
 
 You have some config files and want them on your printer as a proper plugin.
 
-**1. Install the builder** (needs Node.js 20 or newer):
+**1. Install the builder** (needs Node.js 20 or newer). In any directory, an empty one is fine:
 
 ```sh
-npm install -g github:Bespok3d/b3-builder
+npm install github:Bespok3d/b3-builder
 ```
 
-While the repo is private this requires GitHub access to `Bespok3d/b3-builder`; an npm package is
-planned for the public release.
+This puts the `b3-builder` command in `./node_modules/.bin`, where `npx b3-builder` finds it. Do
+not use `npm install -g` with the git URL: npm has a long-standing bug where a global install
+from git skips the package's build step and the command never appears. A proper global install
+(`npm install -g @bespok3d/builder`) arrives when the package is published to npm at the public
+release. While the repo is private, both this install and the `npx` form require GitHub access to
+`Bespok3d/b3-builder`.
 
 **2. Lay out the plugin:**
 
@@ -97,8 +101,11 @@ No checksums, no file list: the builder fills those in. `publisher` is the liter
 **3. Build it:**
 
 ```sh
-b3-builder build --source ./my-macros --out dist --atom-repo you/my-macros
+npx b3-builder build --source ./my-macros --out dist --atom-repo you/my-macros
 ```
+
+(For a one-off build you can skip step 1 entirely: `npx github:Bespok3d/b3-builder build ...`
+downloads, builds, and runs the tool in one go.)
 
 `--atom-repo` is your GitHub `owner/repo` slug; the catalog entry's documentation link points at
 it. The result:
