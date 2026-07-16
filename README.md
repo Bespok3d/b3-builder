@@ -1,229 +1,280 @@
 # b3-builder
 
-The Bespok3d plugin build system. It turns a plugin source dir (or a repo of plugin dirs) into a gated,
-class-aware, signed `.b3` package plus its index atom, the same way in two places:
+b3-builder turns plugin source directories into installable Bespok3d packages. You point it at a
+plugin (or a whole repo of plugins) and it produces a `.b3` archive ready to install on a printer,
+plus the catalog metadata a plugin index needs to list it.
 
-- **locally**, as a `bespok3d build` CLI a plugin publisher runs on their machine, and
-- **in CI**, as a reusable GitHub Action every plugin repo pulls in,
+One build engine, two faces:
 
-both over ONE importable core (`bake` then `pack` then `index` then `sign` then `gate`). The core is a
-library, so a downstream target (the Bespok3d app's in-app package builder, later) can consume it too.
+- a **CLI** (`b3-builder build`) for building on your own machine
+- a reusable **GitHub Action** that gives a plugin repo its whole release pipeline from one `uses:`
 
-This is a **publisher-facing** domain: the tools and docs for anyone who wants to build and ship a `.b3`
-with ease. It is deliberately its OWN repo, distinct from `lib_bespok3d`, which is the INTERNAL SDK (the
-common code shared across the app, the daemon, and the jinni). Two audiences, two repos.
+The tool is organization-agnostic: your publisher identity (repo slugs, list names, tokens) is
+always passed in. Nothing Bespok3d-specific is baked into the builder, so anyone can publish
+plugins with it.
 
-## The hard boundary (what this tool is, and is NOT)
+## What a plugin looks like
 
-b3-builder's unit is a plugin dir, or a repo of plugin dirs. It **never** contains, reads, or reasons
-about: bundle curation, dev/release channels, dev variants, `+dev` build-tags, any "official"/combined
-catalog, doc-staging into app directories, or org/publisher identity. Publisher/org identity (the atom
-doc_url repo, the sub-list name and publisher) is ALWAYS a parameter passed in, with no baked default.
-The Bespok3d app is ONE consumer among several; its offline-bundle machinery lives in the app, not here.
-See ADR-0041 and `../Bespok3d/doc/build-system-consolidation.md` for the full boundary and consumer model.
+```text
+my-plugin/
+  manifest.json      what it is, what it needs, how it installs
+  files/             the payload, mirroring where files land on the printer
+  doc/README.md      optional user-facing docs, linked from the catalog entry
+  tests/run.sh       optional test script the GitHub Action runs before releasing
+```
 
-## Status: clean publisher core, plus the reusable CI Action (relay packet 8)
+The builder computes every file checksum and mode at pack time. You never hand-write a file list.
+The full manifest contract (fields, install classes, services) is documented in the Bespok3d
+package format guide, which publishes alongside the rest of the Bespok3d docs; until then the
+quick start manifest below is a complete working reference.
 
-The repo shape, the pipeline skeleton, both faces, the gate, and the golden-equivalence harness landed in
-packet 1; packet 2 ported `pack` and `index`. Packet 3 corrected the seam: the core is now shaped around
-the publisher unit (a plugin dir, or a repo of plugin dirs), identity is a passed-in parameter, and
-skip-if-unchanged is an opt-in mode. Packet 4 relocated everything app-flavored (the offline-bundle
-assembly, dev channels, the "official" catalog, doc-staging) out of the temporary `src/compat/`
-quarantine and into the app's own build glue (`../Bespok3d/scripts/app-bundle.mjs`), which imports this
-core as a library (`packIfChanged`, `builderVersion`). `src/compat/` no longer exists; b3-builder is now
-a clean publisher tool with zero app coupling. Packet 5 landed `bake` (the per-class dispatch); packet 6
-landed `gate` (the one class-aware refuse-to-pack gate, see below); packet 7 migrated the networking
-pilot's `bake` fields and device-verified the `.ko`. Packet 8 landed the reusable CI Action that wraps the
-tool with GitHub release + register orchestration (see "The reusable CI Action" below). Only `sign`
-remains a seam. Still ahead, across the relay (`~/.claude/plans/relay-build-system-consolidation.md`):
+## Plugin kinds
 
-| Step | What it does | Lands in |
-| --- | --- | --- |
-| `bake` | per-class bake dispatch (pip, go, download, docker-c, docker-ko) | done |
-| `pack` | build the `.b3` (checksummed manifest, files, doc) + opt-in skip-if-unchanged | done |
-| `index` | each plugin's atom, plus a leaf sub-list for a repo of plugin dirs | done |
-| `gate` | one class-aware refuse-to-pack gate | done |
-| `sign` | GPG-sign the `.b3` and the atom/list (a no-op seam today) | packet 10 |
+| Kind | You ship | You declare | Example |
+| --- | --- | --- | --- |
+| Config files and patches | Klipper/Moonraker configs, macros, patches, static files | nothing, just `files/` | cpu-temp |
+| Python | Python code with pip dependencies | `requirements.txt` and/or `klipper_requirements.txt` at the plugin root | spoolman |
+| Go binary | a Go program cross-compiled for the printer (arm64) | a `"class": "go"` bake entry | prometheus-exporter |
+| Prebuilt download | an upstream release repackaged (sha256-pinned) | a `"class": "download"` bake entry | tailscale |
+| Native C program | C source cross-built in Docker (arm64) | a `"class": "docker-c"` bake entry | u1-hw-camera |
+| Kernel module | a `.ko` built for the exact printer kernel | a `"class": "docker-ko"` bake entry | tun-module |
 
-## The bake dispatch (R1)
+The examples are Bespok3d-published plugins ("U1" is the Snapmaker U1, the first printer Bespok3d
+supports).
 
-A plugin whose payload is a build output declares HOW to build it, so the tool runs the right baker
-instead of the plugin hand-rolling a `build.sh`. `bake` is an OPT-IN mode (`--bake`), like skip-unchanged:
-a real publisher / CI build turns it on to produce payloads from source; a build over an already-baked
-tree (the golden rail, the app's own build glue) leaves it off and `bake` is a passthrough.
+Only the first kind needs nothing beyond its files. Python plugins declare their dependencies in
+requirements files, and the last four kinds declare how their payload is built from source in the
+manifest's `bake` list (see the bake reference below). Every kind past the first is produced with
+the `--bake` flag.
 
-Two declaration sources, one dispatcher:
+## Quick start
 
-- **Python deps (class 2)** stay presence-driven off a `requirements.txt` / `klipper_requirements.txt`
-  at the plugin root (ADR-0036 fixes it as a FILE, never a manifest field).
-- **The four compiled / fetched classes** are declared in a `bake` manifest field, a list keyed on `class`:
+You have some config files and want them on your printer as a proper plugin.
 
-| `class` | Bakes | Reproduces |
-| --- | --- | --- |
-| `go` | a static arm64 Go binary (CGO off), pinned to a source commit | `prometheus-exporter/build.sh` |
-| `download` | sha-pinned upstream binaries (`.deb`, `.tar.xz`, `.tar.gz`), verified + extracted + installed | `zerotier` / `tailscale` / `system-utils` |
-| `docker-c` | a native C binary + `.so` cross-built in Docker (arm64 under QEMU) | `u1-hw-camera/toolchain/build.sh` |
-| `docker-ko` | a cross-compiled kernel module, staged as the manifest's kernel variant | `tun-module/toolchain/build.sh` |
-
-The kernel axis (`docker-ko`) is modeled distinctly from an arch tuple: the step carries a `kernel`
-`{ release, vermagic }`, and the bake asserts vermagic at build time only. A vermagic match is necessary
-but NOT sufficient (ADR-0039), so this bake never claims the module works; the on-device capability
-exercise is the pilot's job (packet 7). The two Docker classes preflight `docker info` and, if the daemon
-is down, tell the user to start Docker rather than surfacing the raw socket error.
-
-## The refuse-to-pack gate (R2)
-
-`gate` is the one class-aware check that a plugin's declared payload was actually baked, so an unbaked
-payload can never be packed into a broken `.b3` regardless of which repo the plugin lives in. It
-generalizes the shell packer's Python-only `ensure_baked` / `check_baked_deps` / `check_baked_kmodule` to
-every class:
-
-| Class | Declared by | Baked output the gate asserts exists |
-| --- | --- | --- |
-| 2 (Python) | `requirements.txt` / `klipper_requirements.txt` presence | `files/wheels` / `files/site-packages` is non-empty |
-| 3 (`go`) | the `bake` step's `output` | that file |
-| 4 (`download`) | each fetch member's `dest` | each member file |
-| 5 (`docker-c`) | each `expect` name under `dest` | each artifact |
-| 6 (`docker-ko`) | each variant step's `variant_dest` | each `.ko` variant file |
-
-A binary-only plugin (class 1: config / text / patch, no Python deps, no bake step) declares nothing to
-bake, so it has no gap and packs clean. The gate checks OUTPUT EXISTENCE, not whether a bake ran in this
-build, so a plugin baked out-of-band and a `--bake` build both pass; only a genuinely unbaked plugin
-fails. It never claims a `.ko` works (a vermagic string is not a gate, ADR-0039); it asserts only that the
-variant file was baked. The pipeline runs it LAST, so a consumer never publishes an unbaked `.b3`. Because
-the check only inspects the source tree, a library consumer that packs via `packIfChanged` rather than the
-full pipeline (the app's bundle glue) calls the same exported `assertBaked` before it packs; between the
-two, no path can ship an unbaked payload.
-
-## Usage
+**1. Install the builder** (needs Node.js 20 or newer):
 
 ```sh
-# one plugin dir (unit auto-detected: the dir holds a manifest.json)
-bespok3d build --source ./my-plugin --out dist --atom-repo my-org/my-plugin
-
-# a repo of plugin dirs (atoms plus an assembled sub-list)
-bespok3d build --source . --out dist --atom-repo my-org/my-repo \
-  --list-name "My Repo" --list-publisher my-org
-
-# opt-in skip-if-unchanged: reuse an existing .b3 whose fingerprint is unchanged
-bespok3d build --source . --out dist --atom-repo my-org/my-repo \
-  --list-name "My Repo" --list-publisher my-org --skip-unchanged
-
-# opt-in bake: produce each plugin's payload from source (its declared bake class + ADR-0036 deps)
-bespok3d build --source ./my-plugin --out dist --atom-repo my-org/my-plugin --bake
+npm install -g github:Bespok3d/b3-builder
 ```
+
+While the repo is private this requires GitHub access to `Bespok3d/b3-builder`; an npm package is
+planned for the public release.
+
+**2. Lay out the plugin:**
+
+```text
+my-macros/
+  manifest.json
+  files/cfg/klipper/my-macros.cfg
+```
+
+A minimal working `manifest.json`:
+
+```json
+{
+  "name": "my-macros",
+  "title": "My Macros",
+  "version": "0.1.0",
+  "description": "My favorite Klipper macros as an installable plugin.",
+  "tagline": "My favorite macros, one install away.",
+  "category": "tuning",
+  "channel": "stable",
+  "printer_specific": false,
+  "source": "https://github.com/you/my-macros",
+  "publisher": "PLACEHOLDER",
+  "requires": { "capabilities": ["klipper-generic"], "variables": [] },
+  "permissions": ["klipper-config", "restart"],
+  "install": {
+    "place": [{ "class": "klipper-config", "src": "files/cfg/klipper/my-macros.cfg" }],
+    "restart": ["klipper"]
+  }
+}
+```
+
+No checksums, no file list: the builder fills those in. `publisher` is the literal string
+`PLACEHOLDER` for now; it becomes your GPG key fingerprint once package signing goes live.
+
+**3. Build it:**
+
+```sh
+b3-builder build --source ./my-macros --out dist --atom-repo you/my-macros
+```
+
+`--atom-repo` is your GitHub `owner/repo` slug; the catalog entry's documentation link points at
+it. The result:
+
+```text
+dist/my-macros-0.1.0.b3       the installable package
+dist/my-macros.atom.json      its catalog entry
+```
+
+**4. Install it:** sideload the `.b3` in the Bespok3d desktop app (Add plugin from file), or
+publish it through the GitHub Action below.
+
+## CLI reference
+
+```sh
+b3-builder build [flags]
+```
+
+| Flag | Meaning | Default |
+| --- | --- | --- |
+| `--source <dir>` | what to build: one plugin dir, or a repo of plugin dirs | current dir |
+| `--out <dir>` | where the built artifacts go | `./dist` |
+| `--atom-repo <owner/repo>` | publisher identity; each catalog entry's doc link points at this repo (required) | none |
+| `--unit plugin\|repo` | build one plugin, or every plugin dir in the source dir | auto-detected |
+| `--list-name <name>` | display name of the assembled plugin list (repo unit, required) | none |
+| `--list-publisher <name>` | publisher of the assembled plugin list (repo unit, required) | none |
+| `--exclude <dir>` | skip this immediate subdir even if it holds a manifest (repeatable; repo unit) | none |
+| `--bake` | produce each plugin's payload from source via its declared bake steps | off |
+| `--skip-unchanged` | reuse an existing `.b3` whose content is unchanged instead of repacking | off |
+
+Unit auto-detection: a source dir that itself holds a `manifest.json` is one plugin; otherwise it
+is treated as a repo of plugin dirs. An explicit `--unit` wins.
+
+Outputs: every plugin yields `<name>-<version>.b3` plus `<name>.atom.json`, its atom: the catalog
+entry a plugin index aggregates. A repo build also
+assembles `index.json`, a self-contained plugin list (with dependencies resolved across the repo's
+plugins) that an index of lists can reference. Two plugins in one repo may not share the same
+name and version.
+
+Exit behavior: success prints `Built N package(s) into <out>` and exits 0; any failure prints
+`b3-builder build failed: <reason>` and exits 1. Any subcommand other than `build` prints the
+usage line and exits 2.
+
+## Bake reference
+
+Plugins whose payload is a build output declare how to produce it in the manifest's `bake` list.
+All bakes target the printer's platform: arm64 Linux, the hardware Bespok3d currently supports
+(the Snapmaker U1 first).
+Each entry names a `class`; a plugin may declare several steps. Baking only runs with `--bake`
+(or the Action's `bake: 'true'`): a build over an already-baked tree skips it. The `bake` field is
+build-time only and is stripped from the shipped `.b3`. A plugin that needs a bake but has not
+been baked fails the build's final gate instead of packing empty.
+
+**Python dependencies** are not a bake entry: put a `requirements.txt` (deps for the plugin's own
+virtualenv, shipped as wheels) and/or `klipper_requirements.txt` (packages unpacked for a
+Klipper/Moonraker extra) at the plugin root. With `--bake` the builder downloads them for the
+printer's platform (aarch64, CPython 3.11); a dependency with no arm64 wheel fails the build
+loudly instead of shipping a package the printer cannot install. Needs `python3` with pip on the
+build machine.
+
+**`"class": "go"`**: clone, check out, and cross-compile a Go program (static arm64 binary).
+Needs the Go toolchain and git.
+
+| Field | Meaning | Default |
+| --- | --- | --- |
+| `source` | git URL of the Go project | required |
+| `commit` | exact commit to build | required |
+| `package` | package path inside the project | `.` |
+| `output` | where the binary lands, relative to the plugin dir | required |
+
+**`"class": "download"`**: fetch upstream release artifacts, verify them, and stage files out of
+them. Needs `curl`, `tar`, and `ar` (for `.deb`).
+
+| Field | Meaning | Default |
+| --- | --- | --- |
+| `fetch[].url` | artifact URL | required |
+| `fetch[].sha256` | checksum the download must match | required |
+| `fetch[].archive` | `deb`, `tar.xz`, or `tar.gz` | required |
+| `fetch[].members[]` | `{path, dest, mode}`: file inside the archive, destination relative to the plugin dir, file mode | mode `0755` |
+| `include[]` | `{src, dest, mode}`: local files staged alongside (launcher scripts etc.) | mode `0755` |
+
+**`"class": "docker-c"`**: build C source in Docker for arm64 (QEMU on x86 runners) and stage the
+produced artifacts. Needs Docker.
+
+| Field | Meaning | Default |
+| --- | --- | --- |
+| `dockerfile` | Dockerfile that builds the program | required |
+| `context` | Docker build context, relative to the plugin dir | `.` |
+| `platform` | target platform | `linux/arm64` |
+| `out` | dir inside the image holding the build output | `/out` |
+| `dest` | where the output tree lands, relative to the plugin dir | required |
+| `expect[]` | artifact names that must exist after the build | none |
+
+**`"class": "docker-ko"`**: build a kernel module against the exact printer kernel. The built
+module's vermagic is checked against the declared one; on mismatch the build refuses to ship the
+`.ko`. Needs Docker.
+
+| Field | Meaning | Default |
+| --- | --- | --- |
+| `dockerfile` | Dockerfile that builds the module | required |
+| `context` | Docker build context, relative to the plugin dir | `.` |
+| `module` | module filename the build produces | required |
+| `out` | dir inside the image holding the build output | `/out` |
+| `kernel.release` | target kernel release string | required |
+| `kernel.vermagic` | vermagic string the target kernel accepts | required |
+| `variant_dest` | where the `.ko` lands, relative to the plugin dir | required |
+
+## GitHub Action reference
+
+The composite Action gives a plugin repo its whole release pipeline from one `uses:`. A run
+builds (and bakes) every plugin, runs each plugin's `tests/run.sh` (a failing test aborts before
+anything is released), cuts a GitHub release with the `.b3` asset per plugin, rewrites the
+assembled `index.json` so each entry's download URL points at its real release asset, commits
+that `index.json` back to the repo, and optionally registers the list in an index-of-lists repo.
+That full pipeline is the `repo` unit (the default); with `unit: plugin` the Action only builds
+the artifacts: no tests, no release, no index commit, no registration.
+
+A complete `release.yml`:
 
 ```yaml
-# CI (a repo's whole release workflow: build -> test -> pack -> release -> index -> register)
-- uses: actions/checkout@v4
-  with:
-    fetch-depth: 0
-- uses: Bespok3d/b3-builder@v1
-  with:
-    unit: repo
-    bake: 'true'
-    atom-repo: ${{ github.repository }}
-    list-name: My Repo
-    list-publisher: my-org
-    list-ref-name: My Repo
-    main-index-repo: my-org/main-index
-    main-index-token: ${{ secrets.MAIN_INDEX_TOKEN }}
+name: release
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: Bespok3d/b3-builder@v1
+        with:
+          unit: repo
+          bake: 'true'
+          atom-repo: ${{ github.repository }}
+          list-name: My Plugins
+          list-publisher: my-org
+          list-ref-name: My Plugins
+          main-index-repo: my-org/main-index
+          main-index-token: ${{ secrets.MAIN_INDEX_TOKEN }}
 ```
 
-See "The reusable CI Action" below for what each input does and the secrets model.
+| Input | Meaning | Default |
+| --- | --- | --- |
+| `unit` | `repo` (a repo of plugin dirs, full pipeline) or `plugin` (one plugin dir, build only) | `repo` |
+| `source` | source dir to build, relative to the checkout | `.` |
+| `out` | output dir for the `.b3` set and the built index | `dist` |
+| `atom-repo` | `owner/repo` slug the catalog doc links point at (required) | none |
+| `list-name` | display name of the assembled plugin list (repo unit) | none |
+| `list-publisher` | publisher of the assembled plugin list (repo unit) | none |
+| `list-ref-name` | name the list is registered under in the index-of-lists (repo unit) | none |
+| `main-index-repo` | `owner/repo` of the index-of-lists to register into (repo unit) | none |
+| `main-index-token` | token with contents write on the index-of-lists repo; empty skips registration | empty |
+| `exclude-dirs` | space-separated subdirs that must never publish (dev-only variants) | empty |
+| `bake` | produce each plugin's payload from source via its bake steps | `'false'` |
+| `skip-unchanged` | reuse an existing `.b3` whose content is unchanged | `'false'` |
+| `node-version` | Node.js version the pipeline runs on | `'20'` |
 
-## The reusable CI Action (R5)
-
-`action.yml` is a **composite** GitHub Action that gives a plugin repo its whole CI from one `uses:`
-instead of each repo re-copying a `release.yml`. It wraps the same core the CLI runs and adds the
-GitHub-specific orchestration around it, in order:
-
-| Step | What runs |
-| --- | --- |
-| build + pack + index | one `bespok3d build` invocation (bake the per-class payloads, pack the `.b3` set, assemble the atoms + sub-list, gate) |
-| test | each plugin's `tests/run.sh`, on the baked tree (a failing test aborts before any release is cut) |
-| release | a GitHub release + `.b3` asset per plugin, collecting each asset's API URL |
-| index (finalize) | swap each sub-list entry's placeholder `download_url` (the bare `.b3` filename) for the real release asset URL |
-| register | reference the assembled sub-list in the index-of-lists repo |
-
-The `download_url` finalize step is why the core writes a placeholder filename in the first place: a
-GitHub release asset URL only exists after the upload and is a CI artifact, so the tool stays
-GitHub-agnostic and the Action fills the field (`src/action/inject-release-urls.ts`, tested). Nothing
-about GitHub releases or a specific org lives in the core.
-
-**Org identity arrives ONLY via inputs, never baked into the Action logic** (the hard boundary, ADR-0041):
-
-| Input | What it is |
-| --- | --- |
-| `atom-repo` | owner/repo each atom's doc_url points at (usually `${{ github.repository }}`) |
-| `list-name` / `list-publisher` | the assembled sub-list's own name + publisher (repo unit) |
-| `list-ref-name` | the display name the sub-list is registered under in the index-of-lists |
-| `main-index-repo` | the index-of-lists repo the sub-list registers into |
-| `main-index-token` | a token with contents write on that repo; empty skips the register step |
-| `exclude-dirs` | space-separated subdirs that hold a `manifest.json` but must never publish (a dev-only variant, e.g. `fluidd-bleeding-edge`); skipped by build discovery AND the release loop |
-| `bake` / `skip-unchanged` | opt into building payloads from source / reusing unchanged `.b3` files |
-
-`exclude-dirs` is caller-supplied curation, the same shape as identity: the tool learns only which named
-dirs to skip, never that a dir is a "dev variant" (no bundle/variant concept enters the core, ADR-0041).
-A repo with a dev-only UI variant wires it as `exclude-dirs: fluidd-bleeding-edge` in its own `release.yml`.
-
-### The secrets model
-
-The only secret the Action needs is `main-index-token`: a token with contents write on the index-of-lists
-repo, so a plugin repo's CI can register its sub-list there (the per-repo `GITHUB_TOKEN` cannot write a
-sibling repo). The caller wires it from a secret, `main-index-token: ${{ secrets.MAIN_INDEX_TOKEN }}`.
-
-- **Today (private alpha):** each repo carries its own `MAIN_INDEX_TOKEN` Actions secret. GitHub Free
-  cannot expose an ORG secret to PRIVATE repos, and all Bespok3d repos are private, so per-repo is forced.
-  The same token value works on every repo (it authenticates to the destination index-of-lists; the source
-  repo identity is irrelevant), and runs as the token owner's identity regardless of who pushes, so
-  contributor pushes keep working.
-- **When the repos go public (AGPL, the planned end state):** create ONE **org** secret `MAIN_INDEX_TOKEN`
-  (org secrets work on Free once the repos are public), set its visibility to all/selected repos, and
-  delete every per-repo copy. Future repos inherit it with zero per-repo upkeep. This is the centralization
-  R5 buys: N hand-copied `release.yml` files with N secret sets collapse to one Action + one org secret.
-
-See [[project_ci_secrets_centralization]] for the full history (the GitHub-Free constraint, the push-race
-that bit material-tags, the seat-cost facts).
-
-### Push-race hardening
-
-Both git pushes the Action makes (this repo's `index.json`, and the sub-list ref in the index-of-lists)
-retry on a non-fast-forward rejection: up to five attempts, rebasing on the remote between tries. This
-replaces the bare co-repo self-push that once left a stale index (material-tags, 2026-06-30). A same-file
-concurrent conflict still exhausts the retries and fails loud (re-run a FRESH `workflow_dispatch`, never a
-re-run, which re-checks-out the stale trigger SHA).
-
-### Deploying the Action
-
-`uses: Bespok3d/b3-builder@<ref>` requires this repo pushed to GitHub as a reusable-action repo. Because
-`dist/` and `node_modules/` are gitignored, the Action builds itself from source (`npm ci` + `npm run
-build`) on each run before invoking the tool. Committing `dist/` or publishing to npm would remove that
-step; it is deferred (a build adds a modest per-run cost, not a correctness concern).
-
-## The golden-equivalence harness
-
-The core is ported behind a rail that proves it reproduces the current build output byte-for-byte before
-anything depends on it. `test/golden/` holds committed fixtures snapshotted from the legacy scripts.
-"byte-for-byte" means: the atoms and sub-list match by **content** (parsed, deep-equal, in the exact
-canonical JSON the system writes), and each `.b3` matches by the **content hash of every payload / doc
-file** plus its parsed manifest (a `.b3` is a zip whose framing is non-deterministic, so the invariant is
-its content, not its zip bytes).
-
-- `test/equivalence.test.ts` is the **publisher rail**: it builds one plugin dir and a repo of plugin
-  dirs (the networking co-repo) via the clean core with identity passed in, and matches the golden.
-  (The monorepo-bundle rail, the app's own concern, relocated to `../Bespok3d/scripts/test/` in packet 4.)
-
-`npm run capture-golden` re-snapshots the networking golden from the current plugin trees (re-run it if a
-plugin source changes; review the recapture).
+Tokens: the releases and the `index.json` commit use the workflow's own `github.token`, which
+needs `permissions: contents: write` (as in the example). Registering into a separate
+index-of-lists repo needs its own token (`main-index-token`) with contents write on that repo;
+leave it empty and the register step is skipped, everything else still runs. Registration writes
+`lists/<your-repo>.json` into the index-of-lists repo, pointing at your repo's committed
+`index.json`. Docker builds
+(`docker-c` / `docker-ko` bakes) are cached through the Actions layer cache automatically.
 
 ## Development
 
 ```sh
-npm install
-npm run check   # the gate: RULE ZERO, eslint, typecheck, build, the equivalence rail
-npm test        # the rail on its own
+npm ci
+npm run check   # typecheck, lint, tests, and the repo's guards
 ```
 
-Agent instructions and the engineering rules for this repo live in [CLAUDE.md](CLAUDE.md). Read it before
-making changes, whichever tool you are.
+Contributor conventions and the internal architecture notes live in [CLAUDE.md](CLAUDE.md).
