@@ -1,4 +1,5 @@
 import type { BuildArtifacts, BuildRequest, JsonObject, PipelineContext } from './types.js'
+import { isListIdentity } from './types.js'
 import { bake } from './steps/bake.js'
 import { pack } from './steps/pack.js'
 import { buildRegistry } from './steps/index.js'
@@ -21,10 +22,11 @@ export async function runPipeline(request: BuildRequest): Promise<BuildArtifacts
   return { packages: gated.packages, atoms: gated.atoms, subList: requireSubListForRepo(gated) }
 }
 
-// A repo build must have produced its assembled sub-list; a null there means the registry step was
-// skipped or misordered. A single-plugin build legitimately has none.
+// A repo build carrying a list identity must have produced its assembled sub-list; a null there means
+// the registry step was skipped or misordered. A single-plugin build and an atoms-only repo build
+// legitimately have none.
 function requireSubListForRepo(context: PipelineContext): JsonObject | null {
-  if (context.request.unit === 'repo' && context.subList === null) {
+  if (context.request.unit === 'repo' && isListIdentity(context.request.identity) && context.subList === null) {
     throw new Error('pipeline finished a repo build without a sub-list (the registry step did not run)')
   }
   return context.subList

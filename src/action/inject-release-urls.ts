@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 // Action face, never the core, because a GitHub release asset URL is a CI artifact the tool must never
 // bake in (the hard boundary, ADR-0041): the core stays GitHub-agnostic, the Action fills the field.
 
-interface PublishablePlugin {
+export interface PublishablePlugin {
   download_url: string
   [field: string]: unknown
 }
@@ -28,7 +28,7 @@ export function injectReleaseUrls(
   return { ...subList, plugins: finalized }
 }
 
-function finalizeDownloadUrl(
+export function finalizeDownloadUrl(
   plugin: PublishablePlugin,
   assetUrlByFilename: Record<string, string>,
 ): PublishablePlugin {

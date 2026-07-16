@@ -7,10 +7,11 @@ import type { BuildRequest, BuildUnit } from '../core/index.js'
 
 // The `b3-builder build` CLI: a thin face over the one publisher core. It parses the invocation into a
 // BuildRequest and runs the pipeline, then reports what was produced. Its unit is a plugin dir (build
-// one .b3 + atom) or a repo of plugin dirs (a .b3 + atom each, plus one assembled sub-list); the unit is
-// auto-detected from whether the source dir itself holds a manifest.json, or set explicitly with
-// --unit. Publisher/org identity (--atom-repo, and --list-name/--list-publisher for a repo) is passed
-// in, never baked.
+// one .b3 + atom) or a repo of plugin dirs (a .b3 + atom each, plus one assembled sub-list when the repo
+// publishes its own list); the unit is auto-detected from whether the source dir itself holds a
+// manifest.json, or set explicitly with --unit. Publisher/org identity (--atom-repo, plus
+// --list-name/--list-publisher for a repo that owns its sub-list; pass neither to build atoms only) is
+// passed in, never baked.
 const USAGE =
   'usage: b3-builder build --source <dir> --out <dir> --atom-repo <owner/repo> [--unit plugin|repo] [--list-name <name>] [--list-publisher <name>] [--exclude <dir>]... [--skip-unchanged] [--bake]'
 

@@ -11,7 +11,9 @@ branding:
 # (finalize each catalog entry's download_url with the real release URL) then register (reference the
 # assembled sub-list in the index-of-lists). Publisher/org identity (atom-repo, list-name, list-publisher,
 # the index-of-lists repo, and its token) arrives ONLY via inputs, never baked into this Action's logic:
-# the tool is org-agnostic, the caller supplies who they are (THE HARD BOUNDARY, ADR-0041).
+# the tool is org-agnostic, the caller supplies who they are (THE HARD BOUNDARY, ADR-0041). A repo that
+# passes NO list identity builds atoms-only: no sub-list is assembled or committed, and the finalized
+# per-plugin atoms left in the out dir are what a downstream registration step publishes.
 #
 # Note on step order: the b3-builder pipeline bakes, packs, and indexes in one invocation, so "test" runs
 # after pack rather than between build and pack. This is behavior-equivalent to the legacy build->test->pack
@@ -35,10 +37,10 @@ inputs:
     description: owner/repo slug each atom's doc_url points at (publisher identity, no baked default)
     required: true
   list-name:
-    description: display name of the assembled sub-list (repo unit)
+    description: display name of the assembled sub-list (repo unit); leave BOTH this and list-publisher empty for an atoms-only repo
     required: false
   list-publisher:
-    description: publisher of the assembled sub-list (repo unit)
+    description: publisher of the assembled sub-list (repo unit); leave BOTH this and list-name empty for an atoms-only repo
     required: false
   list-ref-name:
     description: display name this sub-list is registered under in the index-of-lists (repo unit)
@@ -166,8 +168,18 @@ runs:
         done
         echo "B3D_URL_MAP=$url_map" >> "$GITHUB_ENV"
 
-    - name: Finalize index.json download_urls with the release asset URLs (repo unit)
+    - name: Finalize atom download_urls with the release asset URLs (repo unit)
       if: ${{ inputs.unit == 'repo' }}
+      shell: bash
+      env:
+        B3D_ACTION_PATH: ${{ github.action_path }}
+        B3D_OUT: ${{ inputs.out }}
+      run: |
+        set -euo pipefail
+        node "$B3D_ACTION_PATH/dist/action/finalize-atom-urls.js" "$B3D_OUT" "$B3D_URL_MAP"
+
+    - name: Finalize index.json download_urls with the release asset URLs (repo unit)
+      if: ${{ inputs.unit == 'repo' && inputs.list-name != '' }}
       shell: bash
       env:
         B3D_ACTION_PATH: ${{ github.action_path }}
@@ -179,7 +191,7 @@ runs:
           "$B3D_OUT/index.json" "$B3D_URL_MAP" "$B3D_SOURCE/index.json"
 
     - name: Commit the assembled index.json (repo unit)
-      if: ${{ inputs.unit == 'repo' }}
+      if: ${{ inputs.unit == 'repo' && inputs.list-name != '' }}
       shell: bash
       env:
         B3D_SOURCE: ${{ inputs.source }}
@@ -202,7 +214,7 @@ runs:
         done
 
     - name: Register this sub-list in the index-of-lists (repo unit)
-      if: ${{ inputs.unit == 'repo' && inputs.main-index-token != '' }}
+      if: ${{ inputs.unit == 'repo' && inputs.main-index-token != '' && inputs.list-name != '' }}
       shell: bash
       env:
         MAIN_INDEX_TOKEN: ${{ inputs.main-index-token }}

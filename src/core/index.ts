@@ -17,6 +17,7 @@ export { bakePlugin } from './bake/dispatch.js'
 // built) mirrors these and guards its copies against them with a cross-boundary drift test, per the
 // single-source-of-truth rule for an unavoidable mirror.
 export { sharedEntryFields, atomKey, latestUpdated, isCollection } from './build/entry.js'
+export { isListIdentity } from './types.js'
 export type { RawBuildInputs } from './request.js'
 export type {
   AtomIdentity,
