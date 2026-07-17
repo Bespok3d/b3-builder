@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readdirSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { CommandRunner } from './runner.js'
@@ -37,19 +37,26 @@ export function bakePythonDeps(pluginDir: string, runner: CommandRunner): void {
 function bakeWheels(pluginDir: string, runner: CommandRunner): void {
   const requirements = join(pluginDir, REQUIREMENTS_DECLARATION)
   if (!existsSync(requirements)) return
-  const wheels = join(pluginDir, WHEELS_PAYLOAD_DIR)
-  mkdirSync(wheels, { recursive: true })
+  const wheels = resetPayloadDir(join(pluginDir, WHEELS_PAYLOAD_DIR))
   downloadWheels(requirements, wheels, runner)
 }
 
 function bakeSitePackages(pluginDir: string, runner: CommandRunner): void {
   const requirements = join(pluginDir, KLIPPER_REQUIREMENTS_DECLARATION)
   if (!existsSync(requirements)) return
-  const sitePackages = join(pluginDir, SITE_PACKAGES_PAYLOAD_DIR)
-  mkdirSync(sitePackages, { recursive: true })
+  const sitePackages = resetPayloadDir(join(pluginDir, SITE_PACKAGES_PAYLOAD_DIR))
   const wheelDir = mkdtempSync(join(tmpdir(), 'b3-wheels-'))
   downloadWheels(requirements, wheelDir, runner)
   wheelsIn(wheelDir).forEach((wheel) => unzipWheel(wheel, sitePackages, runner))
+}
+
+// Empty the payload dir before repopulating so the baked set is exactly what the current requirements
+// resolve to. Without this, a stale wheel from an earlier build (a dep that has since floated to a newer
+// version) survives beside the new one, and the printer's offline pip refuses two versions of one package.
+function resetPayloadDir(payloadDir: string): string {
+  rmSync(payloadDir, { recursive: true, force: true })
+  mkdirSync(payloadDir, { recursive: true })
+  return payloadDir
 }
 
 function downloadWheels(requirements: string, dest: string, runner: CommandRunner): void {

@@ -1,4 +1,4 @@
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -40,6 +40,17 @@ describe('bakePythonDeps', () => {
     expect(download.args.slice(0, 6)).toEqual(['-m', 'pip', 'download', '-r', join(dir, 'requirements.txt'), '-d'])
     expect(argAfter(download, '-d')).toBe(join(dir, 'files', 'wheels'))
     expect(download.args).toEqual(expect.arrayContaining(ARM64_FLAGS))
+  })
+
+  it('re-baking clears a stale wheel so only the current requirement resolution is packed', () => {
+    const dir = pluginWith({ 'requirements.txt': 'humanize>=4.9.0\n' })
+    writeStub(join(dir, 'files', 'wheels', 'humanize-4.15.0-py3-none-any.whl'))
+    const { runner } = fakeRunner((spec) => {
+      if (spec.args.includes('download')) writeStub(join(argAfter(spec, '-d'), 'humanize-4.16.0-py3-none-any.whl'))
+      return undefined
+    })
+    bakePythonDeps(dir, runner)
+    expect(readdirSync(join(dir, 'files', 'wheels'))).toEqual(['humanize-4.16.0-py3-none-any.whl'])
   })
 
   it('klipper_requirements.txt downloads then unpacks each wheel into files/site-packages', () => {
