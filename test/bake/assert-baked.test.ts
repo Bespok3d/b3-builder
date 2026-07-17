@@ -23,7 +23,7 @@ function fixture(manifest: JsonObject, bakedFiles: Record<string, string> = {}):
 
 const GO_STEP = { class: 'go', source: 'https://example.invalid/x.git', commit: 'abc', output: 'files/bin/exporter' }
 const DOWNLOAD_STEP = { class: 'download', fetch: [{ url: 'file:///x.tgz', sha256: 'deadbeef', archive: 'tar.gz', members: [{ path: 'ts', dest: 'files/bin/tailscaled', mode: '0755' }] }] }
-const DOCKER_C_STEP = { class: 'docker-c', dockerfile: 'Dockerfile', dest: 'files/camera', expect: ['libcam.so', 'camd'] }
+const DOCKER_C_STEP = { class: 'docker-c', dockerfile: 'Dockerfile', members: [{ path: 'libcam.so', dest: 'files/camera/libcam.so' }, { path: 'camd', dest: 'files/camera/camd' }] }
 const DOCKER_KO_STEP = { class: 'docker-ko', dockerfile: 'Dockerfile', module: 'tun.ko', kernel: { release: '6.1.0', vermagic: '6.1.0 SMP mod_unload aarch64' }, variant_dest: 'files/modules/6.1.0/tun.ko' }
 
 describe('assertBaked: class 1 (binary-only)', () => {
@@ -82,12 +82,12 @@ describe('assertBaked: class 4 (sha-pinned download)', () => {
 })
 
 describe('assertBaked: class 5 (docker C binary)', () => {
-  it('refuses a docker-c plugin missing any expected artifact', () => {
+  it('refuses a docker-c plugin missing any declared member', () => {
     const source = fixture({ name: 'u1-hw-camera', version: '0.1.0', bake: [DOCKER_C_STEP] }, { 'files/camera/libcam.so': 'so' })
     expect(bakedGaps(source)).toEqual([expect.stringContaining('files/camera/camd')])
   })
 
-  it('passes a docker-c plugin with every expected artifact staged', () => {
+  it('passes a docker-c plugin with every declared member staged', () => {
     const source = fixture({ name: 'u1-hw-camera', version: '0.1.0', bake: [DOCKER_C_STEP] }, { 'files/camera/libcam.so': 'so', 'files/camera/camd': 'bin' })
     expect(bakedGaps(source)).toEqual([])
   })

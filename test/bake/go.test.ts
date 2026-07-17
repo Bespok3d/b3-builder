@@ -1,6 +1,6 @@
 import { existsSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { isAbsolute, join, relative, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { bakeGo } from '../../src/core/bake/go.js'
 import type { GoBake } from '../../src/core/bake/manifest-bake.js'
@@ -35,6 +35,20 @@ describe('bakeGo', () => {
     expect(build.env).toEqual({ GOOS: 'linux', GOARCH: 'arm64', CGO_ENABLED: '0' })
     expect(build.args).toEqual(['-C', expect.any(String), 'build', '-o', join(pluginDir, STEP.output), '.'])
     expect(existsSync(join(pluginDir, STEP.output))).toBe(true)
+  })
+
+  it('passes go an absolute -o even when the plugin dir is relative', () => {
+    const pluginDirRelative = relative(process.cwd(), mkdtempSync(join(tmpdir(), 'b3-go-rel-')))
+    const { calls, runner } = fakeRunner((spec) => {
+      if (spec.command === 'go') writeStub(argAfter(spec, '-o'))
+      return undefined
+    })
+
+    bakeGo(STEP, pluginDirRelative, runner)
+
+    // A relative -o would resolve against `go -C <clone>` and strand the binary in the throwaway clone.
+    expect(isAbsolute(argAfter(nth(calls, 2), '-o'))).toBe(true)
+    expect(existsSync(resolve(pluginDirRelative, STEP.output))).toBe(true)
   })
 
   it('fails loudly when the build exits non-zero', () => {

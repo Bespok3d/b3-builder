@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import type { CommandRunner } from './runner.js'
 import { runOrThrow } from './runner.js'
 import { sha256OfFile } from '../build/file-tree.js'
-import { stageFile } from './stage.js'
+import { stageFile, stageMember } from './stage.js'
 import type { ArchiveKind, DownloadBake, DownloadFetch } from './manifest-bake.js'
 
 // Class 4: fetch sha-pinned upstream binaries and stage them into files/, no compile. Reproduces the
@@ -22,7 +22,7 @@ function processFetch(fetch: DownloadFetch, index: number, work: string, pluginD
   fetchToFile(fetch.url, archiveFile, runner)
   verifySha256(archiveFile, fetch.sha256)
   extractArchive(fetch.archive, archiveFile, work, runner)
-  fetch.members.forEach((member) => stageFile(join(work, member.path), join(pluginDir, member.dest), member.mode))
+  fetch.members.forEach((member) => stageMember(member, work, pluginDir))
 }
 
 export function fetchToFile(url: string, dest: string, runner: CommandRunner): void {

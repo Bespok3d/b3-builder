@@ -20,6 +20,18 @@ function fixtureTarball(): { url: string; sha256: string } {
   return { url: `file://${tarball}`, sha256: sha256OfFile(tarball) }
 }
 
+// The upstream-app shape (octoeverywhere): a release tarball whose payload is whole DIRECTORIES to vendor,
+// plus loose files next to them.
+function fixtureAppTarball(): { url: string; sha256: string } {
+  const content = mkdtempSync(join(tmpdir(), 'b3-dl-app-fixture-'))
+  mkdirSync(join(content, 'vendor-app/nested'), { recursive: true })
+  writeFileSync(join(content, 'vendor-app/nested/module.py'), 'fake vendored module\n')
+  writeFileSync(join(content, 'LICENSE'), 'fake license\n')
+  const tarball = join(content, 'app.tgz')
+  spawnSync('tar', ['-czf', tarball, '-C', content, 'vendor-app', 'LICENSE'])
+  return { url: `file://${tarball}`, sha256: sha256OfFile(tarball) }
+}
+
 describe('bakeDownload (real fetch + verify + extract + install)', () => {
   it('fetches a sha-pinned archive, extracts the member, and installs it with its mode', () => {
     const pluginDir = mkdtempSync(join(tmpdir(), 'b3-dl-plugin-'))
@@ -37,6 +49,32 @@ describe('bakeDownload (real fetch + verify + extract + install)', () => {
     expect(readFileSync(staged, 'utf8')).toBe('fake upstream binary\n')
     expect(statSync(staged).mode & 0o777).toBe(0o755)
     expect(readFileSync(join(pluginDir, 'files/bin/demo-run'), 'utf8')).toBe('#!/bin/sh\n')
+  })
+
+  it('stages a directory member as a tree, alongside a file member from the same archive', () => {
+    const pluginDir = mkdtempSync(join(tmpdir(), 'b3-dl-tree-'))
+    const { url, sha256 } = fixtureAppTarball()
+    const step: DownloadBake = {
+      class: 'download',
+      fetch: [
+        {
+          url,
+          sha256,
+          archive: 'tar.gz',
+          members: [
+            { path: 'vendor-app', dest: 'files/app/vendor-app', mode: '0755' },
+            { path: 'LICENSE', dest: 'files/app/LICENSE', mode: '0644' },
+          ],
+        },
+      ],
+      include: [],
+    }
+
+    bakeDownload(step, pluginDir, spawnRunner)
+
+    // The octoeverywhere shape: whole python packages are vendored, so a member is a tree as often as a file.
+    expect(readFileSync(join(pluginDir, 'files/app/vendor-app/nested/module.py'), 'utf8')).toBe('fake vendored module\n')
+    expect(readFileSync(join(pluginDir, 'files/app/LICENSE'), 'utf8')).toBe('fake license\n')
   })
 
   it('refuses an artifact whose sha256 does not match the pin', () => {

@@ -1,6 +1,6 @@
 import { mkdirSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { dirname, join } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import type { CommandRunner } from './runner.js'
 import { runOrThrow } from './runner.js'
 import type { GoBake } from './manifest-bake.js'
@@ -13,7 +13,10 @@ export function bakeGo(step: GoBake, pluginDir: string, runner: CommandRunner): 
   const work = mkdtempSync(join(tmpdir(), 'b3-go-'))
   runOrThrow(runner, { command: 'git', args: ['clone', '--quiet', step.source, work] }, `git clone ${step.source}`)
   runOrThrow(runner, { command: 'git', args: ['-C', work, 'checkout', '--quiet', step.commit] }, `git checkout ${step.commit}`)
-  const outputAbs = join(pluginDir, step.output)
+  // Absolute, never merely joined: `go -C <clone>` resolves a RELATIVE `-o` against the clone dir, so a
+  // relative pluginDir (`--source ./prometheus-exporter`) would silently write the binary inside the
+  // throwaway clone and leave the payload empty.
+  const outputAbs = resolve(pluginDir, step.output)
   mkdirSync(dirname(outputAbs), { recursive: true })
   runOrThrow(
     runner,

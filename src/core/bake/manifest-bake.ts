@@ -2,7 +2,6 @@ import type { JsonObject, JsonValue } from '../types.js'
 import { asArray, asObject, asString } from '../build/json.js'
 import type {
   ArchiveKind,
-  ArchiveMember,
   BakeStep,
   DockerCBake,
   DockerKoBake,
@@ -11,6 +10,7 @@ import type {
   GoBake,
   IncludeFile,
   KernelTarget,
+  PayloadMember,
 } from './bake-types.js'
 
 // Parse the declarative `bake` manifest field (bake-types.ts) out of the opaque plugin manifest JSON: a
@@ -19,7 +19,6 @@ import type {
 // types are re-exported here so a baker has one import site for both the shape and the parse.
 export type {
   ArchiveKind,
-  ArchiveMember,
   BakeStep,
   DockerCBake,
   DockerKoBake,
@@ -28,6 +27,7 @@ export type {
   GoBake,
   IncludeFile,
   KernelTarget,
+  PayloadMember,
 } from './bake-types.js'
 
 export function parseBakeSteps(manifest: JsonObject): BakeStep[] {
@@ -73,7 +73,7 @@ function parseArchiveKind(value: string): ArchiveKind {
   throw new Error(`unknown download archive "${value}" (expected deb, tar.xz, or tar.gz)`)
 }
 
-function parseMember(member: JsonObject): ArchiveMember {
+function parseMember(member: JsonObject): PayloadMember {
   return { path: required(member, 'path'), dest: required(member, 'dest'), mode: asString(member.mode, '0755') }
 }
 
@@ -88,8 +88,7 @@ function parseDockerC(entry: JsonObject): DockerCBake {
     context: asString(entry.context, '.'),
     platform: asString(entry.platform, 'linux/arm64'),
     out: asString(entry.out, '/out'),
-    dest: required(entry, 'dest'),
-    expect: asArray(entry.expect).map((name) => asString(name)),
+    members: asArray(entry.members).map((member) => parseMember(asObject(member))),
   }
 }
 

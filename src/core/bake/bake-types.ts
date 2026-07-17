@@ -12,8 +12,10 @@
 // a Debian `.deb` (ar then its inner data.tar.xz), an xz tarball, and a gzip tarball (`.tgz` included).
 export type ArchiveKind = 'deb' | 'tar.xz' | 'tar.gz'
 
-// One member to lift out of a fetched archive and stage into the plugin's files/ tree.
-export interface ArchiveMember {
+// One member to lift out of a baker's produced tree (a fetched archive, an extracted image /out) and
+// stage into the plugin's files/ tree. Shared by the download and docker-c classes: both declare WHICH
+// members of that tree are the payload, so neither ships whatever the producer happened to leave behind.
+export interface PayloadMember {
   path: string
   dest: string
   mode: string
@@ -23,7 +25,7 @@ export interface DownloadFetch {
   url: string
   sha256: string
   archive: ArchiveKind
-  members: ArchiveMember[]
+  members: PayloadMember[]
 }
 
 // A local file copied into the payload alongside the fetched binaries (the zt-run / ts-run launcher
@@ -48,14 +50,16 @@ export interface DownloadBake {
   include: IncludeFile[]
 }
 
+// `members` is the EXHAUSTIVE payload declaration, not a smoke test: the image's out dir must hold
+// exactly these and nothing else, so a toolchain change that quietly enlarges or reshapes what installs
+// on a printer fails the bake instead of shipping. Same contract the download class carries.
 export interface DockerCBake {
   class: 'docker-c'
   dockerfile: string
   context: string
   platform: string
   out: string
-  dest: string
-  expect: string[]
+  members: PayloadMember[]
 }
 
 // The kernel a `.ko` must load into, modeled as its OWN axis (release + vermagic), NOT an arch tuple:

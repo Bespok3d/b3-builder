@@ -49,7 +49,7 @@ function bakeStepGaps(step: BakeStep, pluginDir: string): string[] {
     case 'download':
       return step.fetch.flatMap((fetch) => fetch.members).flatMap((member) => missingPath(pluginDir, member.dest, 'a downloaded binary'))
     case 'docker-c':
-      return step.expect.flatMap((name) => missingPath(pluginDir, join(step.dest, name), `the ${name} artifact`))
+      return step.members.flatMap((member) => missingPath(pluginDir, member.dest, `the ${member.path} artifact`))
     case 'docker-ko':
       return missingPath(pluginDir, step.variantDest, `the ${step.kernel.vermagic} kernel module`)
   }

@@ -199,8 +199,10 @@ manifest (a zip's framing is non-deterministic, so the invariant is content, not
 
 ## Hard constraints
 
-- **Never run git.** The maintainer commits. Every edit (here and in any co-repo the migration touches) is
-  staged in the local working tree only; the per-repo commit and push are the maintainer's.
+- **Commit, never push.** Commits in this repo and in any co-repo the migration touches are granted
+  (2026-07-16), authored as the maintainer, with ZERO Claude/Anthropic advertising in the message. Pushing
+  is the maintainer's alone, as is anything else outside this repo that is not read-only. Do not ask for
+  the commit permission again; it is this line.
 - **Never fake acceptance.** No stub that makes the rail green without the real port; no shadow copy of a
   working generator. If the real port is not achievable in your packet, report BLOCKED.
 - **GPG is deferred (R4, packet 10, LAST) but the `sign` seam stays present.** Do not fold real signing

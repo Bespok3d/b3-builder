@@ -190,14 +190,18 @@ them. Needs `curl`, `tar`, and `ar` (for `.deb`).
 **`"class": "docker-c"`**: build C source in Docker for arm64 (QEMU on x86 runners) and stage the
 produced artifacts. Needs Docker.
 
+`members[]` is the EXHAUSTIVE list of what the build produces, not a spot-check: `out` must hold
+exactly these and nothing else. An artifact you did not declare fails the build instead of quietly
+shipping to a printer, so a Dockerfile change that starts leaving something extra in `out` is caught
+at build time. Same contract the `download` class carries.
+
 | Field | Meaning | Default |
 | --- | --- | --- |
 | `dockerfile` | Dockerfile that builds the program | required |
 | `context` | Docker build context, relative to the plugin dir | `.` |
 | `platform` | target platform | `linux/arm64` |
 | `out` | dir inside the image holding the build output | `/out` |
-| `dest` | where the output tree lands, relative to the plugin dir | required |
-| `expect[]` | artifact names that must exist after the build | none |
+| `members[]` | `{path, dest, mode}`: artifact inside `out`, destination relative to the plugin dir, file mode | mode `0755` |
 
 **`"class": "docker-ko"`**: build a kernel module against the exact printer kernel. The built
 module's vermagic is checked against the declared one; on mismatch the build refuses to ship the
