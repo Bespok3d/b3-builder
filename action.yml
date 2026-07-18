@@ -15,6 +15,10 @@ branding:
 # passes NO list identity builds atoms-only: no sub-list is assembled or committed, and the finalized
 # per-plugin atoms left in the out dir are what a downstream registration step publishes.
 #
+# Set publish=false for a PR or branch build: the pipeline still builds, tests, packs, and indexes, but
+# cuts no release and registers nothing, so an unmerged branch produces the .b3 set as a downloadable
+# artifact without publishing. Release stays main-only, gated by the caller's workflow trigger.
+#
 # Note on step order: the b3-builder pipeline bakes, packs, and indexes in one invocation, so "test" runs
 # after pack rather than between build and pack. This is behavior-equivalent to the legacy build->test->pack
 # order (pack only zips the already-baked tree, it never mutates it) and still gates the release: a failing
@@ -64,6 +68,10 @@ inputs:
     description: reuse an existing .b3 whose fingerprint is unchanged instead of repacking
     required: false
     default: 'false'
+  publish:
+    description: release the built .b3 set (a GitHub release per plugin) and register the assembled sub-list; set to 'false' for a PR or branch build that only produces the .b3 files as artifacts
+    required: false
+    default: 'true'
   node-version:
     description: Node.js version the build and the pipeline run on
     required: false
@@ -133,6 +141,7 @@ runs:
         done
 
     - name: Release each plugin and collect its asset URL
+      if: ${{ inputs.publish == 'true' }}
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
@@ -169,7 +178,7 @@ runs:
         echo "B3D_URL_MAP=$url_map" >> "$GITHUB_ENV"
 
     - name: Finalize atom download_urls with the release asset URLs (repo unit)
-      if: ${{ inputs.unit == 'repo' }}
+      if: ${{ inputs.unit == 'repo' && inputs.publish == 'true' }}
       shell: bash
       env:
         B3D_ACTION_PATH: ${{ github.action_path }}
@@ -179,7 +188,7 @@ runs:
         node "$B3D_ACTION_PATH/dist/action/finalize-atom-urls.js" "$B3D_OUT" "$B3D_URL_MAP"
 
     - name: Finalize index.json download_urls with the release asset URLs (repo unit)
-      if: ${{ inputs.unit == 'repo' && inputs.list-name != '' }}
+      if: ${{ inputs.unit == 'repo' && inputs.list-name != '' && inputs.publish == 'true' }}
       shell: bash
       env:
         B3D_ACTION_PATH: ${{ github.action_path }}
@@ -191,7 +200,7 @@ runs:
           "$B3D_OUT/index.json" "$B3D_URL_MAP" "$B3D_SOURCE/index.json"
 
     - name: Commit the assembled index.json (repo unit)
-      if: ${{ inputs.unit == 'repo' && inputs.list-name != '' }}
+      if: ${{ inputs.unit == 'repo' && inputs.list-name != '' && inputs.publish == 'true' }}
       shell: bash
       env:
         B3D_SOURCE: ${{ inputs.source }}
@@ -214,7 +223,7 @@ runs:
         done
 
     - name: Register this sub-list in the index-of-lists (repo unit)
-      if: ${{ inputs.unit == 'repo' && inputs.main-index-token != '' && inputs.list-name != '' }}
+      if: ${{ inputs.unit == 'repo' && inputs.main-index-token != '' && inputs.list-name != '' && inputs.publish == 'true' }}
       shell: bash
       env:
         MAIN_INDEX_TOKEN: ${{ inputs.main-index-token }}
