@@ -13,7 +13,7 @@ import type { BuildRequest, BuildUnit } from '../core/index.js'
 // --list-name/--list-publisher for a repo that owns its sub-list; pass neither to build atoms only) is
 // passed in, never baked.
 const USAGE =
-  'usage: b3-builder build --source <dir> --out <dir> --atom-repo <owner/repo> [--unit plugin|repo] [--list-name <name>] [--list-publisher <name>] [--exclude <dir>]... [--skip-unchanged] [--bake]'
+  'usage: b3-builder build --source <dir> --out <dir> --atom-repo <owner/repo> [--unit plugin|repo] [--list-name <name>] [--list-publisher <name>] [--exclude <dir>]... [--skip-unchanged] [--bake] [--signing-key <armored-private-key>]'
 
 function requestFromArgs(args: string[]): BuildRequest {
   const { values } = parseArgs({
@@ -28,6 +28,7 @@ function requestFromArgs(args: string[]): BuildRequest {
       exclude: { type: 'string', multiple: true },
       'skip-unchanged': { type: 'boolean' },
       bake: { type: 'boolean' },
+      'signing-key': { type: 'string' },
     },
     allowPositionals: false,
   })
@@ -42,6 +43,7 @@ function requestFromArgs(args: string[]): BuildRequest {
     exclude: values.exclude ?? [],
     skipUnchanged: values['skip-unchanged'] ?? false,
     bake: values.bake ?? false,
+    signingKey: values['signing-key'],
   })
 }
 

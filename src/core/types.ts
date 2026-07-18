@@ -38,6 +38,7 @@ export interface PluginBuildRequest {
   identity: AtomIdentity
   skipUnchanged?: boolean
   bake?: boolean
+  signingKey?: string
 }
 
 // A repo-of-dirs build: every plugin dir to its .b3 + atom. A list identity additionally assembles the
@@ -55,6 +56,7 @@ export interface RepoBuildRequest {
   exclude?: string[]
   skipUnchanged?: boolean
   bake?: boolean
+  signingKey?: string
 }
 
 export type BuildRequest = PluginBuildRequest | RepoBuildRequest

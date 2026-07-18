@@ -15,6 +15,7 @@ export interface RawBuildInputs {
   exclude: string[]
   skipUnchanged: boolean
   bake: boolean
+  signingKey?: string
 }
 
 export function publisherRequest(inputs: RawBuildInputs): BuildRequest {
@@ -27,6 +28,7 @@ export function publisherRequest(inputs: RawBuildInputs): BuildRequest {
       identity: { atomRepo },
       skipUnchanged: inputs.skipUnchanged,
       bake: inputs.bake,
+      signingKey: presentValue(inputs.signingKey),
     }
   }
   return {
@@ -37,6 +39,7 @@ export function publisherRequest(inputs: RawBuildInputs): BuildRequest {
     exclude: inputs.exclude,
     skipUnchanged: inputs.skipUnchanged,
     bake: inputs.bake,
+    signingKey: presentValue(inputs.signingKey),
   }
 }
 

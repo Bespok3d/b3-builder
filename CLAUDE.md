@@ -78,11 +78,13 @@ must be clean.
 
 The one core runs five ordered steps, and every face (CLI, Action, and one day the app dev tools) runs the
 same pipeline: `bake` then `pack` then `index` then `sign` then `gate`. Each step lives in `src/core/steps/`
-and names its owning relay packet in its own header comment. The order is GPG-aware from day one: the
-`sign` step exists as a seam so R4 (real signing) slots in without reshaping the pipeline. Today `sign` is
-an honest no-op (signing is decorative until the TRUST perimeter lands); it is now the ONLY step that
-returns the context unchanged. The `gate` step (R2, packet 6) is the class-aware refuse-to-pack gate (see
-below).
+and names its owning relay packet in its own header comment. `sign` (R4) does real GPG detached signing
+(ADR-0041: identity is an input, never baked): the byte-generic primitive lives in
+`src/core/build/sign-bytes.ts` (`signDetached` / `verifyDetached`, openpgp v6), and `sign.ts` calls it per
+packed `.b3`, writing `<packagePath>.sig`. It is gated on an optional `request.signingKey`: undefined
+(no key supplied, e.g. before a caller has key distribution wired up) leaves it a passthrough no-op; a key
+present means every package gets a real detached signature. The `gate` step (R2, packet 6) is the
+class-aware refuse-to-pack gate (see below).
 
 ### The bake dispatch (R1, packet 5; `src/core/bake/`)
 
@@ -156,7 +158,8 @@ instead of hand-copying a `release.yml`.
   enters the tool (the hard boundary). Do NOT replace this with a `dev_only` manifest field, which would
   bake the variant concept into discovery.
 
-Every other unfinished step (only `sign`, deferred to R4 / packet 10) is a passthrough until its packet lands.
+Every step is implemented; none are passthrough placeholders. `sign` degrades to a no-op only when no
+`signingKey` is supplied (see above), which is a runtime input state, not an unfinished step.
 
 ## The golden-equivalence harness (the rail; do not weaken it)
 
@@ -205,8 +208,9 @@ manifest (a zip's framing is non-deterministic, so the invariant is content, not
   the commit permission again; it is this line.
 - **Never fake acceptance.** No stub that makes the rail green without the real port; no shadow copy of a
   working generator. If the real port is not achievable in your packet, report BLOCKED.
-- **GPG is deferred (R4, packet 10, LAST) but the `sign` seam stays present.** Do not fold real signing
-  into the earlier packets; do keep every packet GPG-aware (the seam exists, do not remove it).
+- **GPG signing (R4) is real, not deferred.** `sign.ts` calls `signDetached` (openpgp v6, see "The
+  pipeline and its seams") whenever `request.signingKey` is set. Do not reintroduce a no-op passthrough
+  or a stub that skips actually signing when a key is present.
 - **The kernel axis (R3) is different.** For a `.ko`, verification is an on-device capability exercise,
   NEVER a vermagic string and never a bare insmod (both are necessary but not sufficient). The bake step
   may assert vermagic at bake time; it may not claim the module works without a device exercise.
