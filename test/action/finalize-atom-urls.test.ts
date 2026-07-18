@@ -29,6 +29,19 @@ describe('finalizeAtomUrls', () => {
     expect(tailscale.version).toBe('0.1.0')
   })
 
+  it('leaves a collection atom alone: it ships no payload, so it has no download_url to finalize', () => {
+    const outDir = mkdtempSync(join(tmpdir(), 'b3-atom-finalize-'))
+    writeAtom(outDir, 'tailscale', 'tailscale-0.1.0.b3')
+    writeFileSync(
+      join(outDir, 'all-the-tags.atom.json'),
+      JSON.stringify({ name: 'all-the-tags', version: '0.1.0', kind: 'collection', members: [] }),
+    )
+    const finalized = finalizeAtomUrls(outDir, { 'tailscale-0.1.0.b3': 'https://api.github.com/repos/x/y/releases/assets/1' })
+    expect(finalized).toEqual(['tailscale.atom.json'])
+    const collection = JSON.parse(readFileSync(join(outDir, 'all-the-tags.atom.json'), 'utf8')) as { kind: string }
+    expect(collection.kind).toBe('collection')
+  })
+
   it('refuses an atom whose .b3 was never released', () => {
     const outDir = mkdtempSync(join(tmpdir(), 'b3-atom-finalize-'))
     writeAtom(outDir, 'tailscale', 'tailscale-0.1.0.b3')

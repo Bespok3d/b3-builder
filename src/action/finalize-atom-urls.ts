@@ -12,14 +12,18 @@ import type { PublishablePlugin } from './inject-release-urls.js'
 
 export function finalizeAtomUrls(outputDir: string, assetUrlByFilename: Record<string, string>): string[] {
   const atomFiles = readdirSync(outputDir).filter((entry) => entry.endsWith('.atom.json'))
-  atomFiles.forEach((filename) => finalizeAtomFile(join(outputDir, filename), assetUrlByFilename))
-  return atomFiles
+  const finalized = atomFiles.filter((filename) => finalizeAtomFile(join(outputDir, filename), assetUrlByFilename))
+  return finalized
 }
 
-function finalizeAtomFile(atomPath: string, assetUrlByFilename: Record<string, string>): void {
+// A collection atom carries no download_url (it ships no payload and therefore no .b3), so there is
+// nothing to finalize and it is left as built.
+function finalizeAtomFile(atomPath: string, assetUrlByFilename: Record<string, string>): boolean {
   const atom = JSON.parse(readFileSync(atomPath, 'utf8')) as PublishablePlugin
+  if (atom.download_url === undefined) return false
   const finalized = finalizeDownloadUrl(atom, assetUrlByFilename)
   writeFileSync(atomPath, `${JSON.stringify(finalized, null, 2)}\n`)
+  return true
 }
 
 function main(argv: string[]): void {
