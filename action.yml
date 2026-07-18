@@ -158,6 +158,9 @@ runs:
           skip=""
           for excluded in $B3D_EXCLUDE_DIRS; do [ "$base" = "$excluded" ] && skip=1; done
           [ -n "$skip" ] && { echo "Skipped excluded dir ${base} (never publishes)"; continue; }
+          # A collection (kind:collection) is install-orchestration metadata with no payload, so pack
+          # never produces a .b3 for it and there is nothing to release.
+          [ "$(jq -r '.kind // "plugin"' "${dir}manifest.json")" = "collection" ] && { echo "Skipped collection ${base} (no packed asset by design)"; continue; }
           name=$(jq -r '.name' "${dir}manifest.json")
           version=$(jq -r '.version' "${dir}manifest.json")
           tag="${name}-v${version}"
