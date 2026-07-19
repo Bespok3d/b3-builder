@@ -7,7 +7,7 @@ import { asString } from '../build/json.js'
 import { assertUniqueAtoms } from '../build/unique-atoms.js'
 import { writeJsonFile } from '../build/write-json.js'
 
-// Step 3 of 5: turn the packed set into its published registry form and write it to the output dir.
+// Step 3 of 4: turn the packed set into its published registry form and write it to the output dir.
 // Every discovered plugin dir becomes its own atom (`<name>.atom.json`); a repo build carrying a list
 // identity additionally assembles the atoms into one leaf sub-list (`index.json`), while an atoms-only
 // repo build (whose atoms register into a list it does not own) stops at the atoms. Both repo forms

@@ -3,7 +3,8 @@ import { join, relative } from 'node:path'
 import AdmZip from 'adm-zip'
 import type { JsonObject, PackedPackage } from '../types.js'
 import { asString, omitFields } from './json.js'
-import { DEP_DECLARATION_NAMES, buildFilesArray, walkAllFiles } from './file-tree.js'
+import { DEP_DECLARATION_NAMES, buildFilesArray, walkPackedFiles } from './file-tree.js'
+import { signDetached } from './sign-bytes.js'
 
 // The manifest's `bake` field is BUILD-time metadata (HOW to produce the payload): the daemon ignores it
 // and the catalog atom never carries it, so a packed .b3 drops it rather than ship build recipes (upstream
@@ -23,10 +24,12 @@ export function packageFilename(manifest: JsonObject): string {
 // build the same archive shape; the only difference between them (auto-bump / lockfile / pruning) is
 // about WHETHER and WHEN to pack, never about the archive's content, so one packer serves every caller.
 //
-// The zip content and the manifest's checksummed files[] are DELIBERATELY built from two different
-// walks: `zip -qr $output files/` archives the files/ tree as-is (junk included), while build_files_
-// array excludes __pycache__/*.pyc/.DS_Store from what gets checksummed. A stray .pyc therefore ships
-// in the .b3 unlisted; that legacy quirk is part of the byte-for-byte target, not a bug to fix here.
+// The zip content and the manifest's checksummed files[] come from ONE walk (walkPackedFiles), which is
+// what makes files[] a complete inventory of the archive: every member the packer adds is listed and
+// therefore covered by the manifest signature. The only exceptions are manifest.json and
+// manifest.json.sig, which cannot be listed rather than are chosen not to be (files[] lives inside
+// manifest.json, and the signature post-dates it). A verifier rejects a .b3 with any other unlisted
+// member. The legacy shell packers walked twice and shipped junk unlisted; see walkPackedFiles.
 export function packPlugin(manifest: JsonObject, pluginDir: string, outputDir: string): PackedPackage {
   const filename = packageFilename(manifest)
   const path = join(outputDir, filename)
@@ -51,5 +54,18 @@ export function packPlugin(manifest: JsonObject, pluginDir: string, outputDir: s
 }
 
 function addTree(zip: AdmZip, pluginDir: string, treeRoot: string): void {
-  walkAllFiles(treeRoot).forEach((absPath) => zip.addFile(relative(pluginDir, absPath), readFileSync(absPath)))
+  walkPackedFiles(treeRoot).forEach((absPath) => zip.addFile(relative(pluginDir, absPath), readFileSync(absPath)))
+}
+
+// Signs the manifest.json entry ALREADY WRITTEN into a packed .b3, over its exact zip bytes (never a
+// re-stringify), and adds the detached signature as manifest.json.sig inside the same archive. A
+// separate post-write step, not part of packPlugin itself, so packPlugin/packIfChanged keep their
+// existing synchronous signature for callers that never sign (the app's bundle glue).
+export async function signManifestInPlace(packagePath: string, armoredPrivateKey: string): Promise<void> {
+  const zip = new AdmZip(packagePath)
+  const manifestEntry = zip.getEntry('manifest.json')
+  if (manifestEntry === null) throw new Error(`packed .b3 at ${packagePath} has no manifest.json entry to sign`)
+  const armoredSignature = await signDetached(manifestEntry.getData(), armoredPrivateKey)
+  zip.addFile('manifest.json.sig', Buffer.from(armoredSignature))
+  zip.writeZip(packagePath)
 }

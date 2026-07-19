@@ -131,7 +131,8 @@ runs:
         for excluded in $B3D_EXCLUDE_DIRS; do args+=(--exclude "$excluded"); done
         [ "$B3D_BAKE" = "true" ] && args+=(--bake)
         [ "$B3D_SKIP_UNCHANGED" = "true" ] && args+=(--skip-unchanged)
-        [ -n "$B3D_SIGNING_KEY" ] && args+=(--signing-key "$B3D_SIGNING_KEY")
+        # B3D_SIGNING_KEY reaches the CLI through the env above, never through argv: an armored key
+        # starts with a dash (parseArgs refuses it) and argv is world-readable on the runner.
         node "$B3D_ACTION_PATH/dist/cli/main.js" "${args[@]}"
 
     - name: Test each plugin (a plugin with tests ships tests/run.sh)

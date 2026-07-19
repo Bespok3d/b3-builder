@@ -6,7 +6,6 @@ import { signDetached, verifyDetached } from '../src/core/build/sign-bytes.js'
 async function fakeKeypair(): Promise<{ privateKey: string; publicKey: string }> {
   const { privateKey, publicKey } = await openpgp.generateKey({
     type: 'ecc',
-    curve: 'curve25519',
     userIDs: [{ name: 'demo', email: 'demo@example.test' }],
     format: 'armored',
   })
@@ -26,7 +25,7 @@ describe('signDetached / verifyDetached', () => {
     const bytes = new TextEncoder().encode('demo package payload\n')
     const signature = await signDetached(bytes, privateKey)
     const tampered = Uint8Array.from(bytes)
-    tampered[0] = tampered[0] ^ 0xff
+    tampered[0] = (tampered[0] ?? 0) ^ 0xff
     expect(await verifyDetached(tampered, signature, publicKey)).toBe(false)
   })
 

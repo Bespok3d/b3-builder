@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { join, relative } from 'node:path'
-import { buildFilesArray, sha256OfFile, walkManifestPayload } from './file-tree.js'
+import { buildFilesArray, sha256OfFile, walkPackedFiles } from './file-tree.js'
 import { readManifest } from './plugin-source.js'
 
 // The change-detection fingerprint for a plugin dir: a sha256 folding together everything that
@@ -9,9 +9,9 @@ import { readManifest } from './plugin-source.js'
 // change packing output invalidates every cached .b3), (2) the source manifest content (its own fields,
 // and transitively the files[] the packer derives from the payload), (3) the manifest-filtered files/
 // payload by path + content sha256 + mode, and (4) the filtered doc/ tree by path + content sha256. It
-// is deliberately the FILTERED file set (walkManifestPayload's exclusions), not the whole-tree walk the
-// zip uses: junk a plugin never meaningfully packs (__pycache__, *.pyc, .DS_Store) must never trigger a
-// spurious rebuild. Reuses the sha256-reduce primitive the dev build-tag was built on.
+// is the same filtered file set the packer archives (walkPackedFiles's exclusions), so junk a plugin
+// never meaningfully packs (__pycache__, *.pyc, .DS_Store) can neither ship nor trigger a spurious
+// rebuild. Reuses the sha256-reduce primitive the dev build-tag was built on.
 export function pluginFingerprint(pluginDir: string, builderVersion: string): string {
   const manifest = readManifest(pluginDir)
   const payload = buildFilesArray(pluginDir)
@@ -32,7 +32,7 @@ export function pluginFingerprint(pluginDir: string, builderVersion: string): st
 // A content digest of one filtered tree (path + content sha256, path-sorted for stability). A missing
 // root walks to [], yielding the stable empty digest, so a plugin without a doc/ dir is not special.
 function hashFilteredTree(root: string): string {
-  const files = [...walkManifestPayload(root)].sort((earlier, later) => earlier.localeCompare(later))
+  const files = [...walkPackedFiles(root)].sort((earlier, later) => earlier.localeCompare(later))
   const digest = files.reduce(
     (hash, absPath) => hash.update(relative(root, absPath)).update('\0').update(sha256OfFile(absPath)).update('\0'),
     createHash('sha256'),

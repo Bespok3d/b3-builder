@@ -76,15 +76,27 @@ must be clean.
 
 ## The pipeline and its seams
 
-The one core runs five ordered steps, and every face (CLI, Action, and one day the app dev tools) runs the
-same pipeline: `bake` then `pack` then `index` then `sign` then `gate`. Each step lives in `src/core/steps/`
-and names its owning relay packet in its own header comment. `sign` (R4) does real GPG detached signing
-(ADR-0041: identity is an input, never baked): the byte-generic primitive lives in
-`src/core/build/sign-bytes.ts` (`signDetached` / `verifyDetached`, openpgp v6), and `sign.ts` calls it per
-packed `.b3`, writing `<packagePath>.sig`. It is gated on an optional `request.signingKey`: undefined
-(no key supplied, e.g. before a caller has key distribution wired up) leaves it a passthrough no-op; a key
-present means every package gets a real detached signature. The `gate` step (R2, packet 6) is the
-class-aware refuse-to-pack gate (see below).
+The one core runs four ordered steps, and every face (CLI, Action, and one day the app dev tools) runs the
+same pipeline: `bake` then `pack` then `index` then `gate`. Each step lives in `src/core/steps/` and names
+its owning relay packet in its own header comment. GPG detached signing (R4) is not a discrete step: `pack`
+signs each packed `.b3`'s manifest in place as part of packing it (ADR-0041: identity is an input, never
+baked). The byte-generic primitive lives in `src/core/build/sign-bytes.ts` (`signDetached` / `verifyDetached`,
+openpgp v6); `src/core/build/archive.ts`'s `signManifestInPlace` calls it over the exact zip bytes of the
+already-written `manifest.json` entry and adds the detached signature as `manifest.json.sig` inside the same
+archive. It is gated on an optional `request.signingKey`: undefined (no key supplied, e.g. before a caller
+has key distribution wired up) packs unsigned; a key present means every package gets a real detached
+signature. The `gate` step (R2, packet 6) is the class-aware refuse-to-pack gate (see below).
+
+**The key reaches `request.signingKey` through the `B3D_SIGNING_KEY` environment variable, never a CLI
+flag** (`src/cli/build-request.ts`; the Action passes it in the step env, `action.yml`). Two hard reasons:
+an ASCII-armored private key starts with `-----BEGIN`, and node's `parseArgs` refuses any option value
+starting with a dash, so a `--signing-key` flag could never carry a real key (it threw "argument is
+ambiguous" on every signed build until 2026-07-19); and an argv-borne private key is readable by every
+process on the machine through `ps` and `/proc/<pid>/cmdline`. Do not reintroduce the flag. The seam is
+covered end to end by `test/signing-path.test.ts` (invocation plus environment into a request, request
+through the whole pipeline, signature read back out of the produced `.b3`); a unit test over
+`signManifestInPlace` alone does NOT prove a real build signs, which is exactly how the broken flag
+survived a green gate.
 
 ### The bake dispatch (R1, packet 5; `src/core/bake/`)
 
@@ -158,8 +170,9 @@ instead of hand-copying a `release.yml`.
   enters the tool (the hard boundary). Do NOT replace this with a `dev_only` manifest field, which would
   bake the variant concept into discovery.
 
-Every step is implemented; none are passthrough placeholders. `sign` degrades to a no-op only when no
-`signingKey` is supplied (see above), which is a runtime input state, not an unfinished step.
+Every step is implemented; none are passthrough placeholders. Signing inside `pack` degrades to unsigned
+output only when no `signingKey` is supplied (see above), which is a runtime input state, not an unfinished
+step.
 
 ## The golden-equivalence harness (the rail; do not weaken it)
 
@@ -177,6 +190,14 @@ manifest (a zip's framing is non-deterministic, so the invariant is content, not
   scripts while they still existed; the migration deletes those scripts repo by repo, so the capture tool
   is retired. The rail's claim is "identical to what the legacy scripts produced", and a regenerated
   golden cannot make that claim. Never hand-write, fake, or re-snapshot a fixture.
+- **One deliberate divergence from legacy, and it is a security fix, not a port bug.** The legacy shell
+  packers walked twice: `zip -qr` archived the `files/` tree as-is while `build_files_array` checksummed a
+  filtered list, so `__pycache__` / `*.pyc` / `.DS_Store` rode inside the `.b3` absent from `files[]` and
+  therefore uncovered by the manifest signature. The packer now uses ONE walk (`walkPackedFiles`), which
+  makes `files[]` a complete inventory: `doc/`, `manifest.json` and `manifest.json.sig` are the only
+  unlisted members, all three by construction. The goldens contain no junk, so this changes nothing they
+  pin and the rail stays green. Do not "restore legacy fidelity" by splitting the walk again;
+  `test/archive.test.ts` fails if you do.
 - **The rail builds from the LIVE sibling plugin trees** (`../plugins/networking`, `../plugins/fluidd-plugin`),
   so a source change there (a version bump, an edited payload) turns it red. That is real information: the
   build output moved. Reconciling it against the frozen golden is a maintainer decision, never a quiet
@@ -208,9 +229,10 @@ manifest (a zip's framing is non-deterministic, so the invariant is content, not
   the commit permission again; it is this line.
 - **Never fake acceptance.** No stub that makes the rail green without the real port; no shadow copy of a
   working generator. If the real port is not achievable in your packet, report BLOCKED.
-- **GPG signing (R4) is real, not deferred.** `sign.ts` calls `signDetached` (openpgp v6, see "The
-  pipeline and its seams") whenever `request.signingKey` is set. Do not reintroduce a no-op passthrough
-  or a stub that skips actually signing when a key is present.
+- **GPG signing (R4) is real, not deferred.** `archive.ts`'s `signManifestInPlace`, called from `pack.ts`,
+  calls `signDetached` (openpgp v6, see "The pipeline and its seams") whenever `request.signingKey` is set,
+  over the packed manifest's exact zip bytes. Do not reintroduce a no-op passthrough or a stub that skips
+  actually signing when a key is present.
 - **The kernel axis (R3) is different.** For a `.ko`, verification is an on-device capability exercise,
   NEVER a vermagic string and never a bare insmod (both are necessary but not sufficient). The bake step
   may assert vermagic at bake time; it may not claim the module works without a device exercise.

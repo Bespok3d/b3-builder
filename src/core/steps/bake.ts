@@ -2,7 +2,7 @@ import type { PipelineContext } from '../types.js'
 import { sourcesFor } from '../build/discovery.js'
 import { bakePlugin } from '../bake/dispatch.js'
 
-// Step 1 of 5: bake each plugin whose payload is a build output of its class (R1). Owner: packet 5.
+// Step 1 of 4: bake each plugin whose payload is a build output of its class (R1). Owner: packet 5.
 //
 // The dispatcher (bake/dispatch.ts) runs the right baker for all five shapes: the presence-driven Python
 // bake (ADR-0036) plus the manifest's declared bake steps (go, download, docker-c, docker-ko). It absorbs

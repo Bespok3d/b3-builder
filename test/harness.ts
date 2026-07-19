@@ -53,10 +53,19 @@ function entryPath(fileEntry: JsonValue): string {
 // set of files with the same sha256 and mode) without forcing a ported packer to reproduce one
 // particular sort. Every other manifest array comes from the source manifest verbatim, so it matches
 // by construction.
+//
+// ONE deliberate divergence from the frozen golden is normalized away here: the legacy packers left the
+// doc/ tree out of files[], and we now list it, because an unlisted zip member is an unsigned zip member
+// (see buildFilesArray). Comparing doc/ entries would fail every golden case for a change that is the
+// point of the change, so both sides drop them and the rest of the manifest stays pinned byte-equivalent.
+// What this stops pinning (that doc/ entries carry a correct sha256 and mode) is covered directly by the
+// "lists every payload member it archives" test in archive.test.ts.
 function normalizeManifest(manifest: JsonObject): JsonObject {
   const files = manifest.files
   if (!Array.isArray(files)) return manifest
-  const sorted = [...files].sort((earlier, later) => entryPath(earlier).localeCompare(entryPath(later)))
+  const sorted = [...files]
+    .filter((fileEntry) => !entryPath(fileEntry).startsWith('doc/'))
+    .sort((earlier, later) => entryPath(earlier).localeCompare(entryPath(later)))
   return { ...manifest, files: sorted }
 }
 
