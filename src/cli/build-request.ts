@@ -3,13 +3,12 @@ import { join } from 'node:path'
 import { parseArgs } from 'node:util'
 import { publisherRequest } from '../core/index.js'
 import type { BuildRequest, BuildUnit } from '../core/index.js'
+import { resolveSigningKey } from './signing-key.js'
 
 // Turns a `b3-builder build` invocation into a BuildRequest. Split out of main.ts so it is importable
 // without running the CLI, which is what lets the signing seam be tested instead of assumed.
-// The signing key arrives in B3D_SIGNING_KEY, never as a flag. Two reasons, both hard: an ASCII-armored
-// private key starts with `-----BEGIN`, and node's parseArgs rejects any option value starting with a
-// dash ("argument is ambiguous"), so the flag form could never carry a real key; and an argv-borne
-// private key is readable by every process on the machine through ps and /proc/<pid>/cmdline.
+// The signing KEY arrives in B3D_SIGNING_KEY and a REFERENCE to one arrives in --sign; signing-key.ts
+// explains why those are two different channels and resolves both into the one armored key.
 export const SIGNING_KEY_VAR = 'B3D_SIGNING_KEY'
 
 export function requestFromArgs(args: string[], env: NodeJS.ProcessEnv): BuildRequest {
@@ -25,6 +24,7 @@ export function requestFromArgs(args: string[], env: NodeJS.ProcessEnv): BuildRe
       exclude: { type: 'string', multiple: true },
       'skip-unchanged': { type: 'boolean' },
       bake: { type: 'boolean' },
+      sign: { type: 'string' },
     },
     allowPositionals: false,
   })
@@ -39,7 +39,7 @@ export function requestFromArgs(args: string[], env: NodeJS.ProcessEnv): BuildRe
     exclude: values.exclude ?? [],
     skipUnchanged: values['skip-unchanged'] ?? false,
     bake: values.bake ?? false,
-    signingKey: env[SIGNING_KEY_VAR],
+    signingKey: resolveSigningKey(values.sign, env[SIGNING_KEY_VAR]),
   })
 }
 

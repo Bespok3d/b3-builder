@@ -98,12 +98,20 @@ unsigned build claims no identity and leaves the declared value alone. This bake
 (ADR-0041): the key is an input, and the sub-list's own `publisher` field stays the caller's
 `--list-publisher`, which is list curation the signing key says nothing about. The `gate` step (R2, packet 6) is the class-aware refuse-to-pack gate (see below).
 
-**The key reaches `request.signingKey` through the `B3D_SIGNING_KEY` environment variable, never a CLI
-flag** (`src/cli/build-request.ts`; the Action passes it in the step env, `action.yml`). Two hard reasons:
-an ASCII-armored private key starts with `-----BEGIN`, and node's `parseArgs` refuses any option value
-starting with a dash, so a `--signing-key` flag could never carry a real key (it threw "argument is
+**KEY MATERIAL reaches `request.signingKey` through the `B3D_SIGNING_KEY` environment variable, never a
+CLI flag** (`src/cli/build-request.ts`; the Action passes it in the step env, `action.yml`). Two hard
+reasons: an ASCII-armored private key starts with `-----BEGIN`, and node's `parseArgs` refuses any option
+value starting with a dash, so a `--signing-key` flag could never carry a real key (it threw "argument is
 ambiguous" on every signed build until 2026-07-19); and an argv-borne private key is readable by every
-process on the machine through `ps` and `/proc/<pid>/cmdline`. Do not reintroduce the flag. The seam is
+process on the machine through `ps` and `/proc/<pid>/cmdline`. Do not reintroduce that flag.
+
+**A key REFERENCE is a different thing and does travel in argv: `--sign <key-file|key-id>`**
+(`src/cli/signing-key.ts`), the channel a person publishing from their own machine wants. A path or a key
+id is neither secret nor dash-prefixed, so neither hard reason applies; `resolveSigningKey` turns it into
+the same armored key by reading the file or exporting the secret key from the local GnuPG keyring, and an
+explicit `--sign` wins over the ambient environment. A reference that resolves to no secret key throws:
+never let it degrade to an unsigned build, which is the silent failure the whole signing effort exists to
+end. The seam is
 covered end to end by `test/signing-path.test.ts` (invocation plus environment into a request, request
 through the whole pipeline, signature read back out of the produced `.b3`); a unit test over
 `signManifestInPlace` alone does NOT prove a real build signs, which is exactly how the broken flag

@@ -1,4 +1,4 @@
-import { mkdtempSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
@@ -52,7 +52,17 @@ function packedManifest(packagePath: string): JsonObject {
   return JSON.parse(manifestBytes.toString('utf8')) as JsonObject
 }
 
-describe('the signing key reaches a build through the environment, never argv', () => {
+describe('the signing key reaches a build as key material in the environment or as a name in argv', () => {
+  it('carries an armored private key from a key file named by --sign into the build request', async () => {
+    const { privateKey } = await throwawayKeyPair()
+    const keyFile = join(mkdtempSync(join(tmpdir(), 'b3-signing-path-key-')), 'key.asc')
+    writeFileSync(keyFile, privateKey, 'utf8')
+
+    const request = requestFromArgs([...buildArgsFor(stubPluginDir(DEMO_MANIFEST), tmpdir()), '--sign', keyFile], {})
+
+    expect(request.signingKey).toBe(privateKey)
+  })
+
   it('carries an armored private key from B3D_SIGNING_KEY into the build request', async () => {
     const { privateKey } = await throwawayKeyPair()
 
@@ -76,6 +86,21 @@ describe('the signing key reaches a build through the environment, never argv', 
     const request = requestFromArgs(buildArgsFor(stubPluginDir(DEMO_MANIFEST), tmpdir()), { [SIGNING_KEY_VAR]: '' })
 
     expect(request.signingKey).toBeUndefined()
+  })
+})
+
+// GnuPG exports a secret key still wrapped in its passphrase, and such a key cannot sign. Without this
+// the build runs to completion and dies inside packing on openpgp's "Private key is not decrypted".
+describe('a passphrase-protected key is refused at the first touch of the key', () => {
+  it('names the locked key as the cause instead of failing later inside packing', async () => {
+    const lockedKey = await openpgp.generateKey({
+      type: 'ecc',
+      userIDs: [{ name: 'throwaway locked test key' }],
+      passphrase: 'throwaway passphrase',
+      format: 'armored',
+    })
+
+    await expect(signingKeyFingerprint(lockedKey.privateKey)).rejects.toThrow(/passphrase-protected and cannot sign/)
   })
 })
 

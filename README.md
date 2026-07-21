@@ -137,6 +137,7 @@ b3-builder build [flags]
 | `--exclude <dir>` | skip this immediate subdir even if it holds a manifest (repeatable; repo unit) | none |
 | `--bake` | produce each plugin's payload from source via its declared bake steps | off |
 | `--skip-unchanged` | reuse an existing `.b3` whose content is unchanged instead of repacking | off |
+| `--sign <key-file\|key-id>` | sign with this key: a file holding an armored private key, or a key id in your GnuPG keyring | unsigned |
 
 Unit auto-detection: a source dir that itself holds a `manifest.json` is one plugin; otherwise it
 is treated as a repo of plugin dirs. An explicit `--unit` wins.
@@ -150,6 +151,36 @@ name and version.
 Exit behavior: success prints `Built N package(s) into <out>` and exits 0; any failure prints
 `b3-builder build failed: <reason>` and exits 1. Any subcommand other than `build` prints the
 usage line and exits 2.
+
+## Signing what you publish
+
+A build signs nothing unless you give it a key, and an unsigned package is one a printer cannot
+tell apart from anyone else's. Two ways to hand a key over, for the two places builds happen.
+
+**On your own machine, name a key with `--sign`.** Either the path to a file holding an armored
+private key, or a key id or fingerprint held in your local GnuPG keyring:
+
+```sh
+b3-builder build --source ./my-macros --out dist --atom-repo you/my-macros --sign ~/keys/my-publishing-key.asc
+b3-builder build --source ./my-macros --out dist --atom-repo you/my-macros --sign 3AA5C34371567BD2
+```
+
+A key id is exported through `gpg` in batch mode. The key must not be passphrase-protected: GnuPG
+exports it still wrapped in its passphrase, and a wrapped key cannot sign, so the build stops and
+says so. A reference that resolves to no secret key fails the build too; it never falls through to
+packing unsigned in silence.
+
+**In CI, put the armored key itself in the `B3D_SIGNING_KEY` environment variable** (the GitHub
+Action reads it from a repository secret). The key material never travels as a flag value:
+anything in a command line is readable by every other process on the machine. `--sign` carries
+only a reference to a key, which is why it is safe there. An explicit `--sign` wins over
+`B3D_SIGNING_KEY` when both are present.
+
+Signing also decides who the package says it comes from: the packed manifest and the catalog entry
+both get the fingerprint of the signing key in place of the source's `PLACEHOLDER` publisher.
+
+If you use the Bespok3d desktop app to create and label your publishing keys, referring to one of
+those keys by its label here is a planned convenience, not something this version does yet.
 
 ## Bake reference
 

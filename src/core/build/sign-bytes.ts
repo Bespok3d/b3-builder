@@ -8,9 +8,23 @@ import * as openpgp from 'openpgp'
 
 export async function signDetached(bytes: Uint8Array, armoredPrivateKey: string): Promise<string> {
   const message = await openpgp.createMessage({ binary: bytes })
-  const signingKeys = await openpgp.readPrivateKey({ armoredKey: armoredPrivateKey })
+  const signingKeys = await readUnlockedPrivateKey(armoredPrivateKey)
   const signature = await openpgp.sign({ message, signingKeys, detached: true, format: 'armored' })
   return signature
+}
+
+// A private key exported from a keyring normally arrives still protected by its passphrase, and such a
+// key cannot sign. Caught here it names its own cause at the first touch of the key; left to openpgp it
+// surfaces as "Private key is not decrypted" from inside packing, after a build has already run.
+async function readUnlockedPrivateKey(armoredPrivateKey: string): Promise<openpgp.PrivateKey> {
+  const key = await openpgp.readPrivateKey({ armoredKey: armoredPrivateKey })
+  if (!key.isDecrypted()) {
+    throw new Error(
+      `signing key ${key.getFingerprint()} is passphrase-protected and cannot sign. Supply a key that is not passphrase-protected, or export a decrypted copy of it.`,
+    )
+  }
+
+  return key
 }
 
 export async function verifyDetached(
@@ -36,7 +50,7 @@ export async function publicKeyFingerprint(armoredPublicKey: string): Promise<st
 // identity taken from a separately supplied public key is a second claim that can disagree with the
 // signatures beside it; taken from here it cannot, because it is the same key.
 export async function signingKeyFingerprint(armoredPrivateKey: string): Promise<string> {
-  const key = await openpgp.readPrivateKey({ armoredKey: armoredPrivateKey })
+  const key = await readUnlockedPrivateKey(armoredPrivateKey)
 
   return key.getFingerprint()
 }

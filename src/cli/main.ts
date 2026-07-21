@@ -8,9 +8,10 @@ import { requestFromArgs } from './build-request.js'
 // sub-list when the repo publishes its own list); the unit is auto-detected from whether the source dir
 // itself holds a manifest.json, or set explicitly with --unit. Publisher/org identity (--atom-repo, plus
 // --list-name/--list-publisher for a repo that owns its sub-list; pass neither to build atoms only) is
-// passed in, never baked. The signing key arrives in B3D_SIGNING_KEY, never as a flag.
+// passed in, never baked. To sign, name a key with --sign (a key file or a key id) or put the armored
+// key itself in B3D_SIGNING_KEY; the key material never travels as a flag value (see signing-key.ts).
 const USAGE =
-  'usage: b3-builder build --source <dir> --out <dir> --atom-repo <owner/repo> [--unit plugin|repo] [--list-name <name>] [--list-publisher <name>] [--exclude <dir>]... [--skip-unchanged] [--bake]   (to sign, set B3D_SIGNING_KEY to an armored private key)'
+  'usage: b3-builder build --source <dir> --out <dir> --atom-repo <owner/repo> [--unit plugin|repo] [--list-name <name>] [--list-publisher <name>] [--exclude <dir>]... [--skip-unchanged] [--bake] [--sign <key-file|key-id>]   (or set B3D_SIGNING_KEY to an armored private key)'
 
 async function main(argv: string[]): Promise<number> {
   if (argv[2] !== 'build') {
