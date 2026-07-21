@@ -31,3 +31,12 @@ export async function publicKeyFingerprint(armoredPublicKey: string): Promise<st
   const key = await openpgp.readKey({ armoredKey: armoredPublicKey })
   return key.getFingerprint()
 }
+
+// The fingerprint of the key that will actually SIGN, read from the private key itself. A publisher
+// identity taken from a separately supplied public key is a second claim that can disagree with the
+// signatures beside it; taken from here it cannot, because it is the same key.
+export async function signingKeyFingerprint(armoredPrivateKey: string): Promise<string> {
+  const key = await openpgp.readPrivateKey({ armoredKey: armoredPrivateKey })
+
+  return key.getFingerprint()
+}

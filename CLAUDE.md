@@ -85,7 +85,18 @@ openpgp v6); `src/core/build/archive.ts`'s `signManifestInPlace` calls it over t
 already-written `manifest.json` entry and adds the detached signature as `manifest.json.sig` inside the same
 archive. It is gated on an optional `request.signingKey`: undefined (no key supplied, e.g. before a caller
 has key distribution wired up) packs unsigned; a key present means every package gets a real detached
-signature. The `gate` step (R2, packet 6) is the class-aware refuse-to-pack gate (see below).
+signature.
+
+**A signed build also STAMPS the publishing identity, and stamping runs BEFORE signing.** The publisher
+is a KEY fingerprint: a source repo cannot know which key will sign its release (its manifest checks in a
+placeholder), and a key rotation would otherwise have to be hand-edited into every repo. So `runPipeline`
+derives the fingerprint once from `request.signingKey` (`signingKeyFingerprint`) onto
+`PipelineContext.publisher`, `pack` writes it into each packed `manifest.json`
+(`archive.stampManifestPublisherInPlace`) and only then signs those bytes, and `index` gives every catalog
+atom the same value, so a package and the entry offering it can never name two different publishers. An
+unsigned build claims no identity and leaves the declared value alone. This bakes in no default
+(ADR-0041): the key is an input, and the sub-list's own `publisher` field stays the caller's
+`--list-publisher`, which is list curation the signing key says nothing about. The `gate` step (R2, packet 6) is the class-aware refuse-to-pack gate (see below).
 
 **The key reaches `request.signingKey` through the `B3D_SIGNING_KEY` environment variable, never a CLI
 flag** (`src/cli/build-request.ts`; the Action passes it in the step env, `action.yml`). Two hard reasons:

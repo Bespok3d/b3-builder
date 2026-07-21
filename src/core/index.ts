@@ -14,7 +14,10 @@ export { assertBaked, bakedGaps } from './bake/assert-baked.js'
 export { bakePlugin } from './bake/dispatch.js'
 // The byte-generic signing primitive, exported so an external index assembler (main-index's
 // assemble.mjs) can sign its own output bytes the same way steps/pack.ts signs a packed .b3's manifest.
-export { signDetached, verifyDetached, publicKeyFingerprint } from './build/sign-bytes.js'
+export { signDetached, verifyDetached, publicKeyFingerprint, signingKeyFingerprint } from './build/sign-bytes.js'
+// The same manifest signing pack.ts performs, exported for a library consumer that packs through
+// packIfChanged instead of the full pipeline (the app's bundle glue) so both paths sign identically.
+export { signManifestInPlace, stampManifestPublisherInPlace, unsignManifestInPlace } from './build/archive.js'
 // The canonical catalog-entry primitives. An external index assembler that cannot import this built
 // dist on its own pure path (the app bundler, whose test-time buildIndex loads without the sibling repo
 // built) mirrors these and guards its copies against them with a cross-boundary drift test, per the

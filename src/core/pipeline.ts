@@ -1,5 +1,6 @@
 import type { BuildArtifacts, BuildRequest, JsonObject, PipelineContext } from './types.js'
 import { isListIdentity } from './types.js'
+import { signingKeyFingerprint } from './build/sign-bytes.js'
 import { bake } from './steps/bake.js'
 import { pack } from './steps/pack.js'
 import { buildRegistry } from './steps/index.js'
@@ -11,7 +12,8 @@ import { gate } from './steps/gate.js'
 // (each plugin's atom, plus a leaf sub-list for a repo of plugin dirs), then the class-aware gate. The
 // order is written out explicitly, one await per step, so a reader sees the whole shape at once.
 export async function runPipeline(request: BuildRequest): Promise<BuildArtifacts> {
-  const initial: PipelineContext = { request, packages: [], atoms: [], subList: null }
+  const publisher = request.signingKey === undefined ? undefined : await signingKeyFingerprint(request.signingKey)
+  const initial: PipelineContext = { request, packages: [], atoms: [], subList: null, publisher }
   const baked = await bake(initial)
   const packed = await pack(baked)
   const registered = await buildRegistry(packed)

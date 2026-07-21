@@ -81,10 +81,13 @@ export interface BuildArtifacts {
 
 // Threaded through the ordered steps as each one fills in its part. `subList` stays null until the
 // registry step runs (and stays null for a single-plugin build or an atoms-only repo build, neither of
-// which has a sub-list).
+// which has a sub-list). `publisher` is the fingerprint of the key this build signs with, derived once
+// in runPipeline so the packed manifests and the catalog entries cannot name different identities; it
+// is undefined for an unsigned build, which leaves whatever the source manifests declare.
 export interface PipelineContext {
   request: BuildRequest
   packages: PackedPackage[]
   atoms: JsonObject[]
   subList: JsonObject | null
+  publisher: string | undefined
 }

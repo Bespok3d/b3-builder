@@ -6,9 +6,9 @@ import AdmZip from 'adm-zip'
 import * as openpgp from 'openpgp'
 import { describe, expect, it } from 'vitest'
 import { SIGNING_KEY_VAR, requestFromArgs } from '../src/cli/build-request.js'
-import { verifyDetached } from '../src/core/build/sign-bytes.js'
+import { signingKeyFingerprint, verifyDetached } from '../src/core/build/sign-bytes.js'
 import { runPipeline } from '../src/core/index.js'
-import type { JsonObject } from '../src/core/index.js'
+import type { BuildArtifacts, JsonObject } from '../src/core/index.js'
 import { stubPluginDir } from './stub-plugin.js'
 
 // The signing SEAM, not the signing primitive: archive.test.ts proves signManifestInPlace signs, and
@@ -21,6 +21,7 @@ const ARMORED_PRIVATE_KEY_HEADER = '-----BEGIN PGP PRIVATE KEY BLOCK-----'
 const DEMO_MANIFEST: JsonObject = {
   name: 'demo',
   version: '0.1.0',
+  publisher: 'PLACEHOLDER',
   install: { place: [{ class: 'system-bin', src: 'files/bin/demo-aarch64' }] },
 }
 
@@ -32,14 +33,23 @@ async function throwawayKeyPair(): Promise<{ privateKey: string; publicKey: stri
   return openpgp.generateKey({ type: 'ecc', userIDs: [{ name: 'throwaway test key' }], format: 'armored' })
 }
 
-async function signedPackagePath(armoredPrivateKey: string | undefined): Promise<string> {
+async function builtArtifacts(armoredPrivateKey: string | undefined): Promise<BuildArtifacts> {
   const outputDir = mkdtempSync(join(tmpdir(), 'b3-signing-path-out-'))
   const environment = armoredPrivateKey === undefined ? {} : { [SIGNING_KEY_VAR]: armoredPrivateKey }
   const request = requestFromArgs(buildArgsFor(stubPluginDir(DEMO_MANIFEST), outputDir), environment)
-  const artifacts = await runPipeline(request)
-  const packed = artifacts.packages[0]
+  return runPipeline(request)
+}
+
+async function signedPackagePath(armoredPrivateKey: string | undefined): Promise<string> {
+  const packed = (await builtArtifacts(armoredPrivateKey)).packages[0]
   if (packed === undefined) throw new Error('the pipeline produced no package to inspect')
   return packed.path
+}
+
+function packedManifest(packagePath: string): JsonObject {
+  const manifestBytes = new AdmZip(packagePath).getEntry('manifest.json')?.getData()
+  if (manifestBytes === undefined) throw new Error('the build produced a .b3 with no manifest.json')
+  return JSON.parse(manifestBytes.toString('utf8')) as JsonObject
 }
 
 describe('the signing key reaches a build through the environment, never argv', () => {
@@ -88,5 +98,32 @@ describe('a full pipeline run signs what it packs', () => {
 
     expect(zip.getEntry('manifest.json')).not.toBeNull()
     expect(zip.getEntry('manifest.json.sig')).toBeNull()
+  })
+})
+
+// A source repo checks in publisher PLACEHOLDER because it cannot know which key will sign its release,
+// so a signed build that shipped that value would hand every printer a package claiming an identity
+// nobody holds while the signature beside it named the real one.
+describe('a signed build publishes under the identity it signs with', () => {
+  it('replaces the source placeholder in the packed manifest with the signing key fingerprint', async () => {
+    const { privateKey } = await throwawayKeyPair()
+
+    const manifest = packedManifest(await signedPackagePath(privateKey))
+
+    expect(manifest.publisher).toBe(await signingKeyFingerprint(privateKey))
+  })
+
+  it('gives the catalog atom the same publisher as the package it points at', async () => {
+    const { privateKey } = await throwawayKeyPair()
+
+    const artifacts = await builtArtifacts(privateKey)
+
+    expect(artifacts.atoms[0]?.publisher).toBe(await signingKeyFingerprint(privateKey))
+  })
+
+  it('leaves the declared publisher alone on an unsigned build, which claims no identity', async () => {
+    const manifest = packedManifest(await signedPackagePath(undefined))
+
+    expect(manifest.publisher).toBe('PLACEHOLDER')
   })
 })

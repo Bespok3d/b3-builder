@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, renameSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import AdmZip from 'adm-zip'
 import type { JsonObject, PackedPackage } from '../types.js'
@@ -57,15 +57,61 @@ function addTree(zip: AdmZip, pluginDir: string, treeRoot: string): void {
   walkPackedFiles(treeRoot).forEach((absPath) => zip.addFile(relative(pluginDir, absPath), readFileSync(absPath)))
 }
 
+// Writes the publishing identity into the manifest.json ALREADY PACKED into a .b3. A plugin's source
+// manifest cannot carry it: the publisher is a KEY fingerprint, the source repo does not know which key
+// will sign its release, and a key rotation would have to be hand-edited into every repo. So the value is
+// stamped by whoever builds and signs, from the key they sign with, exactly as the index publisher is.
+// Runs BEFORE signing, since the signature covers these bytes. Returns false when the manifest already
+// names this publisher, so a skip-unchanged rebuild does not rewrite an archive for nothing.
+export function stampManifestPublisherInPlace(packagePath: string, publisher: string): boolean {
+  const zip = new AdmZip(packagePath)
+  const manifestEntry = zip.getEntry('manifest.json')
+  if (manifestEntry === null) throw new Error(`packed .b3 at ${packagePath} has no manifest.json entry to stamp`)
+  const manifest = JSON.parse(manifestEntry.getData().toString('utf8')) as JsonObject
+  if (manifest.publisher === publisher) return false
+
+  zip.updateFile('manifest.json', Buffer.from(`${JSON.stringify({ ...manifest, publisher }, null, 2)}\n`))
+  replaceArchive(zip, packagePath)
+
+  return true
+}
+
 // Signs the manifest.json entry ALREADY WRITTEN into a packed .b3, over its exact zip bytes (never a
 // re-stringify), and adds the detached signature as manifest.json.sig inside the same archive. A
 // separate post-write step, not part of packPlugin itself, so packPlugin/packIfChanged keep their
-// existing synchronous signature for callers that never sign (the app's bundle glue).
+// existing synchronous signature: pack.ts calls it right after packing, and a library consumer that
+// packs through packIfChanged (the app's bundle glue) calls it on the packages it just packed.
+// Signing REPLACES any signature already in the archive rather than adding a second entry, so a
+// skip-unchanged build that re-signs an untouched .b3, or a build under a rotated key, leaves exactly
+// one signature behind and never an archive carrying two that disagree.
 export async function signManifestInPlace(packagePath: string, armoredPrivateKey: string): Promise<void> {
   const zip = new AdmZip(packagePath)
   const manifestEntry = zip.getEntry('manifest.json')
   if (manifestEntry === null) throw new Error(`packed .b3 at ${packagePath} has no manifest.json entry to sign`)
   const armoredSignature = await signDetached(manifestEntry.getData(), armoredPrivateKey)
+  if (zip.getEntry('manifest.json.sig') !== null) zip.deleteFile('manifest.json.sig')
   zip.addFile('manifest.json.sig', Buffer.from(armoredSignature))
-  zip.writeZip(packagePath)
+  replaceArchive(zip, packagePath)
+}
+
+// Dropping the signature is the other half of the same policy the installer implements: a signature the
+// app cannot match is a hard refusal, while no signature is merely trust tier 'unknown'. A build with no
+// key therefore has to peel the signature an earlier keyed build left in an archive it did not repack,
+// exactly as an unsigned index deletes the stale index.json.sig beside it.
+export function unsignManifestInPlace(packagePath: string): boolean {
+  const zip = new AdmZip(packagePath)
+  if (zip.getEntry('manifest.json.sig') === null) return false
+  zip.deleteFile('manifest.json.sig')
+  replaceArchive(zip, packagePath)
+
+  return true
+}
+
+// Rewriting a .b3 over itself is not atomic, and packIfChanged has already written the .b3.fp sidecar
+// that makes later builds skip it: an archive truncated mid-write would be skipped forever after. Write
+// the new bytes beside it and rename, so an interrupted run leaves the previous archive intact.
+function replaceArchive(zip: AdmZip, packagePath: string): void {
+  const stagedPath = `${packagePath}.signing`
+  zip.writeZip(stagedPath)
+  renameSync(stagedPath, packagePath)
 }

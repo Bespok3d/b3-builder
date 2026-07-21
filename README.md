@@ -95,8 +95,10 @@ A minimal working `manifest.json`:
 }
 ```
 
-No checksums, no file list: the builder fills those in. `publisher` is the literal string
-`PLACEHOLDER` for now; it becomes your GPG key fingerprint once package signing goes live.
+No checksums, no file list, no real publisher: the builder fills those in. Leave `publisher` as the
+literal string `PLACEHOLDER`. You cannot know here which key will sign your release, so a signed build
+overwrites it in the packed manifest (and in the catalog entry) with the fingerprint of the key it
+signed with, before signing those bytes. An unsigned build leaves your placeholder as it found it.
 
 **3. Build it:**
 
