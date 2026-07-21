@@ -1,0 +1,32 @@
+name: Bespok3d builder core
+description: Build this repo's core in place and report the root a caller imports dist/core from.
+
+# The core as a LIBRARY, for a caller that runs its own script over it rather than the whole build
+# pipeline (main-index's assemble.mjs signs the assembled index with the same signDetached the packer
+# uses -- one signing implementation, not two). It exists because b3-builder is private: a caller
+# cannot `actions/checkout` it, since the calling repo's GITHUB_TOKEN is scoped to that repo alone and
+# the checkout fails with "Repository not found". Reaching it through `uses:` instead is what the
+# org-level Actions access setting already permits, so the runner fetches this repo for the caller and
+# github.action_path points at the checkout it made.
+
+outputs:
+  core-root:
+    description: absolute path of the built b3-builder checkout; its dist/core/index.js is the core entry
+    value: ${{ steps.build-core.outputs.core-root }}
+
+runs:
+  using: composite
+  steps:
+    - name: Build the core
+      id: build-core
+      shell: bash
+      env:
+        B3D_ACTION_PATH: ${{ github.action_path }}
+      run: |
+        set -euo pipefail
+        # github.action_path is <checkout>/.github/actions/core for a path-addressed action.
+        coreRoot="$(cd "$B3D_ACTION_PATH/../../.." && pwd)"
+        cd "$coreRoot"
+        npm ci
+        npm run build
+        echo "core-root=$coreRoot" >> "$GITHUB_OUTPUT"
