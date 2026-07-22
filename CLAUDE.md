@@ -85,7 +85,9 @@ openpgp v6); `src/core/build/archive.ts`'s `signManifestInPlace` calls it over t
 already-written `manifest.json` entry and adds the detached signature as `manifest.json.sig` inside the same
 archive. It is gated on an optional `request.signingKey`: undefined (no key supplied, e.g. before a caller
 has key distribution wired up) packs unsigned; a key present means every package gets a real detached
-signature.
+signature. An unsigned build over a manifest that hand-declares a real key fingerprint as its `publisher`
+is REFUSED, not packed (`src/core/build/publisher-claim.ts`): that name is a claim and the packed signature
+is its only proof, so shipping it with no key behind it hands the reader an identity it can never check.
 
 **A signed build also STAMPS the publishing identity, and stamping runs BEFORE signing.** The publisher
 is a KEY fingerprint: a source repo cannot know which key will sign its release (its manifest checks in a

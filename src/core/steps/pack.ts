@@ -3,6 +3,7 @@ import { packPlugin, signManifestInPlace, stampManifestPublisherInPlace } from '
 import { sourcesFor } from '../build/discovery.js'
 import { isCollection } from '../build/entry.js'
 import { packIfChanged } from '../build/skip-unchanged.js'
+import { refuseUnprovenPublisherClaims } from '../build/publisher-claim.js'
 import { builderVersion } from '../version.js'
 import type { PluginSource } from '../build/plugin-source.js'
 
@@ -14,7 +15,9 @@ import type { PluginSource } from '../build/plugin-source.js'
 // that key's own fingerprint as its publisher and then signs the manifest in place (see
 // archive.stampManifestPublisherInPlace, which the signature must cover, and archive.signManifestInPlace),
 // so a shipped package names the identity that really signed it instead of the placeholder its source
-// repo checked in; no signingKey packs unsigned and unstamped, same as before.
+// repo checked in; no signingKey packs unsigned and unstamped, same as before, EXCEPT that a manifest which
+// hand-declares a real key fingerprint is refused outright rather than packed with an unbacked claim (see
+// build/publisher-claim.ts).
 //
 // A kind:collection source is discovered like any other but has no payload to archive (it is pure
 // install-orchestration metadata that reaches the device only through the index), so it is passed over
@@ -22,6 +25,7 @@ import type { PluginSource } from '../build/plugin-source.js'
 export async function pack(context: PipelineContext): Promise<PipelineContext> {
   const { request, publisher } = context
   const sources = sourcesFor(request).filter((source) => !isCollection(source.manifest))
+  refuseUnprovenPublisherClaims(sources, request.signingKey)
   const version = request.skipUnchanged === true ? builderVersion() : ''
   const packages = await Promise.all(sources.map((source) => packSource(source, request, version, publisher)))
   return { ...context, packages }

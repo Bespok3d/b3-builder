@@ -41,6 +41,14 @@ export async function verifyDetached(
   return firstSignature.verified.then(() => true, () => false)
 }
 
+// The public half of the key that signs, so a producer can check its own output with exactly the key that
+// made it, never a second copy of it that could quietly disagree.
+export async function publicHalfOfSigningKey(armoredPrivateKey: string): Promise<string> {
+  const key = await readUnlockedPrivateKey(armoredPrivateKey)
+
+  return key.toPublic().armor()
+}
+
 export async function publicKeyFingerprint(armoredPublicKey: string): Promise<string> {
   const key = await openpgp.readKey({ armoredKey: armoredPublicKey })
   return key.getFingerprint()

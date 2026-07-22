@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs'
 import type { JsonValue } from '../core/types.js'
 import { writeSignedIndexFile } from '../core/build/signed-index.js'
+import { provePublishedList } from './prove-published-list.js'
 
 // Finalize a built sub-list's placeholder download_url values with the real GitHub release asset URLs.
 // b3-builder's index step deliberately writes each plugin's download_url as the local .b3 filename and
@@ -68,6 +69,7 @@ export async function publishSignedSubList(
   const assetUrlByFilename = readJson(assetUrlMapPath) as Record<string, string>
   const finalized = injectReleaseUrls(subList, assetUrlByFilename)
   const signed = await writeSignedIndexFile(publishedIndexPath, finalized as unknown as JsonValue, armoredPrivateKey)
+  await provePublishedList(publishedIndexPath, finalized.publisher, armoredPrivateKey)
 
   return { finalizedCount: finalized.plugins.length, signed }
 }
