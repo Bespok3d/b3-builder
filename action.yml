@@ -204,6 +204,7 @@ runs:
         B3D_ACTION_PATH: ${{ github.action_path }}
         B3D_SOURCE: ${{ inputs.source }}
         B3D_OUT: ${{ inputs.out }}
+        B3D_SIGNING_KEY: ${{ inputs.signing-key }}
       run: |
         set -euo pipefail
         node "$B3D_ACTION_PATH/dist/action/inject-release-urls.js" \
@@ -219,7 +220,14 @@ runs:
         cd "$B3D_SOURCE"
         git config user.name "bespok3d-bot"
         git config user.email "bot@bespok3d.local"
-        git add index.json
+        # The signature is committed with the bytes it covers. Committing the list alone leaves last
+        # release's signature beside this release's list, which reads as tampering, not as unsigned.
+        # A keyless build deletes the signature, so a tracked-but-gone .sig is staged as a deletion.
+        for artifact in index.json index.json.sig; do
+          if [ -f "$artifact" ] || git ls-files --error-unmatch "$artifact" >/dev/null 2>&1; then
+            git add -A -- "$artifact"
+          fi
+        done
         if git diff --cached --quiet; then
           echo "index unchanged; nothing to commit"
           exit 0

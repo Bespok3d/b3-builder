@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
+import type { JsonValue } from '../core/types.js'
+import { writeSignedIndexFile } from '../core/build/signed-index.js'
 
 // Finalize a built sub-list's placeholder download_url values with the real GitHub release asset URLs.
 // b3-builder's index step deliberately writes each plugin's download_url as the local .b3 filename and
@@ -46,23 +48,43 @@ function readJson(path: string): unknown {
   return JSON.parse(readFileSync(path, 'utf8'))
 }
 
-function main(argv: string[]): void {
+// A detached signature covers the exact bytes a reader fetches, so the list is signed HERE and not in the
+// index step: the index step's output still carries placeholder download_urls, and this step rewrites them.
+// Signing before the rewrite produced a signature over bytes nobody is ever served, which the app reads as
+// tampering rather than as an unsigned list.
+function signingKeyFromEnvironment(): string | undefined {
+  return process.env.B3D_SIGNING_KEY === undefined || process.env.B3D_SIGNING_KEY === ''
+    ? undefined
+    : process.env.B3D_SIGNING_KEY
+}
+
+export async function publishSignedSubList(
+  builtIndexPath: string,
+  assetUrlMapPath: string,
+  publishedIndexPath: string,
+  armoredPrivateKey: string | undefined,
+): Promise<{ finalizedCount: number; signed: boolean }> {
+  const subList = readJson(builtIndexPath) as PublishableSubList
+  const assetUrlByFilename = readJson(assetUrlMapPath) as Record<string, string>
+  const finalized = injectReleaseUrls(subList, assetUrlByFilename)
+  const signed = await writeSignedIndexFile(publishedIndexPath, finalized as unknown as JsonValue, armoredPrivateKey)
+
+  return { finalizedCount: finalized.plugins.length, signed }
+}
+
+async function main(argv: string[]): Promise<void> {
   const [indexPath, mapPath, outPath] = argv.slice(2)
   if (indexPath === undefined || mapPath === undefined || outPath === undefined) {
     throw new Error('usage: inject-release-urls <built-index.json> <asset-url-map.json> <publishable-index.json>')
   }
-  const subList = readJson(indexPath) as PublishableSubList
-  const assetUrlByFilename = readJson(mapPath) as Record<string, string>
-  const finalized = injectReleaseUrls(subList, assetUrlByFilename)
-  writeFileSync(outPath, `${JSON.stringify(finalized, null, 2)}\n`)
-  process.stdout.write(`Wrote ${outPath} (${finalized.plugins.length} download_url(s) finalized)\n`)
+  const published = await publishSignedSubList(indexPath, mapPath, outPath, signingKeyFromEnvironment())
+  const proof = published.signed ? 'signed' : 'unsigned'
+  process.stdout.write(`Wrote ${outPath} (${published.finalizedCount} download_url(s) finalized, ${proof})\n`)
 }
 
 if (process.argv[1] !== undefined && process.argv[1].endsWith('inject-release-urls.js')) {
-  try {
-    main(process.argv)
-  } catch (error: unknown) {
+  main(process.argv).catch((error: unknown) => {
     process.stderr.write(`inject-release-urls failed: ${error instanceof Error ? error.message : String(error)}\n`)
     process.exit(1)
-  }
+  })
 }
