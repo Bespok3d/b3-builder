@@ -1,4 +1,4 @@
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
@@ -27,6 +27,17 @@ const DEMO_MANIFEST: JsonObject = {
 
 function buildArgsFor(sourceDir: string, outputDir: string): string[] {
   return ['--unit', 'plugin', '--source', sourceDir, '--out', outputDir, '--atom-repo', 'demo/demo-plugin']
+}
+
+function listBuildArgsFor(sourceDir: string, outputDir: string): string[] {
+  const listIdentity = ['--atom-repo', 'demo/demo-repo', '--list-name', 'Demo List', '--list-publisher', 'demo']
+  return ['--unit', 'repo', '--source', sourceDir, '--out', outputDir, ...listIdentity]
+}
+
+function stubRepoDir(): string {
+  const repoDir = mkdtempSync(join(tmpdir(), 'b3-signing-path-repo-'))
+  stubPluginDir(DEMO_MANIFEST, repoDir)
+  return repoDir
 }
 
 async function throwawayKeyPair(): Promise<{ privateKey: string; publicKey: string }> {
@@ -123,6 +134,45 @@ describe('a full pipeline run signs what it packs', () => {
 
     expect(zip.getEntry('manifest.json')).not.toBeNull()
     expect(zip.getEntry('manifest.json.sig')).toBeNull()
+  })
+})
+
+// The list-level counterpart, and the gap that let ten published sub-lists ship unsigned while every
+// package inside them was signed: the crypto existed and the registry step never called it, so no build
+// of any repo could produce an index.json.sig. The signature has to cover the served bytes exactly, so
+// these read the written file back off disk rather than re-serializing the assembled list.
+describe('a full pipeline run signs the list it publishes', () => {
+  it('writes an index.json.sig that verifies over the index.json bytes as served', async () => {
+    const { privateKey, publicKey } = await throwawayKeyPair()
+    const outputDir = mkdtempSync(join(tmpdir(), 'b3-signing-path-list-'))
+
+    await runPipeline(requestFromArgs(listBuildArgsFor(stubRepoDir(), outputDir), { [SIGNING_KEY_VAR]: privateKey }))
+
+    const indexBytes = readFileSync(join(outputDir, 'index.json'))
+    const armoredSignature = readFileSync(join(outputDir, 'index.json.sig'), 'utf8')
+    expect(await verifyDetached(indexBytes, armoredSignature, publicKey)).toBe(true)
+  })
+
+  it('publishes an unsigned list when no key is in the environment', async () => {
+    const outputDir = mkdtempSync(join(tmpdir(), 'b3-signing-path-list-'))
+
+    await runPipeline(requestFromArgs(listBuildArgsFor(stubRepoDir(), outputDir), {}))
+
+    expect(existsSync(join(outputDir, 'index.json'))).toBe(true)
+    expect(existsSync(join(outputDir, 'index.json.sig'))).toBe(false)
+  })
+
+  // A signature the app cannot check reads as tampering and refuses the whole list, where no signature
+  // at all just loads it unproved. So a rebuild without the key has to take the old one with it.
+  it('removes the signature an earlier keyed build left rather than leaving a stale one beside new bytes', async () => {
+    const { privateKey } = await throwawayKeyPair()
+    const repoDir = stubRepoDir()
+    const outputDir = mkdtempSync(join(tmpdir(), 'b3-signing-path-list-'))
+
+    await runPipeline(requestFromArgs(listBuildArgsFor(repoDir, outputDir), { [SIGNING_KEY_VAR]: privateKey }))
+    await runPipeline(requestFromArgs(listBuildArgsFor(repoDir, outputDir), {}))
+
+    expect(existsSync(join(outputDir, 'index.json.sig'))).toBe(false)
   })
 })
 
