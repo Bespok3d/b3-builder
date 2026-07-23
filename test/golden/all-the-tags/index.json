@@ -265,6 +265,7 @@
       "printer_specific": true,
       "published_at": "2026-06-30",
       "updated_at": "2026-06-30",
+      "author": "bespoked",
       "members": [
         {
           "id": "rfid-ntag",

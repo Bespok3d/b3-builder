@@ -12,6 +12,7 @@ export interface RawBuildInputs {
   atomRepo: string | undefined
   listName?: string
   listPublisher?: string
+  listAuthor?: string
   exclude: string[]
   skipUnchanged: boolean
   bake: boolean
@@ -46,13 +47,19 @@ export function publisherRequest(inputs: RawBuildInputs): BuildRequest {
 function repoIdentity(atomRepo: string, inputs: RawBuildInputs): AtomIdentity | ListIdentity {
   const listName = presentValue(inputs.listName)
   const listPublisher = presentValue(inputs.listPublisher)
-  if (listName === undefined && listPublisher === undefined) return { atomRepo }
+  const listAuthor = presentValue(inputs.listAuthor)
+  if (listName === undefined && listPublisher === undefined) {
+    if (listAuthor !== undefined) {
+      throw new Error('--list-author names a sub-list, so it needs --list-name and --list-publisher too')
+    }
+    return { atomRepo }
+  }
   if (listName === undefined || listPublisher === undefined) {
     throw new Error(
       'a sub-list identity needs BOTH --list-name and --list-publisher (pass neither for an atoms-only repo build)',
     )
   }
-  return { atomRepo, listName, listPublisher }
+  return { atomRepo, listName, listPublisher, ...(listAuthor !== undefined ? { listAuthor } : {}) }
 }
 
 function presentValue(value: string | undefined): string | undefined {

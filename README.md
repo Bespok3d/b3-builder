@@ -86,6 +86,7 @@ A minimal working `manifest.json`:
   "printer_specific": false,
   "source": "https://github.com/you/my-macros",
   "publisher": "PLACEHOLDER",
+  "author": "you",
   "requires": { "capabilities": ["klipper-generic"], "variables": [] },
   "permissions": ["klipper-config", "restart"],
   "install": {
@@ -99,6 +100,16 @@ No checksums, no file list, no real publisher: the builder fills those in. Leave
 literal string `PLACEHOLDER`. You cannot know here which key will sign your release, so a signed build
 overwrites it in the packed manifest (and in the catalog entry) with the fingerprint of the key it
 signed with, before signing those bytes. An unsigned build leaves your placeholder as it found it.
+
+`author` is your display name (a person or an organization). It is separate from `publisher` on
+purpose: `publisher` is the signing-key fingerprint that PROVES who shipped the package, `author` is
+just a name shown next to it, and the two may differ (you author a plugin, an org key signs the
+release). Only the signature is proof; `author` is shown, never trusted.
+
+If your plugin packages an external project, add `sw_version` with that project's version (for example
+`"sw_version": "1.37.2"` for a Fluidd wrapper). The store then shows the upstream version a user is
+installing as the primary one, with your plugin's own `version` in brackets (`Fluidd v1.37.2 (plugin
+v0.1.4)`). Omit `sw_version` for a plugin that wraps nothing.
 
 **3. Build it:**
 
@@ -134,6 +145,7 @@ b3-builder build [flags]
 | `--unit plugin\|repo` | build one plugin, or every plugin dir in the source dir | auto-detected |
 | `--list-name <name>` | display name of the assembled plugin list (repo unit, required) | none |
 | `--list-publisher <name>` | publisher of the assembled plugin list (repo unit, required) | none |
+| `--list-author <name>` | author display name stamped on the assembled list's own entry (repo unit) | none |
 | `--exclude <dir>` | skip this immediate subdir even if it holds a manifest (repeatable; repo unit) | none |
 | `--bake` | produce each plugin's payload from source via its declared bake steps | off |
 | `--skip-unchanged` | reuse an existing `.b3` whose content is unchanged instead of repacking | off |
@@ -149,8 +161,28 @@ plugins) that an index of lists can reference. Two plugins in one repo may not s
 name and version.
 
 Exit behavior: success prints `Built N package(s) into <out>` and exits 0; any failure prints
-`b3-builder build failed: <reason>` and exits 1. Any subcommand other than `build` prints the
-usage line and exits 2.
+`b3-builder build failed: <reason>` and exits 1. Any subcommand other than `build` or `init` prints
+the usage line and exits 2.
+
+### `init`: scaffold the one file you hand-author
+
+```sh
+b3-builder init plugin    # scaffold a manifest.json in the current directory
+b3-builder init list      # scaffold a list reference (an index's lists[] entry)
+```
+
+Like `npm init`: `init` asks a short series of questions and writes the one JSON document a publisher
+authors by hand, then the `build` pipeline generates everything else (the checksums, the file list,
+the atom, the assembled sub-list). Each prompt shows a default in brackets; press Enter to take it. A
+blank answer to `sw_version` omits the field, so a plugin that wraps nothing carries no `sw_version`.
+`init` never overwrites an existing file: it refuses and exits 1, so it is safe to run in a populated
+directory.
+
+- `init plugin` writes `manifest.json`, defaulting `name` to the current directory's name, `publisher`
+  to `PLACEHOLDER` (a signed build stamps the real fingerprint), and `author` to your display name.
+- `init list` writes `<list-name>.json`, the `{ name, url, author, publisher }` reference an index's
+  `lists[]` holds. `author` (display name) and `publisher` (signing-key fingerprint, `PLACEHOLDER`
+  until the referenced list is signed) are kept separate because the two may name different parties.
 
 ## Signing what you publish
 

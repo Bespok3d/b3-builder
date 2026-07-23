@@ -10,6 +10,7 @@
   "printer_specific": false,
   "published_at": "2026-07-05",
   "updated_at": "2026-07-05",
+  "author": "bespoked",
   "requires": {
     "capabilities": [
       "klipper-generic"
@@ -18,15 +19,7 @@
   "provides": [
     "zerotier"
   ],
-  "require": [
-    {
-      "service": "tun",
-      "cardinality": "one"
-    }
-  ],
   "conflicts": [],
-  "doc_url": "https://github.com/Bespok3d/networking/blob/main/zerotier/doc/README.md",
-  "download_url": "zerotier-0.1.1.b3",
   "config": [
     {
       "key": "ZT_NETWORK_ID",
@@ -39,5 +32,14 @@
       "userEditable": true
     }
   ],
-  "changelog_url": "zerotier/doc/CHANGELOG.md"
+  "sw_version": "1.16.2",
+  "changelog_url": "zerotier/doc/CHANGELOG.md",
+  "require": [
+    {
+      "service": "tun",
+      "cardinality": "one"
+    }
+  ],
+  "doc_url": "https://github.com/Bespok3d/networking/blob/main/zerotier/doc/README.md",
+  "download_url": "zerotier-0.1.1.b3"
 }

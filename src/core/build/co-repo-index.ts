@@ -35,8 +35,9 @@ export function buildAtoms(sources: PluginSource[], atomRepo: string): JsonObjec
 // members[] passes through verbatim and it sheds the `kind` that routed it here, because an entry's
 // type IS the array it sits in (a plugin entry carries no kind:plugin either). A repo with no
 // collection publishes no `collections` key at all, the shape every collection-free list already has.
-// The list name and publisher are passed in, never a baked default.
-export function assembleSubList(atoms: JsonObject[], listName: string, listPublisher: string): JsonObject {
+// The list name, publisher, and optional author are passed in, never a baked default. A list omitting
+// its author keeps the exact shape every author-free list already publishes.
+export function assembleSubList(atoms: JsonObject[], listName: string, listPublisher: string, listAuthor?: string): JsonObject {
   const sorted = [...atoms].sort((earlier, later) => asString(earlier.name).localeCompare(asString(later.name)))
   const pluginAtoms = sorted.filter((atom) => !isCollection(atom))
   const providers = providerByService(
@@ -54,6 +55,7 @@ export function assembleSubList(atoms: JsonObject[], listName: string, listPubli
     schema_version: LIST_SCHEMA_VERSION,
     name: listName,
     publisher: listPublisher,
+    ...(listAuthor !== undefined ? { author: listAuthor } : {}),
     updated: latestUpdated([...plugins, ...collections]),
     plugins,
     ...(collections.length > 0 ? { collections } : {}),

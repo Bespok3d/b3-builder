@@ -20,9 +20,13 @@ export interface AtomIdentity {
   atomRepo: string
 }
 
+// `listAuthor` is the human/org display name behind the sub-list ("Bespok3d Official"), separate from
+// `listPublisher` (the signing-key fingerprint). It is optional: a list omitting it publishes the exact
+// author-free shape it always has. Both, like the rest of the identity, are passed in, never baked.
 export interface ListIdentity extends AtomIdentity {
   listName: string
   listPublisher: string
+  listAuthor?: string
 }
 
 export function isListIdentity(identity: AtomIdentity | ListIdentity): identity is ListIdentity {

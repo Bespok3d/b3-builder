@@ -10,6 +10,7 @@
   "printer_specific": true,
   "published_at": "2026-07-05",
   "updated_at": "2026-07-05",
+  "author": "bespoked",
   "requires": {
     "capabilities": [
       "kernel-modules"
@@ -18,10 +19,10 @@
   "provides": [
     "tun"
   ],
-  "require": [],
   "conflicts": [],
-  "doc_url": "https://github.com/Bespok3d/networking/blob/main/tun-module/doc/README.md",
-  "download_url": "tun-module-0.1.0.b3",
   "config": [],
-  "changelog_url": "tun-module/doc/CHANGELOG.md"
+  "changelog_url": "tun-module/doc/CHANGELOG.md",
+  "require": [],
+  "doc_url": "https://github.com/Bespok3d/networking/blob/main/tun-module/doc/README.md",
+  "download_url": "tun-module-0.1.0.b3"
 }

@@ -7,8 +7,15 @@ import { asArray, asBool, asObject, asString, copyIfPresent, fieldPresent } from
 // an injected doc_url/download_url. Flavors that resolve deps ahead of time or compute a disk-relative
 // doc_url are caller-specific and live outside the generic core.
 
-const OPTIONAL_ENTRY_KEYS = ['icon', 'min_daemon_version', 'homepage', 'macros', 'config']
+// `sw_version` is plugin-only: the upstream version a wrapper plugin packages (Fluidd, Mainsail,
+// Tailscale...), distinct from the plugin's own `version`. A collection wraps no external software, so
+// it never carries one.
+const OPTIONAL_ENTRY_KEYS = ['icon', 'min_daemon_version', 'homepage', 'macros', 'config', 'sw_version']
 const COLLECTION_ENTRY_KEYS = ['icon', 'homepage']
+// `author` is the human/org display name behind the entry ("bespoked"), distinct from `publisher` (the
+// signing-key fingerprint that PROVES the release): the two may name different parties. Every entry
+// shape carries it, so it lives in the base fields both a plugin atom and a collection start from.
+const BASE_OPTIONAL_KEYS = ['author']
 
 function serviceName(provided: JsonValue): string {
   return typeof provided === 'string' ? provided : asString(asObject(provided).service)
@@ -60,7 +67,7 @@ export function latestUpdated(entries: JsonObject[]): string {
 // start here. A plugin-only entry (requires/provides/conflicts/endpoints) and a collection-only entry
 // (members) each add their own fields on top.
 export function baseCatalogFields(manifest: JsonObject): JsonObject {
-  return {
+  const entry: JsonObject = {
     name: asString(manifest.name),
     title: asString(manifest.title),
     version: asString(manifest.version),
@@ -73,6 +80,8 @@ export function baseCatalogFields(manifest: JsonObject): JsonObject {
     published_at: asString(manifest.published_at),
     updated_at: asString(manifest.updated_at),
   }
+  copyIfPresent(entry, manifest, BASE_OPTIONAL_KEYS)
+  return entry
 }
 
 export function applyChangelogUrl(entry: JsonObject, manifest: JsonObject): void {
