@@ -1,0 +1,20 @@
+name: pr-gate
+
+# Every pull request and every push to dev or main runs this repo's own gate. b3-builder is node-only
+# and its gate installs its own dependencies, so a checkout and Node are all CI needs.
+on:
+  pull_request:
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run the gate
+        run: bash scripts/check.sh
