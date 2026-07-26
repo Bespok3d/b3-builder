@@ -261,7 +261,9 @@ runs:
         list_url="github:${GITHUB_REPOSITORY}/index.json"
         workdir="$(mktemp -d)"
         # Full clone (no --depth 1) so a rebase on a concurrent push has the history it needs.
-        git clone "https://x-access-token:${MAIN_INDEX_TOKEN}@github.com/${MAIN_INDEX_REPO}.git" "$workdir"
+        # --branch main: the sub-list entry has to land on the branch the index is assembled and read
+        # from, not on whatever the index repo's default branch happens to be.
+        git clone --branch main "https://x-access-token:${MAIN_INDEX_TOKEN}@github.com/${MAIN_INDEX_REPO}.git" "$workdir"
         mkdir -p "$workdir/lists"
         jq -n --arg name "$LIST_REF_NAME" --arg url "$list_url" '{name: $name, url: $url}' \
           > "$workdir/lists/${repo_name}.json"
