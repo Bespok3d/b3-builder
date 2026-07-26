@@ -56,6 +56,21 @@ jobs:
         with:
           node-version: '20'
 
+      # A plugin's baked payload (a sha-pinned download, a cross-built kernel module) is gitignored in
+      # its own repo, because the printer never bakes and CI rebuilds it fresh on every release. So a
+      # clean checkout carries none, and the rail's pack step refuses to pack an unbaked payload. Bake
+      # them here with this tool's own bake pass, the same one the plugin repos' release runs; the gate
+      # then finds the payloads in place. Only the networking tree declares any bake step.
+      - name: Bake the networking payloads
+        working-directory: b3-builder
+        run: |
+          npm install
+          node dist/cli/main.js build \
+            --source ../plugins/networking \
+            --out "$RUNNER_TEMP/bake" \
+            --atom-repo Bespok3d/networking \
+            --bake
+
       - name: Run the gate
         working-directory: b3-builder
         run: bash scripts/check.sh
