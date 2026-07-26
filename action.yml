@@ -122,7 +122,11 @@ runs:
         B3D_SKIP_UNCHANGED: ${{ inputs.skip-unchanged }}
         B3D_SIGNING_KEY: ${{ inputs.signing-key }}
         # Only the docker bakes read this; unset it and a plain build is unaffected (docker-image cacheArgs).
-        B3D_CACHE_ARGS: --cache-from type=gha --cache-to type=gha,mode=max
+        # ignore-error on the write side: the layer cache is an optimization, and a release must not be
+        # lost to it. GitHub's cache service answered the export with "not_found" on 2026-07-25 and killed
+        # an hour-long arm64 bake AFTER the image had already been built, which is a failure the artifact
+        # does not depend on. A cache write that fails now warns and the build continues.
+        B3D_CACHE_ARGS: --cache-from type=gha --cache-to type=gha,mode=max,ignore-error=true
       run: |
         set -euo pipefail
         args=(build --unit "$B3D_UNIT" --source "$B3D_SOURCE" --out "$B3D_OUT" --atom-repo "$B3D_ATOM_REPO")
