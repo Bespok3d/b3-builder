@@ -1,7 +1,20 @@
 name: pr-gate
 
 # Every pull request and every push to dev or main runs this repo's own gate. b3-builder is node-only
-# and its gate installs its own dependencies, so a checkout and Node are all CI needs.
+# and its gate installs its own dependencies, so a checkout and Node are most of what CI needs.
+#
+# The gate's last check is the golden-equivalence rail, which builds real plugin trees through the
+# publisher core and compares the result against the frozen golden. Those trees are the sibling plugin
+# repos, read at ../plugins/<repo>, so CI checks them out beside this one or the rail dies on ENOENT
+# (which is what it did until 2026-07-26). They are private, so the read needs MAIN_INDEX_TOKEN.
+#
+# The plugin checkouts are pinned to commits, not branches: the golden was frozen against those exact
+# source trees, so a floating ref would turn this gate red the next time someone edits a plugin's
+# README. When a plugin's sources genuinely move and the golden is reconciled, its pin moves in the same
+# change. The pinning guard enforces the 40-hex form.
+#
+# Go-public note: a fork PR receives no secret, so these checkouts fail for external contributors. Make
+# the plugin repos public, or gate the rail on the trees being present, before flipping public.
 on:
   pull_request:
   push:
@@ -13,8 +26,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: b3-builder
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/networking
+          ref: 310fd0eb901d1332590c19ef252e32e012c2c841
+          token: ${{ secrets.MAIN_INDEX_TOKEN }}
+          path: plugins/networking
+
+      - uses: actions/checkout@v4
+        with:
+          # The all-the-tags plugin tree lives in the repo named material-tags; the harness reads it at
+          # the ../plugins/all-the-tags path, so the checkout is renamed here.
+          repository: Bespok3d/material-tags
+          ref: 5dcc28f50ba2326772edd78ce04aed2c1a2ffd9b
+          token: ${{ secrets.MAIN_INDEX_TOKEN }}
+          path: plugins/all-the-tags
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/fluidd-plugin
+          ref: 734d0e2d4a6a8895d1d7361b128d00524c45dc22
+          token: ${{ secrets.MAIN_INDEX_TOKEN }}
+          path: plugins/fluidd-plugin
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+
       - name: Run the gate
+        working-directory: b3-builder
         run: bash scripts/check.sh
