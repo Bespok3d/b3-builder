@@ -3,7 +3,7 @@
     "entries": [
       {
         "path": "doc/CHANGELOG.md",
-        "sha256": "1403a027e2ba1d5be995433292d44d92cc1136fe0119a477effbc241ac522b3a"
+        "sha256": "2c80eec53e36e949012461fa8a97020458870c482072cc342eb6eca051ac6ef1"
       },
       {
         "path": "doc/README.md",
@@ -186,7 +186,7 @@
       },
       {
         "path": "doc/README.md",
-        "sha256": "9e46ebbdd589c61d2a14a7ddfe6db65e4a0f1916f9f34654a51fa9b6580c3f0d"
+        "sha256": "59263519bbc235c76b966b5baff172d30c6d4a7e14f2d1171ac1d30239e73234"
       },
       {
         "path": "files/modules/tun-6.1.99.ko",
