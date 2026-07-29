@@ -1,5 +1,11 @@
 # b3-builder
 
+[![licence](https://img.shields.io/badge/licence-AGPL--3.0-blue)](LICENSE)
+[![release](https://img.shields.io/github/v/release/Bespok3d/b3-builder)](https://github.com/Bespok3d/b3-builder/releases)
+[![version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FBespok3d%2Fb3-builder%2Fmain%2Fpackage.json&query=%24.version&label=version&color=blue)](package.json)
+![built with](https://img.shields.io/badge/built%20with-Node.js-informational)
+![stock firmware](https://img.shields.io/badge/stock%20firmware-no%20flashing-brightgreen)
+
 b3-builder turns plugin source directories into installable Bespok3d packages. You point it at a
 plugin (or a whole repo of plugins) and it produces a `.b3` archive ready to install on a printer,
 plus the catalog metadata a plugin index needs to list it.
@@ -372,3 +378,8 @@ not, see <https://www.gnu.org/licenses/>. The full text is in [LICENSE](LICENSE)
 
 Bespok3d is a project of the Bespok3d Organisation, which is not a legal entity. Copyright is held by
 the individual authors named above.
+
+## Support this project
+
+Bespok3d is built and maintained in the open, on stock printer firmware. If it saved you an
+afternoon, you can [buy me a coffee](https://buymeacoffee.com/unlucio).
