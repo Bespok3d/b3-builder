@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+# SPDX-License-Identifier: AGPL-3.0-or-later
 name: pr-gate
 
 # Every pull request and every push to dev or main runs this repo's own gate. b3-builder is node-only
@@ -56,6 +58,10 @@ jobs:
         with:
           node-version: '20'
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       # A plugin's baked payload (a sha-pinned download, a cross-built kernel module) is gitignored in
       # its own repo, because the printer never bakes and CI rebuilds it fresh on every release. So a
       # clean checkout carries none, and the rail's pack step refuses to pack an unbaked payload. Bake
@@ -70,6 +76,13 @@ jobs:
             --out "$RUNNER_TEMP/bake" \
             --atom-repo Bespok3d/networking \
             --bake
+
+      # check.sh runs the per-file licence check through `reuse`, which is not on the runner image. It
+      # reports itself skipped rather than failed when the tool is absent, so without this step the
+      # licence check would be quietly absent from CI while the gate still went green. The
+      # charset-normalizer extra is not optional: reuse aborts on start without an encoding backend.
+      - name: Install the REUSE licence linter
+        run: pip install 'reuse[charset-normalizer]'
 
       - name: Run the gate
         working-directory: b3-builder

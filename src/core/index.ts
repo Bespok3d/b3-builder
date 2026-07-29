@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // The importable surface of the build system. The CLI, the GitHub Action, and any downstream TARGET
 // that consumes the build system as a library (the app dev tools, later) import from here and nothing
 // deeper. Keeping the public surface to this one barrel is what lets those consumers depend on the core

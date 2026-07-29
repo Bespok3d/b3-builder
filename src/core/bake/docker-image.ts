@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { mkdirSync } from 'node:fs'
 import { basename } from 'node:path'
 import type { CommandRunner } from './runner.js'

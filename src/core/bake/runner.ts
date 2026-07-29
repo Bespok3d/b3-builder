@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { spawnSync } from 'node:child_process'
 
 // The external-command seam every baker shells out through. A baker never calls spawnSync directly:

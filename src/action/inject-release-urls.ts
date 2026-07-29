@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { readFileSync } from 'node:fs'
 import type { JsonValue } from '../core/types.js'
 import { writeSignedIndexFile } from '../core/build/signed-index.js'
@@ -7,7 +9,7 @@ import { provePublishedList } from './prove-published-list.js'
 // Finalize a built sub-list's placeholder download_url values with the real GitHub release asset URLs.
 // b3-builder's index step deliberately writes each plugin's download_url as the local .b3 filename and
 // defers the real URL to CI (see build/co-repo-index buildAtoms: "the real CI-injected release URL is a
-// later packet"). This Action helper IS that CI step: given the built index.json and a
+// later stage"). This Action helper IS that CI step: given the built index.json and a
 // { "<name>-<version>.b3": "<release asset url>" } map collected while uploading each .b3 to its release,
 // it swaps every placeholder for its real URL and writes the publishable index.json. It lives in the
 // Action face, never the core, because a GitHub release asset URL is a CI artifact the tool must never

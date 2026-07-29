@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { JsonObject, JsonValue } from '../types.js'
 
 // Thin accessors over the opaque manifest JSON (types.ts models it that way deliberately, so its

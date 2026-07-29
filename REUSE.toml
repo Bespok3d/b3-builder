@@ -1,0 +1,16 @@
+version = 1
+
+# This tool is the project's own work, AGPL-3.0-or-later throughout. Every source file carries its own
+# two-line SPDX header; `precedence = "aggregate"` means those headers win and this block only fills in
+# the files that cannot carry one, which is the documentation, the GitHub templates, the packaging
+# metadata and the frozen golden fixtures under `test/golden/`.
+#
+# Those fixtures are captured output of our own build scripts, kept byte-frozen so the equivalence rail
+# can prove the ported core reproduces them. They are ours and they are under these terms, but a header
+# added to one would change the bytes the rail compares, so they are covered from here instead.
+
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Copyright (C) 2026 unlucio and the Bespok3d contributors"
+SPDX-License-Identifier = "AGPL-3.0-or-later"

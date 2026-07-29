@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { JsonObject, JsonValue } from '../types.js'
 import { asArray, asBool, asObject, asString, copyIfPresent, fieldPresent } from './json.js'
 

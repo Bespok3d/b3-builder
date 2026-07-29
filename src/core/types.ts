@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // The types the one build core is shaped around. The plugin manifest, the registry atom, and the
 // assembled sub-list are external JSON documents whose schema is owned elsewhere (ADR-0010 the .b3
 // format, ADR-0012 the federated registry), so they are modeled here as opaque JSON, never

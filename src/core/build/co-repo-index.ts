@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { basename } from 'node:path'
 import type { JsonObject } from '../types.js'
 import { asArray, asString } from './json.js'
@@ -16,7 +18,7 @@ const LIST_SCHEMA_VERSION = 1
 
 // Every plugin dir published as its own atom, the shape a federated registry hosts: doc_url points at
 // the passed-in atomRepo (an owner/repo slug), download_url is the local .b3 filename (the real
-// CI-injected release URL is a later packet). The publisher/org identity in the doc_url is a parameter,
+// CI-injected release URL is a later Stage). The publisher/org identity in the doc_url is a parameter,
 // never a baked default.
 export function buildAtoms(sources: PluginSource[], atomRepo: string): JsonObject[] {
   return sources.map((source) => {

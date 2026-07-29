@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { chmodSync, copyFileSync, cpSync, mkdirSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { PayloadMember } from './bake-types.js'

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { describe, expect, it } from 'vitest'
 import { parseBakeSteps } from '../../src/core/bake/manifest-bake.js'
 import type { DockerKoBake, DownloadBake, GoBake } from '../../src/core/bake/manifest-bake.js'

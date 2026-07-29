@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+# SPDX-License-Identifier: AGPL-3.0-or-later
 name: Bespok3d build
 description: Build a repo of plugin dirs (or one plugin) into gated, class-aware .b3 files, release them, and register the assembled sub-list, over the one b3-builder core.
 author: Bespok3d

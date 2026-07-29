@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { execFileSync } from 'node:child_process'
 import { readFileSync, statSync } from 'node:fs'
 import { describeError } from '../core/index.js'
 
-// Where the private key that signs a build comes from. Two channels, deliberately different things.
+// Where the private key that signs a build comes from. Two channels, and they differ on purpose.
 //
 // B3D_SIGNING_KEY carries the armored KEY ITSELF and is how CI hands over a secret. A key can never
 // travel as a flag value: an armored key starts with `-----BEGIN`, which node's parseArgs rejects as an

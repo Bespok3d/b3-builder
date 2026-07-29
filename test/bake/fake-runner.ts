@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import type { CommandResult, CommandRunner, CommandSpec } from '../../src/core/bake/runner.js'

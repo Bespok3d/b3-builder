@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -46,6 +48,23 @@ function entryPath(fileEntry: JsonValue): string {
   return typeof path === 'string' ? path : ''
 }
 
+// The doc/ tree is OUT of the equivalence set, on both sides, in files[] and in the archived entries.
+// Two reasons, and neither is a weakening of the rail:
+//
+// - files[]: the legacy packers left doc/ out of it and we now list it, because an unlisted zip member
+//   is an unsigned zip member (see buildFilesArray). That divergence is the point of the change, so
+//   comparing it would fail every golden case for the fix itself.
+// - entries: doc/ holds a plugin's README, CHANGELOG and ATTRIBUTIONS, prose that is edited on its own
+//   schedule and reaches no printer behaviour. A documentation edit turning the BUILD-equivalence rail
+//   red is the defect, not the information the rail exists to carry: what the rail pins is that the
+//   payload and the manifest a printer acts on reproduce the legacy output.
+//
+// What this stops pinning (that doc/ entries carry a correct sha256 and mode, and are archived at all)
+// is covered directly by the "lists every payload member it archives" test in archive.test.ts.
+function isDocPath(path: string): boolean {
+  return path.startsWith('doc/')
+}
+
 // The packed manifest's `files` array is generated and sorted by the packer (the legacy shell packer
 // uses an LC_ALL=C byte sort). Its ORDER is not behaviorally meaningful: the daemon iterates the array
 // to place and chmod files, it does not depend on the order. So the comparison normalizes the order
@@ -53,18 +72,11 @@ function entryPath(fileEntry: JsonValue): string {
 // set of files with the same sha256 and mode) without forcing a ported packer to reproduce one
 // particular sort. Every other manifest array comes from the source manifest verbatim, so it matches
 // by construction.
-//
-// ONE deliberate divergence from the frozen golden is normalized away here: the legacy packers left the
-// doc/ tree out of files[], and we now list it, because an unlisted zip member is an unsigned zip member
-// (see buildFilesArray). Comparing doc/ entries would fail every golden case for a change that is the
-// point of the change, so both sides drop them and the rest of the manifest stays pinned byte-equivalent.
-// What this stops pinning (that doc/ entries carry a correct sha256 and mode) is covered directly by the
-// "lists every payload member it archives" test in archive.test.ts.
 function normalizeManifest(manifest: JsonObject): JsonObject {
   const files = manifest.files
   if (!Array.isArray(files)) return manifest
   const sorted = [...files]
-    .filter((fileEntry) => !entryPath(fileEntry).startsWith('doc/'))
+    .filter((fileEntry) => !isDocPath(entryPath(fileEntry)))
     .sort((earlier, later) => entryPath(earlier).localeCompare(entryPath(later)))
   return { ...manifest, files: sorted }
 }
@@ -77,7 +89,7 @@ export function describeArchive(b3Path: string): ArchiveDescription {
   }
   const manifest = normalizeManifest(JSON.parse(manifestEntry.getData().toString('utf8')) as JsonObject)
   const entries = files
-    .filter((entry) => entry.entryName !== 'manifest.json')
+    .filter((entry) => entry.entryName !== 'manifest.json' && !isDocPath(entry.entryName))
     .map((entry) => ({ path: entry.entryName, sha256: sha256Hex(entry.getData()) }))
     .sort((earlier, later) => earlier.path.localeCompare(later.path))
   return { entries, manifest }
@@ -96,6 +108,19 @@ export function describePackages(packages: PackedPackage[]): Record<string, Arch
     seen.add(packed.filename)
   })
   return Object.fromEntries(packages.map((packed) => [packed.filename, describeArchive(packed.path)]))
+}
+
+// The frozen golden was captured before doc/ left the equivalence set, so it still carries a doc/ entry
+// per package. The fixture is NOT edited to drop them (it stays the real legacy output); the same rule
+// that filters the candidate filters it here, at load, so one implementation decides what is compared.
+export function loadGoldenPackages(path: string): Record<string, ArchiveDescription> {
+  const golden = loadJson(path) as unknown as Record<string, ArchiveDescription>
+  return Object.fromEntries(
+    Object.entries(golden).map(([filename, description]) => [
+      filename,
+      { ...description, entries: description.entries.filter((entry) => !isDocPath(entry.path)) },
+    ]),
+  )
 }
 
 function atomName(atom: JsonObject): string {

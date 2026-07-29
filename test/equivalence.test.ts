@@ -1,10 +1,12 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { existsSync, mkdtempSync, readFileSync, readdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { publisherRequest, runPipeline } from '../src/core/index.js'
 import type { JsonObject } from '../src/core/index.js'
-import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, describePackages, goldenPath, loadJson, sortAtomsByName } from './harness.js'
+import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, describePackages, goldenPath, loadGoldenPackages, loadJson, sortAtomsByName } from './harness.js'
 
 // The golden-equivalence rail for the PUBLISHER core: build a single plugin dir and a repo of plugin
 // dirs via the clean pipeline (publisher/org identity passed in), and assert each reproduces the
@@ -48,7 +50,7 @@ describe('publisher equivalence rail', () => {
       outputDir,
       identity: { atomRepo: NETWORKING_IDENTITY.atomRepo },
     })
-    const goldenPackages = loadJson(goldenPath('networking', 'packages.json'))
+    const goldenPackages = loadGoldenPackages(goldenPath('networking', 'packages.json'))
     const zerotierFile = packageFilenameOf(zerotierDir)
     expect(artifacts.subList).toBeNull()
     expect(artifacts.atoms).toEqual([loadJson(goldenPath('networking', 'zerotier.atom.json'))])
@@ -65,7 +67,7 @@ describe('publisher equivalence rail', () => {
     })
     expect(sortAtomsByName(artifacts.atoms)).toEqual(sortAtomsByName(loadGoldenAtoms()))
     expect(artifacts.subList).toEqual(loadJson(goldenPath('networking', 'index.json')))
-    expect(describePackages(artifacts.packages)).toEqual(loadJson(goldenPath('networking', 'packages.json')))
+    expect(describePackages(artifacts.packages)).toEqual(loadGoldenPackages(goldenPath('networking', 'packages.json')))
   }, 60_000)
 
   // The one repo that publishes a collection alongside its plugins, and the only rail case covering the
@@ -79,6 +81,15 @@ describe('publisher equivalence rail', () => {
   // own source (rfid-openprinttag 0.1.0 to 0.1.1), so its plugins[] is real legacy output of an OLDER
   // tree and asserting today's build against it would be asserting the bump away. The plugin-entry path
   // is the same code the networking and fluidd cases above already pin against a golden that IS current.
+  //
+  // The collections[] array of this one fixture was reconciled on 2026-07-28, on the maintainer's
+  // instruction, after the source moved under it three ways: the all-the-tags collection went 0.1.0 to
+  // 0.1.1 (its rfid-bambu member floor 0.1.0 to 0.2.0, updated_at 2026-06-30 to 2026-07-26) and a second
+  // collection, materials-tracker-plus, was published on 2026-07-27. Say plainly what that costs: for
+  // collections[] alone this fixture no longer carries the legacy claim, because the entries in it were
+  // captured from this tool. It still catches unintended movement in the collection path, and the legacy
+  // claim for the plugin-entry and package paths is untouched, carried by the networking and fluidd cases
+  // above. Nothing else in the file was regenerated: its plugins[] is still the frozen legacy capture.
   it('a repo with a collection: the collection entry reproduces the golden and packs no .b3', async () => {
     const outputDir = mkdtempSync(join(tmpdir(), 'b3-collections-'))
     const artifacts = await runPipeline({
@@ -109,7 +120,7 @@ describe('publisher equivalence rail', () => {
     expect(sortAtomsByName(artifacts.atoms)).toEqual(sortAtomsByName(loadGoldenAtoms()))
     expect(artifacts.subList).toBeNull()
     expect(existsSync(join(outputDir, 'index.json'))).toBe(false)
-    expect(describePackages(artifacts.packages)).toEqual(loadJson(goldenPath('networking', 'packages.json')))
+    expect(describePackages(artifacts.packages)).toEqual(loadGoldenPackages(goldenPath('networking', 'packages.json')))
   }, 60_000)
 
   // A real atom repo, on its own legacy golden: fluidd publishes no list, so this is the atoms-only
@@ -128,7 +139,7 @@ describe('publisher equivalence rail', () => {
     expect(artifacts.atoms).toEqual([loadJson(goldenPath('fluidd', 'fluidd.atom.json'))])
     expect(artifacts.subList).toBeNull()
     expect(existsSync(join(outputDir, 'index.json'))).toBe(false)
-    expect(describePackages(artifacts.packages)).toEqual(loadJson(goldenPath('fluidd', 'packages.json')))
+    expect(describePackages(artifacts.packages)).toEqual(loadGoldenPackages(goldenPath('fluidd', 'packages.json')))
   }, 60_000)
 
   // A repo build that discovers no plugin dirs must not throw ENOENT writing index.json into an output

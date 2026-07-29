@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { BuildArtifacts, BuildRequest, JsonObject, PipelineContext } from './types.js'
 import { isListIdentity } from './types.js'
 import { signingKeyFingerprint } from './build/sign-bytes.js'

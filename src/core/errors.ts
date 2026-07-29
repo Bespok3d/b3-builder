@@ -1,6 +1,8 @@
-// Thrown by a pipeline step whose real behavior a later relay packet still owns. It exists so the
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Thrown by a pipeline step whose real behavior a later Relay Stage still owns. It exists so the
 // scaffold fails LOUDLY (never ships an empty or half-built .b3) and so the golden-equivalence
-// harness stays honestly RED until the owning packet lands, instead of a step silently returning
+// harness stays honestly RED until the owning Stage lands, instead of a step silently returning
 // nothing that reads as success.
 export class NotPortedError extends Error {
   constructor(step: string, owner: string) {

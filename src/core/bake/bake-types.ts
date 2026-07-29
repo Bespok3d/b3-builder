@@ -1,9 +1,11 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // The declarative bake field's typed shape (R1). A plugin whose payload is a build output declares HOW
 // to build it in its manifest, so the tool runs the right baker instead of the plugin hand-rolling a
 // build.sh. The field is a list (a plugin may bake more than one artifact), each entry a discriminated
 // union keyed on `class`, covering the four compiled / fetched classes: go, download, docker-c, docker-ko.
 //
-// Class 2 (Python deps) is deliberately NOT a bake entry: ADR-0036 fixes its declaration as a plain
+// Class 2 (Python deps) is NOT a bake entry, by design: ADR-0036 fixes its declaration as a plain
 // requirements FILE at the plugin root, never a manifest field. The dispatcher runs the pip baker off
 // that file's presence (see python-deps.ts), so class 2 keeps its established contract while the four
 // classes here are declaration-driven. The parse from opaque manifest JSON lives in manifest-bake.ts.
@@ -65,7 +67,7 @@ export interface DockerCBake {
 // The kernel a `.ko` must load into, modeled as its OWN axis (release + vermagic), NOT an arch tuple:
 // "target platform" for a kernel module is an exact kernel build, keyed at runtime on kernel_release /
 // vermagic (ADR-0039). `vermagic` is the bake-time assertion; a match is necessary but NOT sufficient,
-// so it never stands in for the on-device capability exercise (packet 7).
+// so it never stands in for the on-device capability exercise (stage 7).
 export interface KernelTarget {
   release: string
   vermagic: string

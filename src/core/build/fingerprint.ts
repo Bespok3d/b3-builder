@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { createHash } from 'node:crypto'
 import { join, relative } from 'node:path'
 import { buildFilesArray, sha256OfFile, walkPackedFiles } from './file-tree.js'

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { existsSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -15,7 +17,7 @@ import type { DockerKoBake } from './manifest-bake.js'
 // The vermagic assertion is necessary but NOT sufficient (MODVERSIONS is off, so no symbol-CRC net; a
 // wrong-commit .ko has matched vermagic, loaded cleanly, and still failed TUNSETIFF EINVAL, ADR-0039).
 // So this bake asserts vermagic only; it never claims the module WORKS. The real gate is the on-device
-// capability exercise, which is packet 7's job, never this step's.
+// capability exercise, which is a later Stage's job, never this step's.
 export function bakeDockerKo(step: DockerKoBake, pluginDir: string, runner: CommandRunner): void {
   requireDocker(runner, 'docker-ko')
   const tag = imageTag(pluginDir, 'ko')

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { existsSync, mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -10,7 +12,7 @@ import { fakeRunner, writeStub } from './fake-runner.js'
 // cross-build is a native x86 build (no --platform, the inverse of the camera's arm64-under-QEMU). The
 // test injects a runner asserting the build, the vermagic modinfo, and the variant staging, and covers
 // the honest-limit case: a vermagic mismatch is refused, and the bake NEVER claims the module works (the
-// on-device exercise is packet 7).
+// on-device exercise is a later Stage).
 const STEP: DockerKoBake = {
   class: 'docker-ko',
   dockerfile: 'toolchain/Dockerfile',

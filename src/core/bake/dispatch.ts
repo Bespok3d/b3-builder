@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { CommandRunner } from './runner.js'
 import { spawnRunner } from './runner.js'
 import type { PluginSource } from '../build/plugin-source.js'

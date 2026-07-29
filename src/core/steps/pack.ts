@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { BuildRequest, PackedPackage, PipelineContext } from '../types.js'
 import { packPlugin, signManifestInPlace, stampManifestPublisherInPlace } from '../build/archive.js'
 import { sourcesFor } from '../build/discovery.js'

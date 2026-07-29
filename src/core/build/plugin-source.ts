@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { Dirent } from 'node:fs'
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'

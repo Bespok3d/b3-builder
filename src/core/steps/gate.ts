@@ -1,8 +1,10 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { PipelineContext } from '../types.js'
 import { sourcesFor } from '../build/discovery.js'
 import { assertBaked } from '../bake/assert-baked.js'
 
-// Step 4 of 4: the one class-aware refuse-to-pack gate (R2). Owner: packet 6.
+// Step 4 of 4: the one class-aware refuse-to-pack gate (R2).
 //
 // For every discovered plugin source, assert every payload its manifest DECLARES was baked (the logic and
 // the per-class rules live in bake/assert-baked.ts): class 2 off the requirements files, classes 3 to 6

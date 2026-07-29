@@ -256,15 +256,15 @@
     {
       "name": "all-the-tags",
       "title": "All the Tags",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "description": "Installs the whole RFID filament-tag reading stack in one click: the NFC reader and hub, every shipped tag-standard decoder, and Spoolman tracking, so almost any spool you tap is identified and tracked. Includes the open standards (OpenTag3D, OpenPrintTag, generic NDEF JSON, TigerTag) plus full payload decoders for the proprietary tags (Bambu and Creality, with your own keys pasted into their config; without a key they fall back to UID-only tracking). Anycubic decodes the dispute-free fields today (a tester dump finishes it). The members install together with a single service restart. Experiment channel until the stack is verified end to end on a real printer.",
       "tagline": "Every spool, identified: the whole RFID tag-reading stack in one install.",
       "category": "filament",
       "channel": "experiment",
-      "publisher": "PLACEHOLDER",
+      "publisher": "Mauricio Pessoa (Mauker)",
       "printer_specific": true,
       "published_at": "2026-06-30",
-      "updated_at": "2026-06-30",
+      "updated_at": "2026-07-26",
       "author": "bespoked",
       "members": [
         {
@@ -293,7 +293,7 @@
         },
         {
           "id": "rfid-bambu",
-          "version": ">=0.1.0"
+          "version": ">=0.2.0"
         },
         {
           "id": "rfid-creality",
@@ -310,6 +310,72 @@
       ],
       "doc_url": "https://github.com/Bespok3d/material-tags/blob/main/all-the-tags/doc/README.md",
       "changelog_url": "all-the-tags/doc/CHANGELOG.md"
+    },
+    {
+      "name": "materials-tracker-plus",
+      "title": "Materials Tracker Plus",
+      "version": "0.1.1",
+      "description": "Know what filament is loaded, how much of it is left, and see it in the right colour on screen. Installs the whole RFID tag-reading stack (the NFC reader and hub plus every shipped tag decoder, so almost any spool you tap is identified), Spoolman tracking to keep the remaining length up to date, AFC Lite for the automated filament changer, and the U1 G-code preview colours so the sliced preview shows each tool in its real filament colour. Everything installs together with a single service restart. Experiment channel until the stack is verified end to end on a real printer.",
+      "tagline": "Tap a spool, and the printer knows what it is, how much is left, and what colour it prints.",
+      "category": "filament",
+      "channel": "experiment",
+      "publisher": "PLACEHOLDER",
+      "printer_specific": true,
+      "published_at": "2026-07-27",
+      "updated_at": "2026-07-27",
+      "author": "bespoked",
+      "members": [
+        {
+          "id": "rfid-ntag",
+          "version": ">=0.1.6"
+        },
+        {
+          "id": "rfid-generic-ndef",
+          "version": ">=0.1.0"
+        },
+        {
+          "id": "rfid-opentag",
+          "version": ">=0.1.0"
+        },
+        {
+          "id": "rfid-openprinttag",
+          "version": ">=0.1.0"
+        },
+        {
+          "id": "rfid-tigertag",
+          "version": ">=0.1.0"
+        },
+        {
+          "id": "rfid-anycubic",
+          "version": ">=0.1.0"
+        },
+        {
+          "id": "rfid-bambu",
+          "version": ">=0.2.0"
+        },
+        {
+          "id": "rfid-creality",
+          "version": ">=0.1.0"
+        },
+        {
+          "id": "rfid-elegoo",
+          "version": ">=0.1.2"
+        },
+        {
+          "id": "spoolman",
+          "version": ">=0.1.11"
+        },
+        {
+          "id": "afc-lite",
+          "version": ">=0.1.7"
+        },
+        {
+          "id": "u1-gcode-colors",
+          "version": ">=0.1.1"
+        }
+      ],
+      "doc_url": "https://github.com/Bespok3d/material-tags/blob/main/materials-tracker-plus/doc/README.md",
+      "changelog_url": "materials-tracker-plus/doc/CHANGELOG.md"
     }
   ],
   "lists": []

@@ -208,7 +208,7 @@ manifest (a zip's framing is non-deterministic, so the invariant is content, not
   scripts while they still existed; the migration deletes those scripts repo by repo, so the capture tool
   is retired. The rail's claim is "identical to what the legacy scripts produced", and a regenerated
   golden cannot make that claim. Never hand-write, fake, or re-snapshot a fixture.
-- **One deliberate divergence from legacy, and it is a security fix, not a port bug.** The legacy shell
+- **One known divergence from legacy, and it is a security fix, not a port bug.** The legacy shell
   packers walked twice: `zip -qr` archived the `files/` tree as-is while `build_files_array` checksummed a
   filtered list, so `__pycache__` / `*.pyc` / `.DS_Store` rode inside the `.b3` absent from `files[]` and
   therefore uncovered by the manifest signature. The packer now uses ONE walk (`walkPackedFiles`), which
@@ -233,7 +233,9 @@ manifest (a zip's framing is non-deterministic, so the invariant is content, not
 3. **Write the code** to the non-negotiables above.
 4. **Self-review** before declaring done: the non-negotiables, separation of concerns, file size, rule of
    three, typed signatures, no comment except a non-obvious why, no unused imports or vars.
-5. **Run the gate and make it green:** `bash scripts/check.sh` (RULE ZERO, eslint, typecheck, build). This
+5. **Run the gate and make it green:** `bash scripts/check.sh` (RULE ZERO, eslint, typecheck, build, and
+   per-file REUSE licensing: every file carries an SPDX header or is covered by `REUSE.toml`, and every
+   licence a file names has its full text in `LICENSES/`). This
    includes the equivalence rail that proves byte-for-byte reproduction of the legacy build output.
 6. **Add a regression test** for the behavior, in the same change, at the layer that catches its regression.
 7. **Keep the docs current.** Update the README and this file if a boundary, a seam, or the status changes.

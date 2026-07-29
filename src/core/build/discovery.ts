@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { BuildRequest, BuildUnit } from '../types.js'

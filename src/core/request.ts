@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 import type { AtomIdentity, BuildRequest, BuildUnit, ListIdentity } from './types.js'
 
 // The core owns what a valid publisher build request is, so both faces (the CLI and the GitHub Action)

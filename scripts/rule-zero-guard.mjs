@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // RULE ZERO guard: fail the gate if any authored file contains an em-dash or en-dash. No linter
 // enforces RULE ZERO, so this walks the repo and exits non-zero on any offender. Only authored text
 // formats are scanned, by suffix; build output, installed deps, git internals, and the committed
