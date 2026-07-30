@@ -75,6 +75,35 @@ describe('packPlugin lists every payload member it archives', () => {
   })
 })
 
+// Two plugin releases shipped with nothing under files/: a .b3 that installs nothing, which an owner can
+// only discover by installing it. Every packing path (the pack step, a skip-unchanged rebuild, the app's
+// bundle glue) goes through packPlugin, so the refusal lives there and no caller can forget it. Remove the
+// refuseEmptyPayload call and the first case below packs happily, which is the old behaviour.
+describe('packPlugin refuses a package with no payload', () => {
+  it('fails, naming the package, when nothing but a manifest and a README is there to pack', () => {
+    const manifest: JsonObject = { name: 'hollow-demo', version: '0.1.0' }
+    const pluginDir = mkdtempSync(join(tmpdir(), 'b3-hollow-plugin-'))
+    writeFileSync(join(pluginDir, 'manifest.json'), `${JSON.stringify(manifest)}\n`)
+    mkdirSync(join(pluginDir, 'doc'), { recursive: true })
+    writeFileSync(join(pluginDir, 'doc/README.md'), 'prose reaches no printer\n')
+    const outputDir = mkdtempSync(join(tmpdir(), 'b3-archive-out-'))
+
+    expect(() => packPlugin(manifest, pluginDir, outputDir)).toThrow(/hollow-demo: the plugin dir holds no payload/)
+  })
+
+  it('packs a plugin whose whole payload is a Python dep declaration', () => {
+    const manifest: JsonObject = { name: 'deps-only-demo', version: '0.1.0' }
+    const pluginDir = mkdtempSync(join(tmpdir(), 'b3-deps-only-plugin-'))
+    writeFileSync(join(pluginDir, 'manifest.json'), `${JSON.stringify(manifest)}\n`)
+    writeFileSync(join(pluginDir, 'requirements.txt'), 'spoolman-client==1.0.0\n')
+    const outputDir = mkdtempSync(join(tmpdir(), 'b3-archive-out-'))
+
+    const packed = packPlugin(manifest, pluginDir, outputDir)
+
+    expect(new AdmZip(packed.path).getEntries().map((entry) => entry.entryName)).toContain('requirements.txt')
+  })
+})
+
 describe('signManifestInPlace', () => {
   it('adds a manifest.json.sig that verifies against the packed manifest bytes, and breaks on tamper', async () => {
     const manifest: JsonObject = {

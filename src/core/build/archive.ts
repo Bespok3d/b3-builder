@@ -6,6 +6,7 @@ import AdmZip from 'adm-zip'
 import type { JsonObject, PackedPackage } from '../types.js'
 import { asString, omitFields } from './json.js'
 import { DEP_DECLARATION_NAMES, buildFilesArray, walkPackedFiles } from './file-tree.js'
+import { refuseEmptyPayload } from './empty-payload.js'
 import { signDetached } from './sign-bytes.js'
 
 // The manifest's `bake` field is BUILD-time metadata (HOW to produce the payload): the daemon ignores it
@@ -33,6 +34,7 @@ export function packageFilename(manifest: JsonObject): string {
 // manifest.json, and the signature post-dates it). A verifier rejects a .b3 with any other unlisted
 // member. The legacy shell packers walked twice and shipped junk unlisted; see walkPackedFiles.
 export function packPlugin(manifest: JsonObject, pluginDir: string, outputDir: string): PackedPackage {
+  refuseEmptyPayload(manifest, pluginDir)
   const filename = packageFilename(manifest)
   const path = join(outputDir, filename)
 

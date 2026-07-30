@@ -59,8 +59,18 @@ export function assembleSubList(atoms: JsonObject[], listName: string, listPubli
     publisher: listPublisher,
     ...(listAuthor !== undefined ? { author: listAuthor } : {}),
     updated: latestUpdated([...plugins, ...collections]),
+    assembled_at: assemblyStamp(),
     plugins,
     ...(collections.length > 0 ? { collections } : {}),
     lists: [],
   }
+}
+
+// `updated` answers "how new is the newest plugin in here", derived from the entries, so a list rebuilt
+// today over untouched plugins still reads as months old and a reader cannot tell a fresh assembly from a
+// stale file served by a dead workflow. `assembled_at` answers the other question: when the run that
+// produced THIS file happened. Seconds, in UTC, because CI assembles a list many times in one day;
+// milliseconds carry nothing a reader can use.
+function assemblyStamp(): string {
+  return `${new Date().toISOString().slice(0, 19)}Z`
 }

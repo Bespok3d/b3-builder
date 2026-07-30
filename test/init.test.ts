@@ -48,13 +48,16 @@ describe('init list', () => {
     const plan = await planInit(
       'list',
       '/repo/u1-extras',
-      scriptedAsk({ 'url (e.g. github:Owner/repo/index.json)': 'github:Bespok3d/u1-extras/index.json' }),
+      scriptedAsk({
+        'url (e.g. https://github.com/Owner/repo/releases/latest/download/index.json)':
+          'https://github.com/Bespok3d/u1-extras/releases/latest/download/index.json',
+      }),
       '2026-07-23',
     )
     expect(plan.path).toBe('/repo/u1-extras/u1-extras.json')
     expect(plan.document).toEqual({
       name: 'U1 Extras',
-      url: 'github:Bespok3d/u1-extras/index.json',
+      url: 'https://github.com/Bespok3d/u1-extras/releases/latest/download/index.json',
       author: 'bespoked',
       publisher: 'PLACEHOLDER',
     })

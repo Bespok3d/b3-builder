@@ -165,6 +165,7 @@ runs:
         set -euo pipefail
         url_map="$(mktemp)"
         echo '{}' > "$url_map"
+        release_tags="$(mktemp)"
         for dir in "$B3D_SOURCE"/*/; do
           [ -f "${dir}manifest.json" ] || continue
           base=$(basename "$dir")
@@ -190,8 +191,10 @@ runs:
           [ -n "$asset_url" ] || { echo "no asset URL for $asset after upload" >&2; exit 1; }
           tmp=$(mktemp)
           jq --arg fn "$asset" --arg url "$asset_url" '. + {($fn): $url}' "$url_map" > "$tmp" && mv "$tmp" "$url_map"
+          echo "$tag" >> "$release_tags"
         done
         echo "B3D_URL_MAP=$url_map" >> "$GITHUB_ENV"
+        echo "B3D_RELEASE_TAGS=$release_tags" >> "$GITHUB_ENV"
 
     - name: Finalize atom download_urls with the release asset URLs (repo unit)
       if: ${{ inputs.unit == 'repo' && inputs.publish == 'true' }}
@@ -216,35 +219,38 @@ runs:
         node "$B3D_ACTION_PATH/dist/action/inject-release-urls.js" \
           "$B3D_OUT/index.json" "$B3D_URL_MAP" "$B3D_SOURCE/index.json"
 
-    - name: Commit the assembled index.json (repo unit)
+    - name: Publish the assembled index.json as a release asset (repo unit)
       if: ${{ inputs.unit == 'repo' && inputs.list-name != '' && inputs.publish == 'true' }}
       shell: bash
       env:
+        GH_TOKEN: ${{ github.token }}
         B3D_SOURCE: ${{ inputs.source }}
       run: |
         set -euo pipefail
-        cd "$B3D_SOURCE"
-        git config user.name "bespok3d-bot"
-        git config user.email "bot@bespok3d.local"
-        # The signature is committed with the bytes it covers. Committing the list alone leaves last
-        # release's signature beside this release's list, which reads as tampering, not as unsigned.
-        # A keyless build deletes the signature, so a tracked-but-gone .sig is staged as a deletion.
-        for artifact in index.json index.json.sig; do
-          if [ -f "$artifact" ] || git ls-files --error-unmatch "$artifact" >/dev/null 2>&1; then
-            git add -A -- "$artifact"
-          fi
-        done
-        if git diff --cached --quiet; then
-          echo "index unchanged; nothing to commit"
-          exit 0
+        # The list ships the way the .b3 files ship, as an asset of the same release, so a release
+        # writes nothing back into the plugin repo. This step runs AFTER the download-url injection
+        # signed the list, so the signature covers the exact bytes a reader is served.
+        [ -f "$B3D_SOURCE/index.json" ] || { echo "no assembled index.json to publish" >&2; exit 1; }
+        artifacts=("$B3D_SOURCE/index.json")
+        signed=""
+        if [ -f "$B3D_SOURCE/index.json.sig" ]; then
+          artifacts+=("$B3D_SOURCE/index.json.sig")
+          signed=1
         fi
-        git commit -m "assemble sub-list index.json"
-        for attempt in 1 2 3 4 5; do
-          git push && { echo "pushed index.json (attempt ${attempt})"; exit 0; }
-          [ "$attempt" = 5 ] && { echo "index.json push failed after ${attempt} attempts" >&2; exit 1; }
-          echo "index.json push rejected; rebasing on remote (attempt ${attempt})"
-          git pull --rebase --no-edit
-        done
+        # A repo has no release of its own: one is created per plugin. The list rides every release
+        # this run touched, so whichever one is newest answers releases/latest/download with the
+        # current list. No release at all means the list has nowhere to live, and the register step is
+        # about to point the index-of-lists at an address that would answer 404 forever.
+        [ -s "$B3D_RELEASE_TAGS" ] || { echo "this run cut no release, so the assembled index.json has nowhere to publish" >&2; exit 1; }
+        while read -r tag; do
+          [ -n "$tag" ] || continue
+          gh release upload "$tag" "${artifacts[@]}" --clobber
+          # A keyless build publishes no signature. Leaving an earlier run's .sig on the release would
+          # pair this list with a signature over other bytes, which reads as tampering, not as unsigned.
+          if [ -z "$signed" ] && gh release view "$tag" --json assets --jq '.assets[].name' | grep -qx 'index.json.sig'; then
+            gh release delete-asset "$tag" index.json.sig --yes
+          fi
+        done < "$B3D_RELEASE_TAGS"
 
     - name: Register this sub-list in the index-of-lists (repo unit)
       if: ${{ inputs.unit == 'repo' && inputs.main-index-token != '' && inputs.list-name != '' && inputs.publish == 'true' }}
@@ -258,9 +264,9 @@ runs:
         [ -n "$MAIN_INDEX_REPO" ] || { echo "main-index-token was set but main-index-repo was not" >&2; exit 1; }
         [ -n "$LIST_REF_NAME" ] || { echo "main-index-token was set but list-ref-name was not (the ref needs a display name)" >&2; exit 1; }
         repo_name="${GITHUB_REPOSITORY##*/}"
-        # github: ref (not a raw.githubusercontent URL): the app fetches sub-lists via the authenticated
-        # GitHub API, which works for private repos and public alike. Raw URLs 404 on private repos.
-        list_url="github:${GITHUB_REPOSITORY}/index.json"
+        # The latest-release asset URL, never a per-release one: a per-release URL would change on every
+        # release and move the churn this removed from the plugin repo into the index-of-lists instead.
+        list_url="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/index.json"
         workdir="$(mktemp -d)"
         # Full clone (no --depth 1) so a rebase on a concurrent push has the history it needs.
         # --branch main: the sub-list entry has to land on the branch the index is assembled and read

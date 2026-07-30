@@ -123,6 +123,17 @@ export function loadGoldenPackages(path: string): Record<string, ArchiveDescript
   )
 }
 
+// The assembled sub-list's `assembled_at` is OUT of the equivalence set, and this is a divergence of the
+// same kind as doc/ above, not a weakening. The field is the instant the run happened (see
+// co-repo-index.assemblyStamp): the legacy scripts never wrote it, a frozen fixture could not carry it,
+// and no comparison against a fixture could ever match a moving value. What the rail pins is that the
+// catalog content reproduces the legacy output; that the stamp exists and reads as a real UTC instant is
+// pinned directly instead, by co-repo-index.test.ts over the file the assembly actually wrote.
+export function withoutAssemblyStamp(subList: JsonObject): JsonObject {
+  const { assembled_at: _assembledAt, ...catalog } = subList
+  return catalog
+}
+
 function atomName(atom: JsonObject): string {
   return typeof atom.name === 'string' ? atom.name : ''
 }

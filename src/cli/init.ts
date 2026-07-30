@@ -68,7 +68,7 @@ async function planPlugin(cwd: string, ask: Ask, today: string): Promise<InitPla
 // parties; `publisher` starts as a placeholder until the referenced list is signed.
 async function planList(cwd: string, ask: Ask): Promise<InitPlan> {
   const name = await ask('list name', titleCase(basename(cwd)))
-  const url = await ask('url (e.g. github:Owner/repo/index.json)', '')
+  const url = await ask('url (e.g. https://github.com/Owner/repo/releases/latest/download/index.json)', '')
   const author = await ask('author', DEFAULT_AUTHOR)
   const publisher = await ask('publisher (fingerprint, PLACEHOLDER until signed)', PLACEHOLDER_PUBLISHER)
   const document: JsonObject = { name, url, author, publisher }

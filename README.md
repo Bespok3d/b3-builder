@@ -293,10 +293,15 @@ module's vermagic is checked against the declared one; on mismatch the build ref
 The composite Action gives a plugin repo its whole release pipeline from one `uses:`. A run
 builds (and bakes) every plugin, runs each plugin's `tests/run.sh` (a failing test aborts before
 anything is released), cuts a GitHub release with the `.b3` asset per plugin, rewrites the
-assembled `index.json` so each entry's download URL points at its real release asset, commits
-that `index.json` back to the repo, and optionally registers the list in an index-of-lists repo.
-That full pipeline is the `repo` unit (the default); with `unit: plugin` the Action only builds
-the artifacts: no tests, no release, no index commit, no registration.
+assembled `index.json` so each entry's download URL points at its real release asset, uploads that
+signed `index.json` as an asset of the same releases, and optionally registers the list in an
+index-of-lists repo. That full pipeline is the `repo` unit (the default); with `unit: plugin` the
+Action only builds the artifacts: no tests, no release, no list asset, no registration.
+
+A release writes nothing back into the plugin repo. The list ships the way the `.b3` files ship, as
+a release asset, so readers fetch it at
+`https://github.com/<owner>/<repo>/releases/latest/download/index.json`, an address that does not
+change when the next release lands.
 
 A complete `release.yml`:
 
@@ -344,12 +349,11 @@ jobs:
 | `skip-unchanged` | reuse an existing `.b3` whose content is unchanged | `'false'` |
 | `node-version` | Node.js version the pipeline runs on | `'20'` |
 
-Tokens: the releases and the `index.json` commit use the workflow's own `github.token`, which
-needs `permissions: contents: write` (as in the example). Registering into a separate
-index-of-lists repo needs its own token (`main-index-token`) with contents write on that repo;
-leave it empty and the register step is skipped, everything else still runs. Registration writes
-`lists/<your-repo>.json` into the index-of-lists repo, pointing at your repo's committed
-`index.json`. Docker builds
+Tokens: the releases and the list asset use the workflow's own `github.token`, which needs
+`permissions: contents: write` (as in the example). Registering into a separate index-of-lists repo
+needs its own token (`main-index-token`) with contents write on that repo; leave it empty and the
+register step is skipped, everything else still runs. Registration writes `lists/<your-repo>.json`
+into the index-of-lists repo, pointing at your repo's latest-release `index.json` asset. Docker builds
 (`docker-c` / `docker-ko` bakes) are cached through the Actions layer cache automatically.
 
 ## Development

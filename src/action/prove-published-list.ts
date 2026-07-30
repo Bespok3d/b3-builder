@@ -9,7 +9,7 @@ import { namesAPublisher } from '../core/build/publisher-claim.js'
 // proof over bytes it does not serve, hands every reader a list it can never rate above unknown. Both
 // states really happened to the ten published sub-lists: first unsigned for weeks, then signed over the
 // pre-CI bytes rather than the served ones. Neither turned a release run red. This is what turns them red,
-// at the producer, before the list is committed.
+// at the producer, before the list is uploaded to the release that serves it.
 
 export async function provePublishedList(
   publishedIndexPath: string,

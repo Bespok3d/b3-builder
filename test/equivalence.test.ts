@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { publisherRequest, runPipeline } from '../src/core/index.js'
 import type { JsonObject } from '../src/core/index.js'
-import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, describePackages, goldenPath, loadGoldenPackages, loadJson, sortAtomsByName } from './harness.js'
+import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, describePackages, goldenPath, loadGoldenPackages, loadJson, sortAtomsByName, withoutAssemblyStamp } from './harness.js'
 
 // The golden-equivalence rail for the PUBLISHER core: build a single plugin dir and a repo of plugin
 // dirs via the clean pipeline (publisher/org identity passed in), and assert each reproduces the
@@ -66,7 +66,7 @@ describe('publisher equivalence rail', () => {
       identity: NETWORKING_IDENTITY,
     })
     expect(sortAtomsByName(artifacts.atoms)).toEqual(sortAtomsByName(loadGoldenAtoms()))
-    expect(artifacts.subList).toEqual(loadJson(goldenPath('networking', 'index.json')))
+    expect(withoutAssemblyStamp(artifacts.subList as JsonObject)).toEqual(loadJson(goldenPath('networking', 'index.json')))
     expect(describePackages(artifacts.packages)).toEqual(loadGoldenPackages(goldenPath('networking', 'packages.json')))
   }, 60_000)
 

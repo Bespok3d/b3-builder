@@ -166,8 +166,8 @@ declares nothing to bake and packs clean.
 `action.yml` is a **composite** GitHub Action that wraps the tool with the GitHub-specific orchestration a
 plugin repo's release needs: build + pack + index (one `b3-builder build`), then test, then release (a GitHub
 release + `.b3` asset per plugin), then finalize each sub-list entry's `download_url` with the real release
-asset URL, then register the sub-list in the index-of-lists. It exists so every repo pulls one `uses:`
-instead of hand-copying a `release.yml`.
+asset URL, then upload the signed sub-list as an asset of those same releases, then register the sub-list in
+the index-of-lists. It exists so every repo pulls one `uses:` instead of hand-copying a `release.yml`.
 
 - **The core stays GitHub-agnostic.** Creating GitHub releases and pushing to the index-of-lists are the
   Action's orchestration, NOT the core's. Never add release / registry-push / gh / octokit logic to
@@ -178,7 +178,14 @@ instead of hand-copying a `release.yml`.
   `list-ref-name`, `main-index-repo`, `main-index-token`), never a baked default. This is the same hard
   boundary the CLI honors, applied to the CI face. A hardcoded `Bespok3d/...` anywhere in the Action logic
   is WRONG; it belongs in the CALLER's `release.yml`.
-- **Both git pushes are push-race hardened** (5-attempt rebase-retry). Do not weaken them back to a bare push.
+- **A release never writes into the plugin repo.** The assembled list ships as a release asset
+  (`index.json` + `index.json.sig`), uploaded AFTER `inject-release-urls` rewrote and signed it, so the
+  signature covers the exact bytes a reader is served. A repo unit has no release of its own (one is cut per
+  plugin), so the list rides EVERY release the run touched and `releases/latest/download/index.json` always
+  answers with the current one. Do not reintroduce a commit step here: it raced the repo's own pushes and it
+  put a signature over bytes nobody was served.
+- **The one remaining git push, into the index-of-lists, is push-race hardened** (5-attempt rebase-retry).
+  Do not weaken it back to a bare push.
 - **`exclude-dirs` is caller curation, not a variant concept.** A repo with a dev-only variant dir that
   holds a `manifest.json` but must never publish (e.g. `fluidd-bleeding-edge`) passes `exclude-dirs` in
   its own `release.yml`; the Action threads it to `b3-builder build --exclude <dir>` AND skips it in the
