@@ -19,4 +19,12 @@ describe('the sub-list registration step', () => {
   it('rebases a rejected push onto the branch it checked out', () => {
     expect(compositeAction).toMatch(/git pull --rebase --no-edit origin main/)
   })
+
+  // The registered reference names the repo and the asset, and nothing that a release mints fresh. A
+  // per-release asset id would have to be re-registered on every publish, and a reader resolving the
+  // asset by name off the latest release - which is how a private repo is read at all - would have
+  // nothing to match on.
+  it('registers the repo and the asset name, never a per-release id', () => {
+    expect(compositeAction).toMatch(/list_url="https:\/\/github\.com\/\$\{GITHUB_REPOSITORY\}\/releases\/latest\/download\/index\.json"/)
+  })
 })

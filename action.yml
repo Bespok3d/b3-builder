@@ -283,6 +283,11 @@ runs:
         repo_name="${GITHUB_REPOSITORY##*/}"
         # The latest-release asset URL, never a per-release one: a per-release URL would change on every
         # release and move the churn this removed from the plugin repo into the index-of-lists instead.
+        # What it registers is a NAME, not a fetchable address on its own: this repo, and the asset
+        # called index.json on its newest release. A public repo serves that URL as it stands; a PRIVATE
+        # one answers 404 on it for everyone, token or not, so a reader asks the host for the asset of
+        # that name off the latest release instead. Both halves resolve to the same asset, which is what
+        # lets one registered reference serve a public publisher and a private one alike.
         list_url="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/index.json"
         workdir="$(mktemp -d)"
         # Full clone (no --depth 1) so a rebase on a concurrent push has the history it needs.
