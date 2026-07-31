@@ -184,19 +184,36 @@ runs:
             gh release create "$tag" --title "$tag" --notes "Automated release of ${asset}"
           fi
           gh release upload "$tag" "$B3D_OUT/$asset" --clobber
-          # The asset's API URL (.url, not browser_download_url) is what the app fetches with a bearer
+          # The store page shows the notes for the version it is offering, so the release carries this
+          # plugin's docs beside its .b3. A manifest that declares a changelog and ships no file is a
+          # broken promise and fails the release rather than publishing an entry pointing at nothing.
+          changelog_source=$(jq -r '.changelog // ""' "${dir}manifest.json")
+          [ -z "$changelog_source" ] || [ -f "${dir}${changelog_source}" ] \
+            || { echo "manifest declares changelog ${changelog_source} but ${dir}${changelog_source} is missing" >&2; exit 1; }
+          # The copy is what gives each doc a name unique across the run's shared URL map: one release
+          # holds one plugin, the map holds every plugin in the repo. src/action/release-doc-urls.ts
+          # rebuilds the same name to look the URL back up, and its test fails if the two drift.
+          for doc_asset in "${changelog_source}:CHANGELOG.md" "doc/README.md:README.md"; do
+            doc_source="${doc_asset%%:*}"
+            doc_name="${doc_asset##*:}"
+            [ -n "$doc_source" ] && [ -f "${dir}${doc_source}" ] || continue
+            cp "${dir}${doc_source}" "$B3D_OUT/${name}-${version}-${doc_name}"
+            gh release upload "$tag" "$B3D_OUT/${name}-${version}-${doc_name}" --clobber
+          done
+          # An asset's API URL (.url, not browser_download_url) is what the app fetches with a bearer
           # token + Accept: application/octet-stream, which works for private repos and public alike.
-          asset_url=$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag}" \
-            --jq ".assets[] | select(.name==\"${asset}\") | .url")
-          [ -n "$asset_url" ] || { echo "no asset URL for $asset after upload" >&2; exit 1; }
+          asset_urls=$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag}" \
+            --jq '[.assets[] | {(.name): .url}] | add')
+          echo "$asset_urls" | jq -e --arg fn "$asset" 'has($fn)' >/dev/null \
+            || { echo "no asset URL for $asset after upload" >&2; exit 1; }
           tmp=$(mktemp)
-          jq --arg fn "$asset" --arg url "$asset_url" '. + {($fn): $url}' "$url_map" > "$tmp" && mv "$tmp" "$url_map"
+          jq --argjson uploaded "$asset_urls" '. + $uploaded' "$url_map" > "$tmp" && mv "$tmp" "$url_map"
           echo "$tag" >> "$release_tags"
         done
         echo "B3D_URL_MAP=$url_map" >> "$GITHUB_ENV"
         echo "B3D_RELEASE_TAGS=$release_tags" >> "$GITHUB_ENV"
 
-    - name: Finalize atom download_urls with the release asset URLs (repo unit)
+    - name: Finalize atom download and doc URLs with the release asset URLs (repo unit)
       if: ${{ inputs.unit == 'repo' && inputs.publish == 'true' }}
       shell: bash
       env:
@@ -206,7 +223,7 @@ runs:
         set -euo pipefail
         node "$B3D_ACTION_PATH/dist/action/finalize-atom-urls.js" "$B3D_OUT" "$B3D_URL_MAP"
 
-    - name: Finalize index.json download_urls with the release asset URLs (repo unit)
+    - name: Finalize index.json download and doc URLs with the release asset URLs (repo unit)
       if: ${{ inputs.unit == 'repo' && inputs.list-name != '' && inputs.publish == 'true' }}
       shell: bash
       env:

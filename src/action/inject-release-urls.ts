@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs'
 import type { JsonValue } from '../core/types.js'
 import { writeSignedIndexFile } from '../core/build/signed-index.js'
 import { provePublishedList } from './prove-published-list.js'
+import { finalizeDocUrls } from './release-doc-urls.js'
 
 // Finalize a built sub-list's placeholder download_url values with the real GitHub release asset URLs.
 // b3-builder's index step deliberately writes each plugin's download_url as the local .b3 filename and
@@ -29,8 +30,17 @@ export function injectReleaseUrls(
   subList: PublishableSubList,
   assetUrlByFilename: Record<string, string>,
 ): PublishableSubList {
-  const finalized = subList.plugins.map((plugin) => finalizeDownloadUrl(plugin, assetUrlByFilename))
+  const finalized = subList.plugins.map((plugin) => finalizeEntryUrls(plugin, assetUrlByFilename))
   return { ...subList, plugins: finalized }
+}
+
+function finalizeEntryUrls(
+  plugin: PublishablePlugin,
+  assetUrlByFilename: Record<string, string>,
+): PublishablePlugin {
+  const released = finalizeDownloadUrl(plugin, assetUrlByFilename)
+
+  return finalizeDocUrls(released, assetUrlByFilename)
 }
 
 export function finalizeDownloadUrl(

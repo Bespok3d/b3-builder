@@ -44,6 +44,31 @@ describe('finalizeAtomUrls', () => {
     expect(collection.kind).toBe('collection')
   })
 
+  it('points an atom at the notes released with the version it offers', () => {
+    const outDir = mkdtempSync(join(tmpdir(), 'b3-atom-finalize-'))
+    writeFileSync(
+      join(outDir, 'tailscale.atom.json'),
+      JSON.stringify({
+        name: 'tailscale',
+        version: '0.1.0',
+        download_url: 'tailscale-0.1.0.b3',
+        changelog_url: 'tailscale/doc/CHANGELOG.md',
+        doc_url: 'https://github.com/org/repo/blob/main/tailscale/doc/README.md',
+      }),
+    )
+    finalizeAtomUrls(outDir, {
+      'tailscale-0.1.0.b3': 'https://api.github.com/repos/x/y/releases/assets/1',
+      'tailscale-0.1.0-CHANGELOG.md': 'https://api.github.com/repos/x/y/releases/assets/2',
+      'tailscale-0.1.0-README.md': 'https://api.github.com/repos/x/y/releases/assets/3',
+    })
+    const tailscale = JSON.parse(readFileSync(join(outDir, 'tailscale.atom.json'), 'utf8')) as {
+      changelog_url: string
+      doc_url: string
+    }
+    expect(tailscale.changelog_url).toBe('https://api.github.com/repos/x/y/releases/assets/2')
+    expect(tailscale.doc_url).toBe('https://api.github.com/repos/x/y/releases/assets/3')
+  })
+
   it('refuses an atom whose .b3 was never released', () => {
     const outDir = mkdtempSync(join(tmpdir(), 'b3-atom-finalize-'))
     writeAtom(outDir, 'tailscale', 'tailscale-0.1.0.b3')

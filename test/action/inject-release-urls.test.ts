@@ -45,6 +45,25 @@ describe('injectReleaseUrls', () => {
     expect(finalized.plugins[0]).toMatchObject({ name: 'tailscale', version: '0.1.1', category: 'networking' })
   })
 
+  it('points a published entry at the notes released with the version it offers', () => {
+    const documented = {
+      ...builtSubList,
+      plugins: [
+        {
+          name: 'tailscale',
+          version: '0.1.1',
+          download_url: 'tailscale-0.1.1.b3',
+          changelog_url: 'tailscale/doc/CHANGELOG.md',
+        },
+      ],
+    }
+    const finalized = injectReleaseUrls(documented, {
+      'tailscale-0.1.1.b3': 'https://api.github.com/repos/Bespok3d/networking/releases/assets/111',
+      'tailscale-0.1.1-CHANGELOG.md': 'https://api.github.com/repos/Bespok3d/networking/releases/assets/333',
+    })
+    expect(finalized.plugins[0]?.changelog_url).toBe('https://api.github.com/repos/Bespok3d/networking/releases/assets/333')
+  })
+
   it('refuses to finalize a plugin whose .b3 was never released', () => {
     expect(() =>
       injectReleaseUrls(builtSubList, {
