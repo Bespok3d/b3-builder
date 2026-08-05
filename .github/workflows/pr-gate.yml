@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: Bespok3d/networking
-          ref: cfdb8639e9716621c5e71c9f58118bb91360f3a0
+          ref: 94c60482588130ae8ac769d4b41c48c92fa6c762
           path: plugins/networking
 
       - uses: actions/checkout@v4
@@ -42,13 +42,13 @@ jobs:
           # The all-the-tags plugin tree lives in the repo named material-tags; the harness reads it at
           # the ../plugins/all-the-tags path, so the checkout is renamed here.
           repository: Bespok3d/material-tags
-          ref: 1da21625b32ab66a2b3e29dbc9a0226699a5705a
+          ref: 26a1bb18a2c7b88bc5a10877a38e180f2939d69e
           path: plugins/all-the-tags
 
       - uses: actions/checkout@v4
         with:
           repository: Bespok3d/fluidd-plugin
-          ref: bd135e10aad9674181bc3193717cc7f8b70b86cf
+          ref: e3f3924e1abffad6b788f604b32131348f3c92b6
           path: plugins/fluidd-plugin
 
       - uses: actions/setup-node@v4
