@@ -2,14 +2,6 @@
   "tailscale-0.1.1.b3": {
     "entries": [
       {
-        "path": "doc/CHANGELOG.md",
-        "sha256": "2c80eec53e36e949012461fa8a97020458870c482072cc342eb6eca051ac6ef1"
-      },
-      {
-        "path": "doc/README.md",
-        "sha256": "ac6cb130c1dfa3465b95e80af9234c8df6e3f957c0d175a7c9f9f2dd5748f7ab"
-      },
-      {
         "path": "files/authkey.tmpl",
         "sha256": "1af6eaa460c33070c748255b11d6a96453af9ee1016deb224246fd0313171a33"
       },
@@ -39,7 +31,7 @@
       "description": "Joins the printer to your Tailscale mesh network (tailnet), so you can reach Fluidd/Mainsail, the camera, and SSH from anywhere without opening a port on your router. Bring your own account: generate an auth key at login.tailscale.com/admin/settings/keys, then paste it below. The printer authorizes itself the way any Tailscale device does; it appears in your tailnet's device list like a laptop or phone. Bespok3d hosts no coordination service and never sees your auth key or traffic. Runs tailscaled as a managed service on top of the tun-module base (a real /dev/net/tun the tailscale0 network interface needs).",
       "tagline": "Reach your printer from anywhere over your Tailscale network.",
       "category": "system",
-      "channel": "experiment",
+      "channel": "testing",
       "printer_specific": false,
       "changelog": "doc/CHANGELOG.md",
       "published_at": "2026-07-05",
@@ -175,19 +167,13 @@
           "sha256": "b9d5aa6fe63d1e9e6a2643e47b86bd39247b2b91c1df26c092fb217db27a341e",
           "mode": "644"
         }
-      ]
+      ],
+      "license": "https://github.com/Bespok3d/networking/blob/dev/tailscale/doc/LICENSE",
+      "attributions": "# Attributions - tailscale\n\n**Plugin author:** Tailscale Inc., packaged by Bespok3d; the idea of a VPN on the U1 comes from the Extended Firmware overlay `66-app-vpn`, initial Tailscale support there by @mcristina422\n\nPuts the printer on a Tailscale network.\n\n| Upstream project | Author | Licence | Needed at runtime | Code ships in this package |\n| --- | --- | --- | --- | --- |\n| Tailscale client | Tailscale Inc. | BSD-3-Clause | yes | yes |\n\nThe official arm64 Tailscale build (currently 1.98.8) is downloaded from https://pkgs.tailscale.com\nat build time and shipped inside the package.\n\nThe binaries are Tailscale's own builds, shipped byte for byte as downloaded; nothing of\nTailscale's is stored in this repository. The licence text and the provenance note are in\n`vendor/tailscale/` at the root of this repository.\n\nPorted from the Extended Firmware overlay `66-app-vpn`, GPL-3.0, whose Tailscale work is credited to\n@mcristina422.\n"
     }
   },
   "tun-module-0.1.0.b3": {
     "entries": [
-      {
-        "path": "doc/CHANGELOG.md",
-        "sha256": "337d9903526c096800da5ce918009f1f8a3c91cb20021dcb4d926aefc11434bb"
-      },
-      {
-        "path": "doc/README.md",
-        "sha256": "59263519bbc235c76b966b5baff172d30c6d4a7e14f2d1171ac1d30239e73234"
-      },
       {
         "path": "files/modules/tun-6.1.99.ko",
         "sha256": "5d4649035f12563831b9c529e5dc6dd13e220b624c19cd217cc54d19c217df69"
@@ -260,19 +246,13 @@
           "sha256": "5d4649035f12563831b9c529e5dc6dd13e220b624c19cd217cc54d19c217df69",
           "mode": "644"
         }
-      ]
+      ],
+      "license": "https://github.com/Bespok3d/networking/blob/dev/tun-module/doc/LICENSE",
+      "attributions": "# Attributions - tun-module\n\n**Plugin author:** the Linux kernel contributors, built by Bespok3d from the printer kernel source\n\nLoads the kernel `tun` driver the VPN plugins need.\n\n| Upstream project | Author | Licence | Needed at runtime | Code ships in this package |\n| --- | --- | --- | --- | --- |\n| Linux kernel `tun` driver 6.1.99 | the Linux kernel contributors | GPL-2.0-only | yes | yes |\n\nThe module is cross-built at build time from the Rockchip kernel tree at commit\n`8533b2249e1550b233a4836d039d64e3bb2fed7a`, against the stock Snapmaker U1 kernel configuration, and\nshipped as a `.ko`. The licence text and the provenance note are in `vendor/linux-tun/` at the root\nof this repository.\n\nBecause Bespok3d builds this binary, Bespok3d owes its Corresponding Source: the pinned upstream\ncommit plus the `Dockerfile` and `junior-6.1.99.config` in `tun-module/toolchain/`, both published\nwith every release. The inventory entry is in `Bespok3d_history/doc/gpl-source-inventory.md`.\n\nRelated Extended Firmware overlay: `10-patch-kernel-modules` (paxx12), GPL-3.0.\n"
     }
   },
   "zerotier-0.1.1.b3": {
     "entries": [
-      {
-        "path": "doc/CHANGELOG.md",
-        "sha256": "21e1953dafec930a5d2e0d7639ec9a59d789763a16a919210c001ffd3c2918ab"
-      },
-      {
-        "path": "doc/README.md",
-        "sha256": "8f1691808ef7d9db674ad4f0a7d71851507c182dce0846888c5db49ab6078a7d"
-      },
       {
         "path": "files/bin/zerotier-one-aarch64",
         "sha256": "f1931b2b15e980e8472d86f8fb08265e3822c83477aaba81ee8d34e79407f8b9"
@@ -399,7 +379,9 @@
           "sha256": "d6eaba871af53dfd29a96cab1ebd020787b4f1e912a9afa4d3a62f6f764ceb71",
           "mode": "644"
         }
-      ]
+      ],
+      "license": "https://github.com/Bespok3d/networking/blob/dev/zerotier/doc/LICENSE",
+      "attributions": "# Attributions - zerotier\n\n**Plugin author:** ZeroTier, Inc., packaged by Bespok3d\n\nPuts the printer on a ZeroTier network.\n\n| Upstream project | Author | Licence | Needed at runtime | Code ships in this package |\n| --- | --- | --- | --- | --- |\n| ZeroTier One 1.16.2, agent | ZeroTier, Inc. | MPL-2.0 | yes | yes |\n| ZeroTier One 1.16.2, controller and related parts | ZeroTier, Inc. | ZeroTier SOURCE-AVAILABLE LICENSE Version 1.0, no SPDX identifier | yes | yes |\n\nThe official arm64 ZeroTier build (1.16.2) is downloaded from https://download.zerotier.com at build\ntime, pinned by URL and sha256, and shipped inside the package byte for byte as downloaded. Nothing\nof ZeroTier's is stored in this repository and Bespok3d modifies nothing in it.\n\nZeroTier's own notice states the software is source-available and is not open source as defined by\nthe Open Source Initiative, and that commercial use as its licence defines it requires a paid licence\nfrom ZeroTier, Inc. Both licence texts are reproduced verbatim in `vendor/zerotier-one/` at the root\nof this repository, with the provenance note.\n\nRelated Extended Firmware overlay: `66-app-vpn`, GPL-3.0.\n"
     }
   }
 }

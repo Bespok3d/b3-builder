@@ -17,7 +17,9 @@ const COLLECTION_ENTRY_KEYS = ['icon', 'homepage']
 // `author` is the human/org display name behind the entry ("bespoked"), distinct from `publisher` (the
 // signing-key fingerprint that PROVES the release): the two may name different parties. Every entry
 // shape carries it, so it lives in the base fields both a plugin atom and a collection start from.
-const BASE_OPTIONAL_KEYS = ['author']
+// `attributions` is the credits text the store shows for a plugin, carried on the entry itself so the
+// store never has to download the .b3 to say whose work a plugin builds on.
+const BASE_OPTIONAL_KEYS = ['author', 'attributions']
 
 function serviceName(provided: JsonValue): string {
   return typeof provided === 'string' ? provided : asString(asObject(provided).service)
@@ -83,7 +85,15 @@ export function baseCatalogFields(manifest: JsonObject): JsonObject {
     updated_at: asString(manifest.updated_at),
   }
   copyIfPresent(entry, manifest, BASE_OPTIONAL_KEYS)
+  applyLicenseUrl(entry, manifest)
   return entry
+}
+
+// Unlike the changelog, a licence file is never a release asset: it lives in the plugin's own repo and
+// the store only ever links out to it. So the manifest carries the link and the entry passes it
+// through, rather than a source-relative placeholder something downstream has to finalize.
+export function applyLicenseUrl(entry: JsonObject, manifest: JsonObject): void {
+  if (fieldPresent(manifest, 'license')) entry.license_url = asString(manifest.license)
 }
 
 export function applyChangelogUrl(entry: JsonObject, manifest: JsonObject): void {

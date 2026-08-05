@@ -21,6 +21,14 @@ import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, describePackages, goldenP
 // source change there (a version bump, an edited payload) turns it red. That is REAL information, not
 // a cue to re-snapshot: never weaken the comparison, hand-edit a fixture, or fake output to green it.
 // Reconciling a genuine source change against the frozen golden is a maintainer decision.
+//
+// Reconciled on 2026-08-05, on the maintainer's instruction, after two genuine source changes: fluidd
+// moved (0.1.4 to 0.1.5, upstream 1.37.2 to 1.37.3, which had already turned this rail red on its own),
+// and every plugin manifest gained the `license` and `attributions` keys the store reads to show what a
+// plugin is licensed under. Say plainly what that costs: the networking and fluidd fixtures were
+// re-captured from THIS tool, so they no longer carry the legacy claim. They still pin that the atom,
+// the sub-list and the packed payload do not move unless someone means them to, which is what catches a
+// regression from here on.
 
 const NETWORKING_IDENTITY = {
   atomRepo: 'Bespok3d/networking',
