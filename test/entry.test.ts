@@ -56,6 +56,25 @@ describe('author and sw_version on atoms', () => {
   })
 })
 
+// A plugin whose service logs a setup link is unusable without that link, and the store decides whether
+// to offer the captured output by reading the entry alone: an entry that dropped the block sends the
+// reader to a tab that is not there.
+describe('log source on atoms', () => {
+  it('carries an empty log block (take the service wrapper log) onto a plugin entry', () => {
+    const entry = sharedEntryFields(pluginManifest({ log: {} }))
+    expect(entry.log).toEqual({})
+  })
+
+  it('carries a declared path and named captures through unchanged', () => {
+    const entry = sharedEntryFields(pluginManifest({ log: { path: 'var/status/feed.log', captures: { token: 'tok_[a-z0-9]+' } } }))
+    expect(entry.log).toEqual({ path: 'var/status/feed.log', captures: { token: 'tok_[a-z0-9]+' } })
+  })
+
+  it('omits log when the manifest declares none', () => {
+    expect('log' in sharedEntryFields(pluginManifest({}))).toBe(false)
+  })
+})
+
 // The store shows what a plugin is licensed under and whose work it carries by reading the index entry
 // alone, so a release that dropped these two would silently empty the plugin's Licence tab.
 describe('licence and attributions on atoms', () => {

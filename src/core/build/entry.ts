@@ -12,7 +12,13 @@ import { asArray, asBool, asObject, asString, copyIfPresent, fieldPresent } from
 // `sw_version` is plugin-only: the upstream version a wrapper plugin packages (Fluidd, Mainsail,
 // Tailscale...), distinct from the plugin's own `version`. A collection wraps no external software, so
 // it never carries one.
-const OPTIONAL_ENTRY_KEYS = ['icon', 'min_daemon_version', 'homepage', 'macros', 'config', 'sw_version']
+// The two compatibility floors travel on the entry, not only inside the `.b3`, so a reader can tell
+// whether a package fits a printer before downloading it: `min_daemon_version` is the oldest daemon the
+// package runs against, `min_jinni_version` the oldest printer support package it will drive.
+// `log` tells a store reader that this plugin's running service writes output worth surfacing (a setup
+// link, a pairing code), so the store can offer it without downloading the package: an empty block takes
+// the service's own wrapper log, a filled one names its own path and its own named captures.
+const OPTIONAL_ENTRY_KEYS = ['icon', 'min_daemon_version', 'min_jinni_version', 'homepage', 'macros', 'config', 'sw_version', 'log']
 const COLLECTION_ENTRY_KEYS = ['icon', 'homepage']
 // `author` is the human/org display name behind the entry ("bespoked"), distinct from `publisher` (the
 // signing-key fingerprint that PROVES the release): the two may name different parties. Every entry
