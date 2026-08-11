@@ -36,7 +36,7 @@
       "changelog": "doc/CHANGELOG.md",
       "published_at": "2026-07-05",
       "updated_at": "2026-07-05",
-      "source": "https://github.com/bespok3d-org/plugin-networking",
+      "source": "https://github.com/Bespok3d/networking",
       "publisher": "PLACEHOLDER",
       "provides": [
         {
@@ -192,7 +192,7 @@
       "changelog": "doc/CHANGELOG.md",
       "published_at": "2026-07-05",
       "updated_at": "2026-07-05",
-      "source": "https://github.com/bespok3d-org/plugin-networking",
+      "source": "https://github.com/Bespok3d/networking",
       "publisher": "PLACEHOLDER",
       "provides": [
         {
@@ -280,7 +280,7 @@
       "changelog": "doc/CHANGELOG.md",
       "published_at": "2026-07-05",
       "updated_at": "2026-07-05",
-      "source": "https://github.com/bespok3d-org/plugin-networking",
+      "source": "https://github.com/Bespok3d/networking",
       "publisher": "PLACEHOLDER",
       "provides": [
         {

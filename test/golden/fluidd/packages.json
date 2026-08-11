@@ -1120,8 +1120,8 @@
       "changelog": "doc/CHANGELOG.md",
       "published_at": "2025-10-12",
       "updated_at": "2026-08-01",
-      "source": "https://github.com/bespok3d-org/plugin-fluidd",
-      "homepage": "https://github.com/bespok3d-org/plugin-fluidd",
+      "source": "https://github.com/Bespok3d/fluidd-plugin",
+      "homepage": "https://github.com/Bespok3d/fluidd-plugin",
       "publisher": "PLACEHOLDER",
       "provides": [
         {

@@ -22,7 +22,7 @@
     "fluidd-ui"
   ],
   "conflicts": [],
-  "homepage": "https://github.com/bespok3d-org/plugin-fluidd",
+  "homepage": "https://github.com/Bespok3d/fluidd-plugin",
   "config": [
     {
       "key": "FLUIDD_PORT",
