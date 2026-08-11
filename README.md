@@ -19,6 +19,11 @@ The tool is organization-agnostic: your publisher identity (repo slugs, list nam
 always passed in. Nothing Bespok3d-specific is baked into the builder, so anyone can publish
 plugins with it.
 
+**Writing a plugin?** Start at [doc/README.md](doc/README.md). That is the full plugin
+documentation: what a plugin is made of, the six kinds, signing, the release Action, channels,
+local testing and publishing. [doc/plugin-zero-to-hero.md](doc/plugin-zero-to-hero.md) walks one
+plugin from an empty directory to a published release.
+
 ## What a plugin looks like
 
 ```text
@@ -134,7 +139,7 @@ dist/my-macros-0.1.0.b3       the installable package
 dist/my-macros.atom.json      its catalog entry
 ```
 
-**4. Install it:** sideload the `.b3` in the Bespok3d desktop app (Add plugin from file), or
+**4. Install it:** sideload the `.b3` by dragging it onto the Bespok3d desktop app window, or
 publish it through the GitHub Action below.
 
 ## CLI reference
