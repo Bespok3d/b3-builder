@@ -78,7 +78,10 @@ upstream version they are about to install without reading your changelog.
 ```json
 "requires": {
   "capabilities": ["klipper-generic"],
-  "variables": ["MY_PLUGIN_SERVER", "MY_PLUGIN_API_KEY"]
+  "variables": [
+    { "name": "MY_PLUGIN_SERVER", "description": "Where your server is reachable from the printer.", "required": true },
+    { "name": "MY_PLUGIN_API_KEY", "description": "The API key your server issued.", "required": true }
+  ]
 }
 ```
 
@@ -86,8 +89,10 @@ upstream version they are about to install without reading your changelog.
   running Klipper through Bespok3d", which is what most plugins want. A plugin that needs specific
   hardware names the capability for it, and a printer whose adapter does not declare that capability
   will not offer your plugin.
-- **`variables`**: the names of the values your plugin needs at install time. Every name here should
-  have a matching entry in `config`, otherwise the user is never asked for it.
+- **`variables`**: the values your plugin needs at install time, one object each, with a `name`, a
+  `description` and `required`. Every `name` here should have a matching entry in `config`, otherwise
+  the user is never asked for it. Write the objects, not a plain list of names: the daemon reads
+  `required` off each entry, and a bare string there stops the install with an error.
 
 Watch the spelling: **`requires` and `require` are two different fields.** `requires` (with the s) is
 this one, about the printer. `require` (no s) is about other plugins, below.

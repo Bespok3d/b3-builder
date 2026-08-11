@@ -64,7 +64,9 @@ setting, and the file lands on the printer as `runout-beep.cfg`, without the suf
   "author": "you",
   "requires": {
     "capabilities": ["klipper-generic"],
-    "variables": ["BEEP_MILLISECONDS"]
+    "variables": [
+      { "name": "BEEP_MILLISECONDS", "description": "How long the beep lasts.", "required": false }
+    ]
   },
   "config": [
     {

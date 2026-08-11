@@ -66,7 +66,12 @@ A config fragment with a hardcoded value works on your printer and nobody else's
 key in `config`:
 
 ```json
-"requires": { "capabilities": ["klipper-generic"], "variables": ["CPU_TEMP_POLL_SECONDS"] },
+"requires": {
+  "capabilities": ["klipper-generic"],
+  "variables": [
+    { "name": "CPU_TEMP_POLL_SECONDS", "description": "How often the CPU temperature is read.", "required": false }
+  ]
+},
 "config": [
   {
     "key": "CPU_TEMP_POLL_SECONDS",
