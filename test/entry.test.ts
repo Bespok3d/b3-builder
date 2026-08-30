@@ -22,16 +22,19 @@ describe('providerByService', () => {
 describe('resolveDeps', () => {
   it('resolves a required service to its provider id', () => {
     const providers = { tun: 'tun-module' }
-    expect(resolveDeps(['tun'], providers)).toEqual(['tun-module'])
+    expect(resolveDeps('tailscale', ['tun'], providers)).toEqual(['tun-module'])
   })
 
-  it('falls back to the raw service name when nothing provides it', () => {
-    expect(resolveDeps(['unmet-service'], {})).toEqual(['unmet-service'])
+  // The published list said `deps: ["rfid-service"]`, and no publisher will ever publish a package with
+  // that id, so the app refused the entry and every plugin behind it. A name nothing provides is not a
+  // dependency, and shipping it as one breaks the list for every user who reads it.
+  it('stops the build, naming the plugin and the service, when nothing provides it', () => {
+    expect(() => resolveDeps('rfid-anycubic', ['rfid-service'], {})).toThrow(/rfid-anycubic.*rfid-service.*--providers/s)
   })
 
   it('deduplicates a service required more than once', () => {
     const providers = { tun: 'tun-module' }
-    expect(resolveDeps(['tun', 'tun'], providers)).toEqual(['tun-module'])
+    expect(resolveDeps('tailscale', ['tun', 'tun'], providers)).toEqual(['tun-module'])
   })
 })
 

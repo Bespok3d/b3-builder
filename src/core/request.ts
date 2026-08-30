@@ -16,6 +16,7 @@ export interface RawBuildInputs {
   listPublisher?: string
   listAuthor?: string
   exclude: string[]
+  providerSources: string[]
   skipUnchanged: boolean
   bake: boolean
   signingKey?: string
@@ -40,6 +41,7 @@ export function publisherRequest(inputs: RawBuildInputs): BuildRequest {
     outputDir: inputs.outputDir,
     identity: repoIdentity(atomRepo, inputs),
     exclude: inputs.exclude,
+    providerSources: inputs.providerSources,
     skipUnchanged: inputs.skipUnchanged,
     bake: inputs.bake,
     signingKey: presentValue(inputs.signingKey),

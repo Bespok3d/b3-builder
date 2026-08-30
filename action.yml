@@ -66,6 +66,10 @@ inputs:
     description: space-separated immediate subdirs that hold a manifest.json but must never publish (a dev-only variant, e.g. fluidd-bleeding-edge); skipped by build discovery AND the release loop, no baked variant knowledge in the tool (ADR-0041)
     required: false
     default: ''
+  provider-indexes:
+    description: space-separated published index.json locations (a path or an http(s) URL) read for the services plugins in OTHER repos provide, so a require met elsewhere resolves to that plugin's id instead of stopping the build; WHICH indexes to trust is the caller's, never a baked default (ADR-0041)
+    required: false
+    default: ''
   bake:
     description: produce each plugin's payload from source via its declared bake class (CI-time only, ADR-0036)
     required: false
@@ -120,6 +124,7 @@ runs:
         B3D_LIST_NAME: ${{ inputs.list-name }}
         B3D_LIST_PUBLISHER: ${{ inputs.list-publisher }}
         B3D_EXCLUDE_DIRS: ${{ inputs.exclude-dirs }}
+        B3D_PROVIDER_INDEXES: ${{ inputs.provider-indexes }}
         B3D_BAKE: ${{ inputs.bake }}
         B3D_SKIP_UNCHANGED: ${{ inputs.skip-unchanged }}
         B3D_SIGNING_KEY: ${{ inputs.signing-key }}
@@ -135,6 +140,7 @@ runs:
         [ -n "$B3D_LIST_NAME" ] && args+=(--list-name "$B3D_LIST_NAME")
         [ -n "$B3D_LIST_PUBLISHER" ] && args+=(--list-publisher "$B3D_LIST_PUBLISHER")
         for excluded in $B3D_EXCLUDE_DIRS; do args+=(--exclude "$excluded"); done
+        for providerIndex in $B3D_PROVIDER_INDEXES; do args+=(--providers "$providerIndex"); done
         [ "$B3D_BAKE" = "true" ] && args+=(--bake)
         [ "$B3D_SKIP_UNCHANGED" = "true" ] && args+=(--skip-unchanged)
         # B3D_SIGNING_KEY reaches the CLI through the env above, never through argv: an armored key

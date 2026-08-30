@@ -21,6 +21,9 @@ const GOLDEN_DIR = join(REPO_DIR, 'test', 'golden')
 export const NETWORKING_DIR = join(WORKSPACE_DIR, 'plugins', 'networking')
 export const FLUIDD_DIR = join(WORKSPACE_DIR, 'plugins', 'fluidd-plugin')
 export const ALL_THE_TAGS_DIR = join(WORKSPACE_DIR, 'plugins', 'all-the-tags')
+// The org's published index, read for the services plugins in OTHER repos provide. A repo only knows
+// what it builds itself, so without this a requirement met elsewhere has no plugin id to resolve to.
+export const ORG_INDEX_FILE = join(WORKSPACE_DIR, 'main-index', 'index.json')
 
 export interface ArchiveEntry {
   path: string

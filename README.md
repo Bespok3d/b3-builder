@@ -158,6 +158,7 @@ b3-builder build [flags]
 | `--list-publisher <name>` | publisher of the assembled plugin list (repo unit, required) | none |
 | `--list-author <name>` | author display name stamped on the assembled list's own entry (repo unit) | none |
 | `--exclude <dir>` | skip this immediate subdir even if it holds a manifest (repeatable; repo unit) | none |
+| `--providers <index>` | a published index.json (path or http(s) URL) read for the services plugins in OTHER repos provide (repeatable; repo unit) | none |
 | `--bake` | produce each plugin's payload from source via its declared bake steps | off |
 | `--skip-unchanged` | reuse an existing `.b3` whose content is unchanged instead of repacking | off |
 | `--sign <key-file\|key-id>` | sign with this key: a file holding an armored private key, or a key id in your GnuPG keyring | unsigned |
@@ -350,6 +351,7 @@ jobs:
 | `main-index-repo` | `owner/repo` of the index-of-lists to register into (repo unit) | none |
 | `main-index-token` | token with contents write on the index-of-lists repo; empty skips registration | empty |
 | `exclude-dirs` | space-separated subdirs that must never publish (dev-only variants) | empty |
+| `provider-indexes` | space-separated published index.json locations read for services provided in other repos | empty |
 | `bake` | produce each plugin's payload from source via its bake steps | `'false'` |
 | `skip-unchanged` | reuse an existing `.b3` whose content is unchanged | `'false'` |
 | `node-version` | Node.js version the pipeline runs on | `'20'` |

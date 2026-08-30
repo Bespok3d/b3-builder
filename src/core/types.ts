@@ -60,6 +60,12 @@ export interface RepoBuildRequest {
   outputDir: string
   identity: AtomIdentity | ListIdentity
   exclude?: string[]
+  // Published indexes to read service providers out of, so a requirement met by a plugin in ANOTHER
+  // repo resolves to that plugin's id. Each is a path or an http(s) URL to an index.json. Without them
+  // a repo only knows what it builds itself, and a cross-repo requirement has no id to resolve to,
+  // which stops the build (see build/entry.ts resolveDeps). Like every other identity input, WHICH
+  // indexes to trust is the caller's, never a baked default.
+  providerSources?: string[]
   skipUnchanged?: boolean
   bake?: boolean
   signingKey?: string

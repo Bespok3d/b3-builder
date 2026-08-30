@@ -11,6 +11,7 @@ function repoInputs(extra: Record<string, unknown>) {
     outputDir: '/out',
     atomRepo: 'Bespok3d/u1-extras',
     exclude: [],
+    providerSources: [],
     skipUnchanged: false,
     bake: false,
     ...extra,

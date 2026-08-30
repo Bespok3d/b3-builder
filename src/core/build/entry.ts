@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import type { JsonObject, JsonValue } from '../types.js'
+import { DAEMON_SERVED_SERVICES } from './daemon-services.js'
 import { asArray, asBool, asObject, asString, copyIfPresent, fieldPresent } from './json.js'
 
 // The generic catalog-entry helpers a plugin manifest is turned into a registry entry through: the
@@ -31,12 +32,17 @@ const COLLECTION_ENTRY_KEYS = ['icon', 'homepage', 'migration']
 // store never has to download the .b3 to say whose work a plugin builds on.
 const BASE_OPTIONAL_KEYS = ['author', 'attributions']
 
-function serviceName(provided: JsonValue): string {
+export function serviceName(provided: JsonValue): string {
   return typeof provided === 'string' ? provided : asString(asObject(provided).service)
 }
 
+// The services this manifest needs ANOTHER PLUGIN to provide. A requirement the daemon itself serves
+// is a floor on the daemon build, not a package to fetch, so it is dropped before it can be resolved
+// into a store dependency on a plugin id that no publisher will ever publish.
 export function requiredServiceNames(manifest: JsonObject): string[] {
-  return asArray(manifest.require).map((requirement) => asString(asObject(requirement).service))
+  return asArray(manifest.require)
+    .map((requirement) => asString(asObject(requirement).service))
+    .filter((service) => !DAEMON_SERVED_SERVICES.has(service))
 }
 
 export function providedServiceNames(manifest: JsonObject): string[] {
@@ -56,14 +62,22 @@ export function providerByService(sources: { name: string; provides: string[] }[
 }
 
 // The catalog `deps` are store plugin ids, derived from the service graph: a requirement resolves to
-// whichever id provides that service (or the raw service name if nothing does).
-export function resolveDeps(required: string[], providers: Record<string, string>): string[] {
+// whichever id provides that service. A service NOTHING known provides has no id to resolve to, and
+// the raw service name is not one: published as a dep it names a package no registry can serve, so the
+// app refuses the entry and every plugin that depended on it. The build stops instead, naming what to
+// pass, because a list that ships that name is broken for every user who reads it.
+export function resolveDeps(pluginId: string, required: string[], providers: Record<string, string>): string[] {
   const resolved: string[] = []
   required.forEach((service) => {
-    const providerId = providers[service] ?? service
+    const providerId = providers[service]
+    if (providerId === undefined) throw new Error(unprovidedServiceMessage(pluginId, service))
     if (!resolved.includes(providerId)) resolved.push(providerId)
   })
   return resolved
+}
+
+function unprovidedServiceMessage(pluginId: string, service: string): string {
+  return `${pluginId} requires the service "${service}", which no plugin in this build provides. Name the published index that carries its provider with --providers (repeatable, a path or a URL).`
 }
 
 export function atomKey(manifest: JsonObject): string {

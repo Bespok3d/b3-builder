@@ -6,7 +6,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { publisherRequest, runPipeline } from '../src/core/index.js'
 import type { JsonObject } from '../src/core/index.js'
-import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, describePackages, goldenPath, loadGoldenPackages, loadJson, sortAtomsByName, withoutAssemblyStamp } from './harness.js'
+import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, ORG_INDEX_FILE, describePackages, goldenPath, loadGoldenPackages, loadJson, sortAtomsByName, withoutAssemblyStamp } from './harness.js'
 
 // The golden-equivalence rail for the PUBLISHER core: build a single plugin dir and a repo of plugin
 // dirs via the clean pipeline (publisher/org identity passed in), and assert each reproduces the
@@ -113,6 +113,15 @@ describe('publisher equivalence rail', () => {
   // rfid-qidi member: all-the-tags went 0.1.2 to 0.1.3 (rewritten description, testing to stable,
   // updated_at 2026-07-26 to 2026-08-15) and materials-tracker-plus went 0.1.1 to 0.1.2 (updated_at
   // 2026-07-27 to 2026-08-13). plugins[] was left alone again.
+  //
+  // This repo needs the org index passed in, and that is the point of the case. Its rfid plugins require
+  // `rfid-service`, which rfid-ntag provides from ANOTHER repo, so a build that only knows what it builds
+  // itself cannot name a provider. The legacy scripts wrote the service name into deps instead, which is
+  // what this fixture's plugins[] still pins and what shipped a list naming a package no registry can
+  // serve. Say plainly what that costs: today's build resolves the same requirement to `rfid-ntag`, so
+  // plugins[] deps now diverge from the frozen capture ON PURPOSE. It is the defect the capture recorded,
+  // not a port bug, and this case never asserted plugins[] (see above), so the legacy claim carried by
+  // the networking and fluidd cases is untouched.
   it('a repo with a collection: the collection entry reproduces the golden and packs no .b3', async () => {
     const outputDir = mkdtempSync(join(tmpdir(), 'b3-collections-'))
     const artifacts = await runPipeline({
@@ -120,6 +129,7 @@ describe('publisher equivalence rail', () => {
       sourceDir: ALL_THE_TAGS_DIR,
       outputDir,
       identity: { atomRepo: 'Bespok3d/material-tags', listName: 'Material Tags', listPublisher: 'PLACEHOLDER' },
+      providerSources: [ORG_INDEX_FILE],
     })
     const golden = loadJson(goldenPath('all-the-tags', 'index.json'))
     const subList = artifacts.subList as JsonObject
@@ -193,6 +203,7 @@ describe('publisherRequest repo identity', () => {
     outputDir: '/out',
     atomRepo: 'someone/some-repo',
     exclude: [],
+    providerSources: [],
     skipUnchanged: false,
     bake: false,
   }

@@ -11,10 +11,20 @@ import {
   providerByService,
   requiredServiceNames,
   resolveDeps,
+  serviceName,
 } from './entry.js'
 import type { PluginSource } from './plugin-source.js'
+import type { ServiceProvider } from './service-providers.js'
 
 const LIST_SCHEMA_VERSION = 1
+
+// What the list says about itself. Three values that always travel together and are always the
+// caller's, never a baked default.
+export interface SubListIdentity {
+  listName: string
+  listPublisher: string
+  listAuthor?: string
+}
 
 // Every plugin dir published as its own atom, the shape a federated registry hosts: doc_url points at
 // the passed-in atomRepo (an owner/repo slug), download_url is the local .b3 filename (the real
@@ -39,15 +49,13 @@ export function buildAtoms(sources: PluginSource[], atomRepo: string): JsonObjec
 // collection publishes no `collections` key at all, the shape every collection-free list already has.
 // The list name, publisher, and optional author are passed in, never a baked default. A list omitting
 // its author keeps the exact shape every author-free list already publishes.
-export function assembleSubList(atoms: JsonObject[], listName: string, listPublisher: string, listAuthor?: string): JsonObject {
+export function assembleSubList(atoms: JsonObject[], identity: SubListIdentity, knownProviders: ServiceProvider[] = []): JsonObject {
   const sorted = [...atoms].sort((earlier, later) => asString(earlier.name).localeCompare(asString(later.name)))
   const pluginAtoms = sorted.filter((atom) => !isCollection(atom))
-  const providers = providerByService(
-    pluginAtoms.map((atom) => ({ name: asString(atom.name), provides: asArray(atom.provides).map((value) => asString(value)) })),
-  )
+  const providers = providerByService([...providersInThisRepo(pluginAtoms), ...knownProviders])
   const plugins = pluginAtoms.map((atom) => {
     const { require: _require, ...entry } = atom
-    return { ...entry, deps: resolveDeps(requiredServiceNames(atom), providers) }
+    return { ...entry, deps: resolveDeps(asString(atom.name), requiredServiceNames(atom), providers) }
   })
   const collections = sorted.filter(isCollection).map((atom) => {
     const { kind: _kind, ...entry } = atom
@@ -55,15 +63,19 @@ export function assembleSubList(atoms: JsonObject[], listName: string, listPubli
   })
   return {
     schema_version: LIST_SCHEMA_VERSION,
-    name: listName,
-    publisher: listPublisher,
-    ...(listAuthor !== undefined ? { author: listAuthor } : {}),
+    name: identity.listName,
+    publisher: identity.listPublisher,
+    ...(identity.listAuthor !== undefined ? { author: identity.listAuthor } : {}),
     updated: latestUpdated([...plugins, ...collections]),
     assembled_at: assemblyStamp(),
     plugins,
     ...(collections.length > 0 ? { collections } : {}),
     lists: [],
   }
+}
+
+function providersInThisRepo(pluginAtoms: JsonObject[]): ServiceProvider[] {
+  return pluginAtoms.map((atom) => ({ name: asString(atom.name), provides: asArray(atom.provides).map(serviceName) }))
 }
 
 // `updated` answers "how new is the newest plugin in here", derived from the entries, so a list rebuilt

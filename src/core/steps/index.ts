@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import type { JsonObject, PipelineContext } from '../types.js'
 import { isListIdentity } from '../types.js'
 import { assembleSubList, buildAtoms } from '../build/co-repo-index.js'
+import { readProviderSources } from '../build/service-providers.js'
 import { sourcesFor } from '../build/discovery.js'
 import { asString } from '../build/json.js'
 import { writeSignedIndexFile } from '../build/signed-index.js'
@@ -29,7 +30,8 @@ export async function buildRegistry(context: PipelineContext): Promise<PipelineC
   if (request.unit === 'plugin') return { ...context, atoms, subList: null }
   assertUniqueAtoms(sources)
   if (!isListIdentity(request.identity)) return { ...context, atoms, subList: null }
-  const subList = assembleSubList(atoms, request.identity.listName, request.identity.listPublisher, request.identity.listAuthor)
+  const knownProviders = await readProviderSources(request.providerSources ?? [])
+  const subList = assembleSubList(atoms, request.identity, knownProviders)
   await writeSignedIndexFile(join(request.outputDir, 'index.json'), subList, request.signingKey)
   return { ...context, atoms, subList }
 }

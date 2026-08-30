@@ -24,7 +24,22 @@ export { signManifestInPlace, stampManifestPublisherInPlace, unsignManifestInPla
 // dist on its own pure path (the app bundler, whose test-time buildIndex loads without the sibling repo
 // built) mirrors these and guards its copies against them with a cross-boundary drift test, per the
 // single-source-of-truth rule for an unavoidable mirror.
-export { sharedEntryFields, atomKey, latestUpdated, isCollection } from './build/entry.js'
+export {
+  sharedEntryFields,
+  atomKey,
+  latestUpdated,
+  isCollection,
+  serviceName,
+  requiredServiceNames,
+  providerByService,
+  resolveDeps,
+} from './build/entry.js'
+// The service graph resolution, exported so the index-of-lists assembler runs THIS implementation
+// instead of keeping a second one. A dep is a store plugin id, and an id fabricated from a service
+// name names a package no registry can serve, so both assemblers have to agree on what resolves and
+// on stopping when nothing does.
+export { readProviderSource, readProviderSources } from './build/service-providers.js'
+export type { ServiceProvider } from './build/service-providers.js'
 export { isListIdentity } from './types.js'
 export type { RawBuildInputs } from './request.js'
 export type {

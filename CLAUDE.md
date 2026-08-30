@@ -178,6 +178,14 @@ the index-of-lists. It exists so every repo pulls one `uses:` instead of hand-co
   `list-ref-name`, `main-index-repo`, `main-index-token`), never a baked default. This is the same hard
   boundary the CLI honors, applied to the CI face. A hardcoded `Bespok3d/...` anywhere in the Action logic
   is WRONG; it belongs in the CALLER's `release.yml`.
+- **A cross-repo `require` resolves through the `provider-indexes` input, and an unresolved one STOPS the
+  build.** The catalog `deps` are plugin ids derived from the service graph, and a build only knows the
+  plugins it builds, so a requirement met in another repo needs the published index that carries its
+  provider named as an input (`--providers`, repeatable, a path or an http(s) URL; `build/service-providers.ts`).
+  The legacy behaviour, falling back to the raw service name, shipped lists naming packages no registry
+  can serve and made every plugin behind them un-installable, so `resolveDeps` throws instead. WHICH
+  indexes to trust is the caller's, exactly like every other identity input: no org index is baked in.
+
 - **A release never writes into the plugin repo.** The assembled list ships as a release asset
   (`index.json` + `index.json.sig`), uploaded AFTER `inject-release-urls` rewrote and signed it, so the
   signature covers the exact bytes a reader is served. A repo unit has no release of its own (one is cut per

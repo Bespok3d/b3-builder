@@ -96,6 +96,7 @@ and leaves the finished per-plugin entries in the output directory for somebody 
 | `bake` | `'true'` builds payloads from source. Needed by every kind except plain config files |
 | `skip-unchanged` | `'true'` reuses an existing `.b3` whose contents did not change instead of repacking |
 | `exclude-dirs` | Space-separated directory names that hold a manifest but must never publish |
+| `provider-indexes` | Space-separated published index.json locations (a path or an http(s) URL) read for the services plugins in other repos provide |
 | `publish` | `'false'` builds, tests, packs and indexes but cuts no release. Use for pull request builds |
 | `node-version` | Defaults to `20` |
 
@@ -110,6 +111,13 @@ should never see your key. Sign only in the tag-triggered release workflow.
 
 **Let `skip-unchanged` do the boring work.** In a repo holding a dozen plugins, releasing one should
 not rebuild the other eleven. Turn it on and only what actually changed is repacked.
+
+**Use `provider-indexes` when a plugin here requires a service another repo provides.** A build only
+knows the plugins it builds, so a `require` met elsewhere has no plugin id to resolve to. Name the
+published index that carries the provider and the catalog entry gets the real id. Name nothing and the
+build stops: the alternative, publishing the service name as if it were a package, produces a list the
+app refuses, taking down every plugin behind it. Which index to trust is yours to state, never a baked
+default.
 
 **Use `exclude-dirs` for a directory you develop but never ship.** An experimental variant with a real
 manifest in it would otherwise be discovered and published. Name it here and it is skipped by
