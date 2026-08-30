@@ -1,5 +1,5 @@
 {
-  "fluidd-0.1.5.b3": {
+  "fluidd-0.1.6.b3": {
     "entries": [
       {
         "path": "files/b3d-tool-buttons.js.tmpl",
@@ -7,63 +7,63 @@
       },
       {
         "path": "files/fluidd/.version",
-        "sha256": "a04f6d187f93d0a6eb10863b4ba98767f2e6fe503a7ed7cd21d3c960d0888ccc"
+        "sha256": "0e0eea51ddf2a7e7d767d0126d8eb664927c0244a024584e253e2079b5eb7fec"
       },
       {
         "path": "files/fluidd/assets/_baseFor-CmFSrpl9.js",
         "sha256": "42b815a9b670804cd6cf49a98b9ed8090e2a62443fe35010b2c04ef55b1e5e59"
       },
       {
-        "path": "files/fluidd/assets/_baseMerge-Cl1mD_Z3.js",
-        "sha256": "cee72ec9ac39cd7cfd9bb9a5ef85561d4ce7923d698dcfe2052f73141cbbf1b6"
+        "path": "files/fluidd/assets/_baseMerge-B0Izx0Mm.js",
+        "sha256": "f0009e92fac32465c919f3781ed5c26f03c34861c96420b1fd7189c284cbb3ce"
       },
       {
-        "path": "files/fluidd/assets/_createCompounder-BuI_-PJV.js",
-        "sha256": "85275f4a52bb0dddc2707b07ed32c514249109b155d2467fbbc2bf4b0acbe32c"
+        "path": "files/fluidd/assets/_createCompounder-CZQWqG53.js",
+        "sha256": "085131602e1095948bd5939c53f2f449dccea1c8acc9c61fec4f4bfac4033257"
       },
       {
         "path": "files/fluidd/assets/_MapCache-CODy_DtT.js",
         "sha256": "f5c68eef753b7472cedc9a9d89ac5e47632a4ea420840a68af95ca0f9684f18e"
       },
       {
-        "path": "files/fluidd/assets/_plugin-vue2_normalizer-BwvlkTga.js",
-        "sha256": "40fc2f1e45240de654c5b816ab87cd1181ce5eb8fbe8b2128c40ae740c00063e"
+        "path": "files/fluidd/assets/_plugin-vue2_normalizer-D5mCHcOy.js",
+        "sha256": "604519d42188648195104ffabce11dc7077db17482523f0eed0f3d84d095d891"
       },
       {
         "path": "files/fluidd/assets/af-Cda-q-lJ.js",
         "sha256": "8ed09f8c08942f4f229c866c2484b75a5370f825df02db9ae45de5bb242bbcca"
       },
       {
-        "path": "files/fluidd/assets/AfcPrintStartDialogTool-CZT4oN3n.js",
-        "sha256": "b48744d6f8d35b2f3fd008abceef9efe4fc9c3cceb8a21c86aed8f6026106967"
+        "path": "files/fluidd/assets/AfcPrintStartDialogTool-UbJ399qX.js",
+        "sha256": "2ee4d78528be6b105e010198467a7b2e36f297f2679fd9e498e753df64006d0f"
       },
       {
-        "path": "files/fluidd/assets/AppBtn-CrmEnE1u.js",
-        "sha256": "fbea72ebdb3cb26f30f5d35ca4573a3e8ef18438b7e070500549998765c95612"
+        "path": "files/fluidd/assets/AppBtn-Bby50IMh.js",
+        "sha256": "5958d68cec262fe8a94ac1746aa253fa9ec859921548fe9353f70999e7247398"
       },
       {
-        "path": "files/fluidd/assets/AppBtnCollapseGroup-D8f14tsT.js",
-        "sha256": "11bb7abacd7e84db68fea687c93b714f02595c80f857a8d7fedd9a72a1ada124"
+        "path": "files/fluidd/assets/AppBtnCollapseGroup-BBYO9-ca.js",
+        "sha256": "c62b07bd7396d697409a41debd3be935e836d9892980a9a8a461c03a084e4e1b"
       },
       {
         "path": "files/fluidd/assets/AppChart-Bz44aqTu.css",
         "sha256": "f6817845725816f979a309eaadfa91299bcac5f595244ab4df7db8216891f022"
       },
       {
-        "path": "files/fluidd/assets/AppChart-DWG65OLt.js",
-        "sha256": "f78b1cf6039761443e9db3a126a90c97ff07813e4f62a5bb8fe24384a6f946a7"
+        "path": "files/fluidd/assets/AppChart-C3urgSWC.js",
+        "sha256": "76776b66041ef51ea2906521eedde7549abdb585d7592a03ff5690bd0c344cc9"
       },
       {
-        "path": "files/fluidd/assets/AppColorPicker-Ce6V2ct0.css",
-        "sha256": "633afcc03e93dd4551c5fb78b793bec1d06e964f12f1cad4aa9af92921080f2e"
+        "path": "files/fluidd/assets/AppColorPicker-BkBvheR1.js",
+        "sha256": "aad4859a9f09c5b2c86216076f80515b75a42cf4a75cca57746e30d74b7ce93f"
       },
       {
-        "path": "files/fluidd/assets/AppColorPicker-Dnf0G-eH.js",
-        "sha256": "da847c9c972f5e6c33c8b3c68216ec9458d46f681a5081859c2070c3f8a39a1e"
+        "path": "files/fluidd/assets/AppColorPicker-DY59qRAE.css",
+        "sha256": "41b194f5b6c2789b68f797e033ea3e61ecf9bc13cba48184935948086017fc84"
       },
       {
-        "path": "files/fluidd/assets/AppDragIcon-D9uUFP8Y.js",
-        "sha256": "463e5dc4cd27d5abfcedbcbe84c2cb8f3ad5aeaf260e95dd7539cb59fb186871"
+        "path": "files/fluidd/assets/AppDragIcon-BfNc_Aku.js",
+        "sha256": "6b923552c74be0052863d3a5cb6c52e0f062b12063ccaf12d1c15671d7bd13e8"
       },
       {
         "path": "files/fluidd/assets/AppDragIcon-DWfQuZat.css",
@@ -74,20 +74,20 @@
         "sha256": "4f8608a50e6f0eccb9ff02d3b7379e7aeb052f8e267232c4dfcc2e8c2e47f03e"
       },
       {
-        "path": "files/fluidd/assets/AppInlineChart-tU2ZraJ1.js",
-        "sha256": "c370b9da860b3cec75f356a7d94e731b97cd70b37a1b0fbf973c4c0ab12060de"
+        "path": "files/fluidd/assets/AppInlineChart-JztaUEzb.js",
+        "sha256": "770f4ea4c846019705e74ee0ed5a45670774750730869609e19b717852503019"
       },
       {
-        "path": "files/fluidd/assets/AppNamedSlider-wRcBqpIw.js",
-        "sha256": "86400ae2e9f8fdb41966886e3efa5560c0419d54fe640108bcadf69e2ad01b84"
+        "path": "files/fluidd/assets/AppNamedSlider-TakaeQZM.js",
+        "sha256": "ed02b31daba13b89ed431637d98a307a8157a87f4ed95d4b86d8e4e26d4b7935"
       },
       {
-        "path": "files/fluidd/assets/AppSettingsNav-BbBJCrdi.js",
-        "sha256": "9a0e292917a6365fdd967b28d04b3a3e2eeb90617ce6a273a87378f5970a0baf"
+        "path": "files/fluidd/assets/AppSettingsNav-jkdTATYO.js",
+        "sha256": "c0db92f457bbf25d68ebeb8a2edd22aea82afbd6dd2c7b9ae6802e0f408cccf8"
       },
       {
-        "path": "files/fluidd/assets/AppTextField-DCwJYWKN.js",
-        "sha256": "e361abec36d26c67cb742cf6b6224c96bca9c4a1a101ffa82a182b43bb83bd2b"
+        "path": "files/fluidd/assets/AppTextField-D-YLzpf_.js",
+        "sha256": "8ce27f0cfb6f65a92d6efecb397eb6a1c3976c088643d2028c78e984722eef49"
       },
       {
         "path": "files/fluidd/assets/ar-DQkWG67W.js",
@@ -98,40 +98,40 @@
         "sha256": "e45f9fb0e9e4fe2b4e6b5c28ce62c93a8223236010577e24621d43df0caeed65"
       },
       {
-        "path": "files/fluidd/assets/BeaconCard-DZFsnDpA.js",
-        "sha256": "af9ce321d6cb4c8668ae3516a85c066672a369fa347f69a9d1de8b9af7211ea7"
+        "path": "files/fluidd/assets/BeaconCard-CJZ8GpBN.js",
+        "sha256": "4e47a4c732d6d81f010e8b382862ac30f627be1f573c95d92ae6d76de364005e"
       },
       {
-        "path": "files/fluidd/assets/browser-1D2tZwAR.js",
-        "sha256": "72fb52d29a0d44140f1dd30a16774dbb9a1b2e9f47a5923e94fd2aa054eb8559"
+        "path": "files/fluidd/assets/browser-BCj0LS7L.js",
+        "sha256": "8b9a2dc8145c70d2af365f6fba4c03661ea0ba8eba698643f95a9b6624f4f4da"
       },
       {
-        "path": "files/fluidd/assets/browser-B-0GUgJn.js",
-        "sha256": "9505be50eac6525b4ee3d53316ab43cf4c2c845e31bcdc1dbda8dfc63274401e"
+        "path": "files/fluidd/assets/browser-CghQue7T.js",
+        "sha256": "0c55e5e5dc52c22191a41ef9caec6a0ea3c44cc943a00e9313b1627007d18912"
       },
       {
-        "path": "files/fluidd/assets/camera-C1rIv-Ce.js",
-        "sha256": "7f03543eee8b645af51a86f72a1c101dfd44906658522666266ef1e03ed3c7c8"
+        "path": "files/fluidd/assets/camera-D03VWK6P.js",
+        "sha256": "2ea87dce01c1bf33a634bbf7cd9dedabc0c034c5130c858bd4c8229a92f43637"
       },
       {
-        "path": "files/fluidd/assets/codicon-ngg6Pgfi.ttf",
-        "sha256": "9d25513c861704be650eacef8c4588aceabdc8b668857747b5e42b299e926918"
-      },
-      {
-        "path": "files/fluidd/assets/Configure-C4NMMziF.js",
-        "sha256": "dedb34aac63dff42c16c287d46e8c45b5f8981329809691a5b130a094a8fb089"
+        "path": "files/fluidd/assets/codicon-Brq4_Ui5.ttf",
+        "sha256": "cc2472e239e17062e7760af87f8f5997720cc0d94aa014a615c418baaf6333a8"
       },
       {
         "path": "files/fluidd/assets/Configure-jpJLplJh.css",
         "sha256": "5e5238243fe417828964ac60044af7450fb65b4644ad28e253e9b2d89f576fa2"
       },
       {
-        "path": "files/fluidd/assets/Console-BxEnb97p.js",
-        "sha256": "65588fd5ef452b7c6e1e115d697f42912388860839c50e4434db6d52e5b9af75"
+        "path": "files/fluidd/assets/Configure-XPM2ov8i.js",
+        "sha256": "d49a12d9f5d0c5c3038382dfee4fad76aab7c999c6f4b9cbd5fe23c7678ec810"
       },
       {
-        "path": "files/fluidd/assets/ConsoleCard-CN6vy4vu.js",
-        "sha256": "7d91c31f70735451489483490c3a5585f37e178c34ec0fc3fd0da8ea9c1d531b"
+        "path": "files/fluidd/assets/Console-DDOnU9kT.js",
+        "sha256": "eb29bc427d2112a2c8131cdaa08490a49fc2a887347b333231302afe69752333"
+      },
+      {
+        "path": "files/fluidd/assets/ConsoleCard-Bc7X3QAq.js",
+        "sha256": "7d3ebaac79a82f2a7ab68aaf256829892ef8d45958232967a9f797d1b2849770"
       },
       {
         "path": "files/fluidd/assets/ConsoleCard-wznOIkYo.css",
@@ -146,64 +146,64 @@
         "sha256": "361b35ed3c739617f90ee999b6bcfe6e7047c1d30c52df58401c50486f5fd8e4"
       },
       {
-        "path": "files/fluidd/assets/css.worker-yKcq13f2.js",
-        "sha256": "cd07798587ab4b6ba280a3d6ca2f13af27d51eab70a200a8656361ebf170853f"
+        "path": "files/fluidd/assets/css.worker-DOIiYeXg.js",
+        "sha256": "0dc18bc1f9e2001eb327e2938f4671f77af3ca60b39934989f6fe6ddd2262012"
       },
       {
-        "path": "files/fluidd/assets/cssMode-DyBLRVXG.js",
-        "sha256": "3f23bf1e5a46ee7d4ce60146f65460a1435e380826488cd56c0977771f3683ad"
+        "path": "files/fluidd/assets/cssMode-Bk3bDAfW.js",
+        "sha256": "1009c25ce1581a40475d3fab84d7169b65e591997247a63404d089159e1a1e04"
       },
       {
-        "path": "files/fluidd/assets/Dashboard-BCHPrNmB.css",
-        "sha256": "9ba3d34b77b4d655a5db584f3bafdf83a52f52234097e71e587b71625490f68c"
+        "path": "files/fluidd/assets/Dashboard-CpvUJ4FO.js",
+        "sha256": "830f12c7970f8868f271475c9d91e2a7e6ca962a13890227a3fdb695d090abcb"
       },
       {
-        "path": "files/fluidd/assets/Dashboard-DNbt7e59.js",
-        "sha256": "918c239cc0c1c6a21aa358eb95eb2be13daa593b6e257a0dd9579759ee39037c"
+        "path": "files/fluidd/assets/Dashboard-kHrFlKRI.css",
+        "sha256": "99454d35d6d75056a8ed3dca789d865bd74dacf39aed08fb2cf03a61eca640c5"
       },
       {
-        "path": "files/fluidd/assets/de-FpedikYx.js",
-        "sha256": "1e4a7e6930b8935e8f31c1f43b5fd3b8434e7b162dd4a8404766214eb086349d"
+        "path": "files/fluidd/assets/de-lDtOyod2.js",
+        "sha256": "3d8d59f469ffb056d5a1a926e681fa1d01aa42a6dbc43d75b6cd3d0f149bc4cd"
       },
       {
-        "path": "files/fluidd/assets/DeviceCamera-CEgRSNHn.js",
-        "sha256": "daed4b35b5124c99983cf1f156d8a0b27d37b6bb3d3b1fd8fa1b34e34d1cd601"
+        "path": "files/fluidd/assets/DeviceCamera-C5P4MRbA.js",
+        "sha256": "e73e4904c657da988a6663a4b4eb7c2b3b05cf8344f27e84cdd3bc761646f600"
       },
       {
         "path": "files/fluidd/assets/Diagnostics-BftVXYRb.css",
         "sha256": "b4be60245a27e45d26d88811ba098386323e8d45fd39573e8bd418f99c26f65d"
       },
       {
-        "path": "files/fluidd/assets/Diagnostics-Bjs4vM0F.js",
-        "sha256": "ffb3ee8fa0af648c531a995eb0201b2fe4d99da9a7d7f18c7d2fc05e366402a2"
+        "path": "files/fluidd/assets/Diagnostics-Dpymfn_M.js",
+        "sha256": "a89a628fbf792d75df954764f7731ef70649ad06ec9c97eee472f76279aa1c12"
       },
       {
-        "path": "files/fluidd/assets/DiskUsageCard-2IC2soK7.js",
-        "sha256": "df7d20e69edd222a98cad4f866b8d86e9449dc0f6769b5e4d2d36322060a3f3c"
+        "path": "files/fluidd/assets/DiskUsageCard-DlSljMF0.js",
+        "sha256": "59283e5ead00631afffa5fe09d81a2d8cb6347637eb312dd856bae3f5807cba0"
       },
       {
-        "path": "files/fluidd/assets/download-url-BCj14lMx.js",
-        "sha256": "02507f139cccfee225878ca9eb71dee9f29b1ad792f5ba22738b831a302eda1c"
+        "path": "files/fluidd/assets/download-url-BlFA96P0.js",
+        "sha256": "1f49720c25b9cae73cfd72cf591a981bcf4a6e2df724e213a2edde8c4b227cd8"
       },
       {
-        "path": "files/fluidd/assets/dynamicImports-Bq7bSVRn.js",
-        "sha256": "34a0b6fbc91897494304bdf99d229821a847635f5cfec9f9e2af9adf5b298b3a"
+        "path": "files/fluidd/assets/dynamicImports-CVZGzoxj.js",
+        "sha256": "5b78349e1bb8292dd9fb07eaf92013a8be2f6747c8abfd51d0fa41fe9044700e"
       },
       {
-        "path": "files/fluidd/assets/editor-CGi5ri4_.css",
-        "sha256": "2456a9ac9ce527b6ad17ad96cf686b852badb23b321d39e67ec09d1c562f92bb"
+        "path": "files/fluidd/assets/editor-BX3w1-Mx.css",
+        "sha256": "a439d15f4c48ab3510975ad69ee842730571205affe33a069e77efe8095ad933"
       },
       {
-        "path": "files/fluidd/assets/editor.api2-BmVe3eMZ.js",
-        "sha256": "e8775b65ed061550ed94fa7ec21e53ac123938246b225af71d87cbb313f5247a"
+        "path": "files/fluidd/assets/editor.api-BwXaXPrM.js",
+        "sha256": "49d61f4f2b0171d0970217d266707fcd979d3de11a8a894eaa8193365327d3a9"
       },
       {
-        "path": "files/fluidd/assets/editor.worker-tytyn86m.js",
-        "sha256": "631a8189a4026c0b53a286e16d873e8540a287ae5c774bb422a4161e87da6e59"
+        "path": "files/fluidd/assets/editor.worker-BgeVITW_.js",
+        "sha256": "cd2838428ce8b4b8bcab8ef6e2273bb36eb03508a271d60078e926509ef12480"
       },
       {
-        "path": "files/fluidd/assets/en-DPc-vhny.js",
-        "sha256": "76bbd16769289c2852f9a075d5db01fa4f1d70752e6439a9e30c55dbdb0de596"
+        "path": "files/fluidd/assets/en-Clp5RoJg.js",
+        "sha256": "845261f0f382fef7c09816ed30f59e2533b7721286dbd31c57ccae7805a31217"
       },
       {
         "path": "files/fluidd/assets/es-CqxCkQAW.js",
@@ -214,80 +214,80 @@
         "sha256": "2a4f9ac57b529f1a46543588a045e3afae5f825076356cca1114ff766f501f2f"
       },
       {
-        "path": "files/fluidd/assets/file-data-transfer-DJxdvQaG.js",
-        "sha256": "79a51912bc06f85a8ce104e4a9a5d1ff45cee24a2bdad58fad70c9cb9eef2083"
+        "path": "files/fluidd/assets/file-data-transfer-Cn4doo_o.js",
+        "sha256": "a0fc73dc173babdcb06e36cdac5e4e1aa4b397ef25c278ded0408f99a5dd70d9"
       },
       {
-        "path": "files/fluidd/assets/files-m6EQBGUo.js",
-        "sha256": "f6a134bf0f232675e93a57cead5a9f0cc084ec857512a8db7d51da747c838fb1"
+        "path": "files/fluidd/assets/files-DX3xOyvl.js",
+        "sha256": "bea72ef9d2feece35ba08c7b19fe9d61800b75fe288de6b381c70edb78e5ba8d"
       },
       {
-        "path": "files/fluidd/assets/FileSystem-B_trKwTi.css",
-        "sha256": "2e2439a843da4836ab6cf2823049902412f7fd291372d4a2304c4f0a28416eb5"
+        "path": "files/fluidd/assets/FileSystem-BDx5Zy-1.js",
+        "sha256": "9522d100948b13a6a13fcad9eaee05d609837bce4f61e5c1f43a6fc284f4b1c0"
       },
       {
-        "path": "files/fluidd/assets/FileSystem-BTtS7WFc.js",
-        "sha256": "3536c781abe49ba452fb0d3149990f92a49d156c41839294d925ad2c339be3a8"
+        "path": "files/fluidd/assets/FileSystem-MsPQlN7e.css",
+        "sha256": "83e837fa28a66fb5f1c79b2dec68fcc1ff59bd0db0d8a6025f6685115c5feeec"
       },
       {
         "path": "files/fluidd/assets/fr-CNLXHjU0.js",
         "sha256": "746f7a17b0a74f09c55ac0f25dc087a85d194cb68c3b7b4cb818837dc3ee32e2"
       },
       {
-        "path": "files/fluidd/assets/FullscreenCamera-CBFuXR8d.js",
-        "sha256": "49ed732b754980c9e3267dc7e2d5525ef751213d03d86e5cbafa74aa007e5e19"
+        "path": "files/fluidd/assets/FullscreenCamera-vJ7hT647.js",
+        "sha256": "70ceaca8c1818cb5bf3840034a3dba893e1010325bde2a1d062ef3938d0ebd5b"
       },
       {
-        "path": "files/fluidd/assets/GcodePreview-ZPSXRabe.js",
-        "sha256": "ad263cf5ef0a2403eb4485cf131e842aa601809453fc4cfa1c54506d2382a82e"
+        "path": "files/fluidd/assets/GcodePreview-B6m6o45v.js",
+        "sha256": "b10792dbca079297cdb93435cd7a498a5caf6577edd5e79fc2312b79514dce95"
       },
       {
-        "path": "files/fluidd/assets/GcodePreviewCard-BvZ1P1X7.css",
-        "sha256": "3c3bd56f42148a400a88851b7f2d60b2cd91e8e8339d7f41ca2a6af91d72e9c9"
+        "path": "files/fluidd/assets/GcodePreviewCard-YbICbvI1.css",
+        "sha256": "d285c060a30f27165fe292da37e69bf092b6fcbc0a2d85e54ff5e9e1e531338d"
       },
       {
-        "path": "files/fluidd/assets/GcodePreviewCard-Dm_G6Z5X.js",
-        "sha256": "ad8e933878d7648e1b019f9ef198e84e4e1b7dc86c5eb2a343ba41166963dcf1"
+        "path": "files/fluidd/assets/GcodePreviewCard-ZrYeCn2L.js",
+        "sha256": "b1ddba5fda8cfafe932b9cd17fceda227fab2d5a54ef218db90c0bdc5d747a18"
       },
       {
         "path": "files/fluidd/assets/get-DprfYscH.js",
         "sha256": "ea18b17689c2750b8ae0b9c8f1597265aa7c9de6aba34b4518ed372f4217910a"
       },
       {
+        "path": "files/fluidd/assets/History-D3F1jcMG.js",
+        "sha256": "b7d31a2af9eab70eae78ad204828915bcf53030aff493d6747479cc044660fcd"
+      },
+      {
         "path": "files/fluidd/assets/History-IqaLA2bn.css",
         "sha256": "58e4ef3a2f11e265c3403e07ba88ffe3bd88a962f24e79107543a05d1904ab00"
       },
       {
-        "path": "files/fluidd/assets/History-WA13spqe.js",
-        "sha256": "fef82c03ca2121364d962b4d3ac5c99686fd3ba6bf1fe396c3e592b7c0ec7bca"
-      },
-      {
-        "path": "files/fluidd/assets/HlsstreamCamera-CVXKb6Jl.js",
-        "sha256": "13e62d2eaf0b1b5d8f69cd504fbd222f0eeab6da494563929cc071f82a7f0268"
+        "path": "files/fluidd/assets/HlsstreamCamera-B4gaXEt6.js",
+        "sha256": "7c4ded1cdbbf16dc15862ad1055bff316e6882f7518607ffaa2e62a55e3ee09a"
       },
       {
         "path": "files/fluidd/assets/hu-BQMFte4p.js",
         "sha256": "77e3b773ae455dff0b4d745b54e3baaf8409bc973618a3f4d9c4616650800710"
       },
       {
-        "path": "files/fluidd/assets/Icons-DmS4BGhS.js",
-        "sha256": "e7ebb46974b40a863e5e5effe8f04dd5a0eeddcb12ad99e861cd96194ad4c3bd"
+        "path": "files/fluidd/assets/Icons-Bum3DfYN.js",
+        "sha256": "d4002a1fb54f3d2a67c5891a5987f0f54e25e2839d9e02dbeb0447bf8506743c"
       },
       {
-        "path": "files/fluidd/assets/IframeCamera-DYmK-HOt.js",
-        "sha256": "1801672c35c62fcd80dfe880955de37e70363afb5edd6acad05c5db4a906833b"
+        "path": "files/fluidd/assets/IframeCamera-C5EC6R75.js",
+        "sha256": "0d4d4960d7cc61393e665e61c9903d7d4c17647bb875d86aa29e450e232afbfe"
       },
       {
-        "path": "files/fluidd/assets/index-Bmc36AIW.js",
-        "sha256": "5b30660d1613f335c753e38b77b03fc3aa56c524ebd4cc590c0f22a047e9133a"
+        "path": "files/fluidd/assets/index-Bu1PCXqw.js",
+        "sha256": "8729b98850bd9c58609bd62fb745ea93f037a8583578159e17b4cd4248766c26"
       },
       {
-        "path": "files/fluidd/assets/index-Dtw9dMof.css",
-        "sha256": "b3c6854f78d699c046e58a1de901d11780b232626a0dd36a26e242893154d046"
+        "path": "files/fluidd/assets/index-CSq3eKP4.css",
+        "sha256": "cc17ef965964a6da45277f187b11a3218f91963690459fbe11cf54d1d79498db"
       },
       {
-        "path": "files/fluidd/assets/IpstreamCamera-BQWSINzQ.js",
-        "sha256": "c739e6f92533dc5c0ebdd50d2e8198b5f10602a6a1c7bbdf8f1aabfcaa56d516"
+        "path": "files/fluidd/assets/IpstreamCamera-DnCUzyof.js",
+        "sha256": "930d309208d7f246e949288b3023cd15cb01cbdec266099e0439cab4f05ce92a"
       },
       {
         "path": "files/fluidd/assets/is-key-of-eCsGvpyb.js",
@@ -306,92 +306,92 @@
         "sha256": "48f5449d8ad4f32127677428d53f442e343e0783ad2b33367a28e211108fe045"
       },
       {
-        "path": "files/fluidd/assets/JobHistoryItemStatus-DHTogHUO.js",
-        "sha256": "6abffc9ad93ff0d9f8d6d38e4ffb318e34b3f5f6c7237c48dd4faf22ab033f90"
+        "path": "files/fluidd/assets/JobHistoryItemStatus-ng9lUiHI.js",
+        "sha256": "2e70161458a9b7b453aa1dd66aeea886088e63024cde678b7a57d897224e519b"
       },
       {
-        "path": "files/fluidd/assets/JobQueueCard-BMZyzBSF.js",
-        "sha256": "aedde331fe990c7b2de5e4f2c37226ab270d81c490774792394ab8e1dd279cab"
+        "path": "files/fluidd/assets/JobQueueCard-BDdmGILc.js",
+        "sha256": "e5d4b38756a4d72a22fb6d74f793663f4626a3f9c2894a817fd7d2b610dbd9f1"
       },
       {
         "path": "files/fluidd/assets/JobQueueCard-wD83NPR2.css",
         "sha256": "d3a2e680a176ac1404c3d5b718f05a1252eddd27d28776bbd4d6086ab354441c"
       },
       {
-        "path": "files/fluidd/assets/Jobs-B3qigtOA.js",
-        "sha256": "fa7a2ce6229a1037bcb081335e69d35a1303135f8884bdee6ab5b1e080c7afea"
+        "path": "files/fluidd/assets/Jobs-2DfoHZAW.js",
+        "sha256": "6fab96cece024f8ba28898a2acc957ad9d00d2afcdde7fe346f6042ae1fbc6ff"
       },
       {
-        "path": "files/fluidd/assets/json.worker-Oa9UrkKE.js",
-        "sha256": "6a619a418d1f4d309ce13b9e700b522bfcdc56dc888df49318a5f83e8945571a"
+        "path": "files/fluidd/assets/json.worker-DxKNejQh.js",
+        "sha256": "eeeaacc3adafc1228da1875e2d7f985b7f0d0f96363606329fc4894abfcc2267"
       },
       {
-        "path": "files/fluidd/assets/jsonMode-C5YSZh6U.js",
-        "sha256": "2be0cce43f8e0e5304607fe2420f1d9d51f6377aeb92777fc2ab171d9a7c3849"
+        "path": "files/fluidd/assets/jsonMode-BJomU87q.js",
+        "sha256": "f0f967354115a3628a2c675c19ffa17b7476026014bea79c1639f115043f237b"
       },
       {
         "path": "files/fluidd/assets/ko-Djr-uWtG.js",
         "sha256": "16b8adadd28b2e00755a12a08d921f18b4dd0792eadbb0483a91628410e2a02b"
       },
       {
-        "path": "files/fluidd/assets/lib-BPv9EiKI.js",
-        "sha256": "abbc558c5c63ec6e906f91acf09c4cb6ecbf82b0bcb2dc5f7652d6f49db700b4"
-      },
-      {
         "path": "files/fluidd/assets/lib-Cm30cL1j.css",
         "sha256": "8ca08745ec1468f86640e3f768fbf71bf86392fc6847020a6739a1ff8229d77c"
       },
       {
-        "path": "files/fluidd/assets/lspLanguageFeatures-D_J5eBm-.js",
-        "sha256": "ef95dd2396d42ea08cd8b68d9f8ef58f7901d5cef52e8ecc3a99800f1e2dd823"
+        "path": "files/fluidd/assets/lib-DUiKwaNZ.js",
+        "sha256": "9ef7a039a8d1234e27ec9d0cb7cf4bc2b50bb2599402df580fddd0fac3f7ac45"
       },
       {
-        "path": "files/fluidd/assets/MacroCategorySettings-Dcqx2nqs.js",
-        "sha256": "25c344403fcfac6d342a22a99bfb0af530f05cb1180923fe9c196ca6b5528fce"
+        "path": "files/fluidd/assets/lspLanguageFeatures-DIE4fFtl.js",
+        "sha256": "e8ed81d1ae1a5a088a6ea12d5c8b827d8e1a89a809d130912845a5afd29960d0"
+      },
+      {
+        "path": "files/fluidd/assets/MacroCategorySettings-BPIbIwnO.js",
+        "sha256": "bd8184dbf4ab58a278cabea0e0f6dee63f8105de912ef613940b11289bafd34b"
       },
       {
         "path": "files/fluidd/assets/markdown-Cimd5fb3.js",
         "sha256": "621e51234c4fea96a2a3a6e0dd59151f1c0216d7cb4a963361ee29aa302c7977"
       },
       {
-        "path": "files/fluidd/assets/mjpegStream.worker-CkFbgHTR.js",
-        "sha256": "e0d9cdfd0f998ff4f0783f6443ac4bcf00d5d6164bf0b87a1929d1a619e117d3"
+        "path": "files/fluidd/assets/mjpegStream.worker-ChwoxWRk.js",
+        "sha256": "c3bc152cd54aa25cde6a0ac945e2ca20d5ed8e1a89b8c54d53b1841ac5585275"
       },
       {
-        "path": "files/fluidd/assets/MjpegstreamerAdaptiveCamera-EG3hE4Lv.js",
-        "sha256": "dea72ceb8f5b3afb73dcb76e2d8ec3b13d95ff7a896cee88b2222da0d85f9a2a"
+        "path": "files/fluidd/assets/MjpegstreamerAdaptiveCamera-IEIkHUhC.js",
+        "sha256": "a5c2a9b452c864922fd1806a9ca8837941ac6ab3841bb63c903afbed1e9f0a10"
       },
       {
-        "path": "files/fluidd/assets/MjpegstreamerCamera-DwDhWLeS.js",
-        "sha256": "67c83c17e505f84fa763dea9a66920f94d260811579a6a7a58e50de92e498b66"
+        "path": "files/fluidd/assets/MjpegstreamerCamera-1gy-91XF.js",
+        "sha256": "8637a113957d019a2457f6a71fc105a078037c66f3958487af1bba3999d2de70"
       },
       {
-        "path": "files/fluidd/assets/module-DQ2W7G90.js",
-        "sha256": "32ffae3a0fea3c092854f08dcc5b2691c39d2e005b0254cc6aae9fad33fabd2a"
+        "path": "files/fluidd/assets/module-DsZQAuDE.js",
+        "sha256": "e480fbc31fe379214e2935a0292390ca8d6e1d20f62dec6e4e685810854b47aa"
       },
       {
-        "path": "files/fluidd/assets/monacoCodeLensWorker-CeGXjSxG.js",
-        "sha256": "21c2e14390730ba0dbd242b98f9bee493fe1778aff7d805de4efb601ef2e4461"
+        "path": "files/fluidd/assets/monacoCodeLensWorker-CYKkRZ0m.js",
+        "sha256": "f4d732d81eb646038f6fb5db1c2f0da935795ad4e9dd81594be253f5638fda9f"
       },
       {
-        "path": "files/fluidd/assets/monacoDocumentSymbolsWorker-B1RvxTw6.js",
-        "sha256": "1e145518277a64246991331fc07a3cfab13307c377585a23912abc483110f5ea"
+        "path": "files/fluidd/assets/monacoDocumentSymbolsWorker-Cf8lfi1X.js",
+        "sha256": "43637b8480750cf38c4f8ec6406450700feceb4491988b93738a29b90c345441"
       },
       {
-        "path": "files/fluidd/assets/monacoFoldingRangesWorker-D4J5SrDs.js",
-        "sha256": "cefd7922c8ab2e1aa202ef34a8cff4ac73864c6d528161cf05c69d6077a4da10"
+        "path": "files/fluidd/assets/monacoFoldingRangesWorker-DZa2vRDG.js",
+        "sha256": "933a546ed3c3e4cb5057d50238a389b3f890dc5f184de9941314b0f1891c92e8"
       },
       {
         "path": "files/fluidd/assets/nl-6huzaAKa.js",
         "sha256": "9fb942a21a38c5f1ff0bc40f9308e0cf014e374307753a807858d2aa7e15f6ad"
       },
       {
-        "path": "files/fluidd/assets/NotFound-C79IZiYh.js",
-        "sha256": "1cfa59b02114797d3979bacc5c706c925c0ccf4f2efab7a68be0bdc2522c5f12"
+        "path": "files/fluidd/assets/NotFound-DC1Rnyfi.js",
+        "sha256": "3770ee1fbb2177828cdc17e1287fffb25e55e66279f9e27199fd6507a9440ae8"
       },
       {
-        "path": "files/fluidd/assets/parseGcode.worker-BtTjVWHs.js",
-        "sha256": "7c563e0059fd622c5858da12f99d8766f58b52b81d673e39a9e281bc81dda1ce"
+        "path": "files/fluidd/assets/parseGcode.worker-Dt63y5U1.js",
+        "sha256": "0055d63d474fb855001c4de8cab46317c43b384d3aaec28cf0978747159adb04"
       },
       {
         "path": "files/fluidd/assets/pl-Cf61CMqC.js",
@@ -710,60 +710,60 @@
         "sha256": "0c5b83d883ce2e45aed6e1634002d1a19291f375ddfdb21bb3cd2820e5b354f1"
       },
       {
-        "path": "files/fluidd/assets/rolldown-runtime-CNC7AqOf.js",
-        "sha256": "d4a36920c7bab6ec97d0bdc5d1233622f28fe010198ca32bcdd80c8cb6b64aae"
+        "path": "files/fluidd/assets/rolldown-runtime-B0Z9INg1.js",
+        "sha256": "5e9b0d884d2ebb14e241ab38b43e41efb61bce2e74d71507b0b95b264fba4047"
       },
       {
         "path": "files/fluidd/assets/ru-CX6SFs1w.js",
         "sha256": "e2edbb5696bcfade7b28225138950d8bb015f880935af8e841c3f9184e037d7f"
       },
       {
-        "path": "files/fluidd/assets/sandboxedEval.worker-CMwFLJDA.js",
-        "sha256": "7827b88b632a4e53c64d707f47f556f607aa1f511c6e1a91fc88725abec57523"
+        "path": "files/fluidd/assets/sandboxedEval.worker-B3KytC-j.js",
+        "sha256": "26ddaa77426a2cc18f29b6e59e9cc6be69e7e31744aef292b8ce33f8ba75b208"
       },
       {
-        "path": "files/fluidd/assets/services-DkE0LGL2.js",
-        "sha256": "1f51aee3616985ce55ed52285d8ccc542b492310adc51e0022c52f07df3749e0"
+        "path": "files/fluidd/assets/services-BiRK2vs_.js",
+        "sha256": "27d1c630f1bc3a6b34dbf0f3ffdc7674eb6bf0e78b635160ac819e017f4ecc18"
+      },
+      {
+        "path": "files/fluidd/assets/Settings-BJ3-8Ydr.js",
+        "sha256": "87714585a2a846320a4357d8054d9f832664926e55e3420cb1c282190bc56edd"
       },
       {
         "path": "files/fluidd/assets/Settings-Dzk6IFO-.css",
         "sha256": "4837570e6732a795ad2140e0058bb3ce98865c741ce026c03644e7bfafcde0de"
       },
       {
-        "path": "files/fluidd/assets/Settings-mEV_Qz1v.js",
-        "sha256": "084ff06c4d5869868046b57a1cec7a8d83e5756c5b549106d41304f36f95dc84"
-      },
-      {
-        "path": "files/fluidd/assets/setupMonaco-BsspMbCi.js",
-        "sha256": "3db8104af2d5ed913cad5973bbb21f444edb7ceb59cbb2b23ae49830fcf1cafa"
+        "path": "files/fluidd/assets/setupMonaco-DJnot0vu.js",
+        "sha256": "49fe601cb505200def62a056711970d9bd329a1956450c281cfd5615d717a6e5"
       },
       {
         "path": "files/fluidd/assets/sl-BKmRYTmo.js",
         "sha256": "247cb895e597b1ad3a7a70a0e04946dc9a302da07585f0faa71f1abf1225bb05"
       },
       {
-        "path": "files/fluidd/assets/sleep-CEQq2wgp.js",
-        "sha256": "3688489ef83130415cde1b1e65345a1f9bbcb8853d5fcf1c1b5034da790d4fa2"
+        "path": "files/fluidd/assets/sleep-E0hixPFA.js",
+        "sha256": "5bcbd00abbc43397b44808597bf72695ed15ccc7d5675f047096c402a1d6f849"
       },
       {
-        "path": "files/fluidd/assets/socketActions-D7Vpckss.js",
-        "sha256": "f5da401842d8c4299fd6256c6f17952d31d0e8464e20d4cd48a5344aee408abe"
+        "path": "files/fluidd/assets/socketActions-BjlocJGv.js",
+        "sha256": "4f84598087e87fb2014b4f677b8bfb5ba93356ce6584f7cb34c3ae9e546ed00d"
       },
       {
-        "path": "files/fluidd/assets/state-D5EbeaNv.js",
-        "sha256": "ba64141bfbc2fdbb01467e80da00d9144bf615308462bbf1477e101e36619273"
+        "path": "files/fluidd/assets/state-CbSAzLJT.js",
+        "sha256": "b5b361bb5ecea7f9f3e5310f3fbcdbdf94956ee92f878066b83a1d4d544edf99"
       },
       {
-        "path": "files/fluidd/assets/state-D95nW690.js",
-        "sha256": "c60e8ec08c8ed8784ca2d63396985fdfd8f18c21a598158bf9e81774e2c89786"
+        "path": "files/fluidd/assets/state-KvNEQDgW.js",
+        "sha256": "c9de49b315d1d874cd857e31ff916b8ecca6e6566c61720286a72d7cf360fb69"
       },
       {
         "path": "files/fluidd/assets/sv-C7gGT_f4.js",
         "sha256": "7ab3d1807726a1c56e8f825a4bfda24ece15b456f3102c6281021cef08af1886"
       },
       {
-        "path": "files/fluidd/assets/System-DYxqWSEH.js",
-        "sha256": "cbb81bfcf8a01ecf8d0cd6c861748cc2370f54d182296e50fc5ff82f5d9e1bd0"
+        "path": "files/fluidd/assets/System-ClCjHHbW.js",
+        "sha256": "727f24dd22dd54460fb6cf14480cb6fdd0f4419316610129faa6a2cb65d3a3b2"
       },
       {
         "path": "files/fluidd/assets/ta-C3zJZejv.js",
@@ -778,12 +778,12 @@
         "sha256": "872a101e6836e4168722ac6ec3173d26dbdc9f9d622f2698302ca5eda4f6c66d"
       },
       {
-        "path": "files/fluidd/assets/Timelapse-CFheisPX.js",
-        "sha256": "070f5ac8b82db5c84293e9c3fe04ee773af147b3e65060f72f425dd0174229da"
+        "path": "files/fluidd/assets/Timelapse-Crp_uDhv.js",
+        "sha256": "b48c143d69b13ce5c4826d1b66b5488bebf9856bd8baa19247d9086cf4b81867"
       },
       {
-        "path": "files/fluidd/assets/TimelapseRenderSettingsDialog-Di8rM4OH.js",
-        "sha256": "3189cf864bde10e842ce85077051fd14eda44771749b2b296f55293c21a32c84"
+        "path": "files/fluidd/assets/TimelapseRenderSettingsDialog-BJvdYtkl.js",
+        "sha256": "20e7cb9a7d9b6d96dba0792fd3b1e7a85684561d8d2c7efe9a687cfe33a580e8"
       },
       {
         "path": "files/fluidd/assets/toString-BN36OUXd.js",
@@ -794,8 +794,8 @@
         "sha256": "31c3ab6043fcf2ed865c10e968daf7a279ebdebb3434df9fc96fa77c2c94aa6e"
       },
       {
-        "path": "files/fluidd/assets/Tune-D08ana1m.js",
-        "sha256": "ac572ebe575a4ac71d0ddba75c72a096c77ebddb5e6301b812dbaf1ab23e65b5"
+        "path": "files/fluidd/assets/Tune-DSRfhayj.js",
+        "sha256": "5aa116f11652ba34850eae7196861635330c48649a7e3b69335215e66aa8cb76"
       },
       {
         "path": "files/fluidd/assets/Tune-YfFfOyfD.css",
@@ -806,8 +806,12 @@
         "sha256": "93af54f2d109e8f1eadd37f177c74ac365fa79e5cc6d711f4fa9eb960d9d0f61"
       },
       {
-        "path": "files/fluidd/assets/Uv4LMjpegCamera-DL2tgzVZ.js",
-        "sha256": "34acfdc71264fd78422ca9e9d6ab299756828c58762649e2eff7c788e28981ef"
+        "path": "files/fluidd/assets/upperFirst-GyLnuIJO.js",
+        "sha256": "8958b1eb4566f2158bbeded468dff8cd72a2b5d03940ec47523388b886b353d0"
+      },
+      {
+        "path": "files/fluidd/assets/Uv4LMjpegCamera-BND_38bN.js",
+        "sha256": "bad4d7109c00114652a3b5e402648cca068d20d7547523af9341255b45280440"
       },
       {
         "path": "files/fluidd/assets/v4-DDdyfk2q.js",
@@ -818,32 +822,32 @@
         "sha256": "f5e8e659f3465ab61e61852dac5450f8a36fb97a849dd529f5f0fc0434090ed1"
       },
       {
-        "path": "files/fluidd/assets/VModel-EJJ5Ow2-.js",
-        "sha256": "aa1743f3249c8e952a325b0eeb65cdbdefacd590dccaa7c2d826c52383752ff9"
+        "path": "files/fluidd/assets/VModel-Co6vAtf_.js",
+        "sha256": "fb444278d6e262c267f9b891a82acfff71876a4a2cb30e32e8dc45d92270b9f0"
       },
       {
-        "path": "files/fluidd/assets/vue-echarts-chunk-BZd0vyDY.js",
-        "sha256": "e3579ae84f41057b3d1fc1ba9b63ba4c3268d9c2355330189aed8488af107712"
+        "path": "files/fluidd/assets/vue-echarts-chunk-DXc7mXac.js",
+        "sha256": "0e066a0b9d2ea0f6c546a0f4795380760b60cbad0e085f078578b59aeb492210"
       },
       {
-        "path": "files/fluidd/assets/vue.runtime.esm-uXCn7sOw.js",
-        "sha256": "fd9a21865e58f225892f5ac8d6ed260e40e46382414f2d12f51710ec13b610ed"
+        "path": "files/fluidd/assets/vue.runtime.esm-BuK-KA7b.js",
+        "sha256": "43ac149604373e67584c137ec051ce4ff23bbb7f0fa62f00990fec5aa90ff187"
       },
       {
-        "path": "files/fluidd/assets/Watch-BsFMHUzZ.js",
-        "sha256": "cc05b0c06db2d2f602932315b2b95502bc854da55742dbc23c358ba8501bfd95"
+        "path": "files/fluidd/assets/Watch-CG2UWV2X.js",
+        "sha256": "2125873b4033a47a3b299e96105bbb301d4b41c4f23bc0b3c4283cd6e17fc3d9"
       },
       {
-        "path": "files/fluidd/assets/WebrtcCamerastreamerCamera-D4g-tIt7.js",
-        "sha256": "cd1a5e13dc89b72a9b6a198b4f0bccbae4a513149183dc5eaae054e7b2ff2ceb"
+        "path": "files/fluidd/assets/WebrtcCamerastreamerCamera-XxClFh6T.js",
+        "sha256": "3db472388a174c381ad4b3d74bee5a0dd5c597e4558c203fb37fe97fcc25d74d"
       },
       {
-        "path": "files/fluidd/assets/WebrtcGo2RtcCamera-_JDK7Wwy.js",
-        "sha256": "32c502e38b4165ced2387f3027ef9cd98d3cdc9f324d2c2955cc85ce2a493a3e"
+        "path": "files/fluidd/assets/WebrtcGo2RtcCamera-Cl2gf8vV.js",
+        "sha256": "9370b778d528eedff2012b2a772b29e37ac9d8f2b9f5b086a7ae21c283abfa9a"
       },
       {
-        "path": "files/fluidd/assets/WebrtcMediamtxCamera-wTTng3ln.js",
-        "sha256": "06c8b23345c10d408b16cea481d7eabec166c69dfadc315b661ac486eeb9f04a"
+        "path": "files/fluidd/assets/WebrtcMediamtxCamera-CSFnbKBP.js",
+        "sha256": "ba2761134033832c1f51256850c5b01b8b9dc0f52668af5fb4100e40d82590e7"
       },
       {
         "path": "files/fluidd/assets/workbox-window.prod.es5-Bd17z0YL.js",
@@ -858,6 +862,14 @@
         "sha256": "42aad9277bf622edc30a0e5eec3a6b69be94d505f1e7b3b43a87fd64478ab683"
       },
       {
+        "path": "files/fluidd/b3d-afc-lane-toolbar.js",
+        "sha256": "3ba37e697bd6efd7ecabe8eeff052aedaa4122dd310726387887f2de6679e18e"
+      },
+      {
+        "path": "files/fluidd/b3d-afc-spoolman-header.js",
+        "sha256": "554d4a4559a2524f1fa7ce4327aad2df5869aeba63411758fcff41f689a324d9"
+      },
+      {
         "path": "files/fluidd/b3d-afc-toolmap.js",
         "sha256": "93e736bbe897a34b897b12ba3c4d5ac478742e6bb800a705f0c0dbb639196899"
       },
@@ -867,7 +879,7 @@
       },
       {
         "path": "files/fluidd/config.json",
-        "sha256": "999bd5921ff608fd6ecc38ad4e233462135cc62df992aca3c145c3fde8d7719b"
+        "sha256": "7078a2aa730a2d55e76fc1dc3648d01f90c6519657cdd172229da755103f1587"
       },
       {
         "path": "files/fluidd/favicon.ico",
@@ -995,11 +1007,15 @@
       },
       {
         "path": "files/fluidd/index.html",
-        "sha256": "6b0591bb5db90eaac943337371047724b32b1f9b8b67be8ce68a0bc9b8097f15"
+        "sha256": "27684d5349813e5358ceaa5a21f06013a90ec10bd05a283677d41ec07772a897"
       },
       {
         "path": "files/fluidd/logo_annex.svg",
         "sha256": "edc582678200e21f3fb5bb9bde9ed26aa73d1947efe64b1c7a50255c4109ac66"
+      },
+      {
+        "path": "files/fluidd/logo_automated_layers.svg",
+        "sha256": "bc87e59e237e87cdeae1665ea7426a1f917301ab3d4c6e375131ceb6aeafec8e"
       },
       {
         "path": "files/fluidd/logo_btt.svg",
@@ -1074,6 +1090,10 @@
         "sha256": "a55f09cb2860eac88a0c24b9f7e00da8a7177fa9fface4cb1e412eccd3f3f983"
       },
       {
+        "path": "files/fluidd/logo_snapmaker.svg",
+        "sha256": "c427193d943fe9ccd58d321b7d051fdb02e858eec63cb6609fc00ad19db0f1bb"
+      },
+      {
         "path": "files/fluidd/logo_voron.svg",
         "sha256": "3614a61e111952642b0c9903404420ccd38bed92b08ae9db9cb97f77665d3590"
       },
@@ -1095,7 +1115,7 @@
       },
       {
         "path": "files/fluidd/release_info.json",
-        "sha256": "ec696265df8659cc5307ce6a21c97dd8f117d2a1a72dd0228db36984f1dfce7c"
+        "sha256": "d137f69da9cea160fefb55bcdbef703409c432e772364c906f5c8f8532c9b338"
       },
       {
         "path": "files/fluidd/robots.txt",
@@ -1103,14 +1123,14 @@
       },
       {
         "path": "files/fluidd/sw.js",
-        "sha256": "c25fd52047d253b0185f05c7033f727480e52777cd3bb16c0c7bfe25c3c50d8f"
+        "sha256": "62373ff2b5e3eaa87497e639cd5f128b8adce6afd6892e3db97ab061d3712906"
       }
     ],
     "manifest": {
       "name": "fluidd",
       "title": "Fluidd",
-      "version": "0.1.5",
-      "sw_version": "1.37.3",
+      "version": "0.1.6",
+      "sw_version": "1.37.4",
       "author": "bespoked",
       "description": "Swaps SM's outdated Fluidd for the current upstream release. You get input-shaper graphs, integrated config/G-code editors, tool-colour preview, modern mesh viz. Uninstall restores the SM-shipped copy automatically; no nginx config touched.",
       "tagline": "Modern Fluidd v1.37.3: replaces the stock SM build.",
@@ -1208,7 +1228,7 @@
         },
         {
           "path": "files/fluidd/.version",
-          "sha256": "a04f6d187f93d0a6eb10863b4ba98767f2e6fe503a7ed7cd21d3c960d0888ccc",
+          "sha256": "0e0eea51ddf2a7e7d767d0126d8eb664927c0244a024584e253e2079b5eb7fec",
           "mode": "644"
         },
         {
@@ -1217,13 +1237,13 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/_baseMerge-Cl1mD_Z3.js",
-          "sha256": "cee72ec9ac39cd7cfd9bb9a5ef85561d4ce7923d698dcfe2052f73141cbbf1b6",
+          "path": "files/fluidd/assets/_baseMerge-B0Izx0Mm.js",
+          "sha256": "f0009e92fac32465c919f3781ed5c26f03c34861c96420b1fd7189c284cbb3ce",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/_createCompounder-BuI_-PJV.js",
-          "sha256": "85275f4a52bb0dddc2707b07ed32c514249109b155d2467fbbc2bf4b0acbe32c",
+          "path": "files/fluidd/assets/_createCompounder-CZQWqG53.js",
+          "sha256": "085131602e1095948bd5939c53f2f449dccea1c8acc9c61fec4f4bfac4033257",
           "mode": "644"
         },
         {
@@ -1232,8 +1252,8 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/_plugin-vue2_normalizer-BwvlkTga.js",
-          "sha256": "40fc2f1e45240de654c5b816ab87cd1181ce5eb8fbe8b2128c40ae740c00063e",
+          "path": "files/fluidd/assets/_plugin-vue2_normalizer-D5mCHcOy.js",
+          "sha256": "604519d42188648195104ffabce11dc7077db17482523f0eed0f3d84d095d891",
           "mode": "644"
         },
         {
@@ -1242,18 +1262,18 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/AfcPrintStartDialogTool-CZT4oN3n.js",
-          "sha256": "b48744d6f8d35b2f3fd008abceef9efe4fc9c3cceb8a21c86aed8f6026106967",
+          "path": "files/fluidd/assets/AfcPrintStartDialogTool-UbJ399qX.js",
+          "sha256": "2ee4d78528be6b105e010198467a7b2e36f297f2679fd9e498e753df64006d0f",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/AppBtn-CrmEnE1u.js",
-          "sha256": "fbea72ebdb3cb26f30f5d35ca4573a3e8ef18438b7e070500549998765c95612",
+          "path": "files/fluidd/assets/AppBtn-Bby50IMh.js",
+          "sha256": "5958d68cec262fe8a94ac1746aa253fa9ec859921548fe9353f70999e7247398",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/AppBtnCollapseGroup-D8f14tsT.js",
-          "sha256": "11bb7abacd7e84db68fea687c93b714f02595c80f857a8d7fedd9a72a1ada124",
+          "path": "files/fluidd/assets/AppBtnCollapseGroup-BBYO9-ca.js",
+          "sha256": "c62b07bd7396d697409a41debd3be935e836d9892980a9a8a461c03a084e4e1b",
           "mode": "644"
         },
         {
@@ -1262,23 +1282,23 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/AppChart-DWG65OLt.js",
-          "sha256": "f78b1cf6039761443e9db3a126a90c97ff07813e4f62a5bb8fe24384a6f946a7",
+          "path": "files/fluidd/assets/AppChart-C3urgSWC.js",
+          "sha256": "76776b66041ef51ea2906521eedde7549abdb585d7592a03ff5690bd0c344cc9",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/AppColorPicker-Ce6V2ct0.css",
-          "sha256": "633afcc03e93dd4551c5fb78b793bec1d06e964f12f1cad4aa9af92921080f2e",
+          "path": "files/fluidd/assets/AppColorPicker-BkBvheR1.js",
+          "sha256": "aad4859a9f09c5b2c86216076f80515b75a42cf4a75cca57746e30d74b7ce93f",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/AppColorPicker-Dnf0G-eH.js",
-          "sha256": "da847c9c972f5e6c33c8b3c68216ec9458d46f681a5081859c2070c3f8a39a1e",
+          "path": "files/fluidd/assets/AppColorPicker-DY59qRAE.css",
+          "sha256": "41b194f5b6c2789b68f797e033ea3e61ecf9bc13cba48184935948086017fc84",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/AppDragIcon-D9uUFP8Y.js",
-          "sha256": "463e5dc4cd27d5abfcedbcbe84c2cb8f3ad5aeaf260e95dd7539cb59fb186871",
+          "path": "files/fluidd/assets/AppDragIcon-BfNc_Aku.js",
+          "sha256": "6b923552c74be0052863d3a5cb6c52e0f062b12063ccaf12d1c15671d7bd13e8",
           "mode": "644"
         },
         {
@@ -1292,23 +1312,23 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/AppInlineChart-tU2ZraJ1.js",
-          "sha256": "c370b9da860b3cec75f356a7d94e731b97cd70b37a1b0fbf973c4c0ab12060de",
+          "path": "files/fluidd/assets/AppInlineChart-JztaUEzb.js",
+          "sha256": "770f4ea4c846019705e74ee0ed5a45670774750730869609e19b717852503019",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/AppNamedSlider-wRcBqpIw.js",
-          "sha256": "86400ae2e9f8fdb41966886e3efa5560c0419d54fe640108bcadf69e2ad01b84",
+          "path": "files/fluidd/assets/AppNamedSlider-TakaeQZM.js",
+          "sha256": "ed02b31daba13b89ed431637d98a307a8157a87f4ed95d4b86d8e4e26d4b7935",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/AppSettingsNav-BbBJCrdi.js",
-          "sha256": "9a0e292917a6365fdd967b28d04b3a3e2eeb90617ce6a273a87378f5970a0baf",
+          "path": "files/fluidd/assets/AppSettingsNav-jkdTATYO.js",
+          "sha256": "c0db92f457bbf25d68ebeb8a2edd22aea82afbd6dd2c7b9ae6802e0f408cccf8",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/AppTextField-DCwJYWKN.js",
-          "sha256": "e361abec36d26c67cb742cf6b6224c96bca9c4a1a101ffa82a182b43bb83bd2b",
+          "path": "files/fluidd/assets/AppTextField-D-YLzpf_.js",
+          "sha256": "8ce27f0cfb6f65a92d6efecb397eb6a1c3976c088643d2028c78e984722eef49",
           "mode": "644"
         },
         {
@@ -1322,33 +1342,28 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/BeaconCard-DZFsnDpA.js",
-          "sha256": "af9ce321d6cb4c8668ae3516a85c066672a369fa347f69a9d1de8b9af7211ea7",
+          "path": "files/fluidd/assets/BeaconCard-CJZ8GpBN.js",
+          "sha256": "4e47a4c732d6d81f010e8b382862ac30f627be1f573c95d92ae6d76de364005e",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/browser-1D2tZwAR.js",
-          "sha256": "72fb52d29a0d44140f1dd30a16774dbb9a1b2e9f47a5923e94fd2aa054eb8559",
+          "path": "files/fluidd/assets/browser-BCj0LS7L.js",
+          "sha256": "8b9a2dc8145c70d2af365f6fba4c03661ea0ba8eba698643f95a9b6624f4f4da",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/browser-B-0GUgJn.js",
-          "sha256": "9505be50eac6525b4ee3d53316ab43cf4c2c845e31bcdc1dbda8dfc63274401e",
+          "path": "files/fluidd/assets/browser-CghQue7T.js",
+          "sha256": "0c55e5e5dc52c22191a41ef9caec6a0ea3c44cc943a00e9313b1627007d18912",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/camera-C1rIv-Ce.js",
-          "sha256": "7f03543eee8b645af51a86f72a1c101dfd44906658522666266ef1e03ed3c7c8",
+          "path": "files/fluidd/assets/camera-D03VWK6P.js",
+          "sha256": "2ea87dce01c1bf33a634bbf7cd9dedabc0c034c5130c858bd4c8229a92f43637",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/codicon-ngg6Pgfi.ttf",
-          "sha256": "9d25513c861704be650eacef8c4588aceabdc8b668857747b5e42b299e926918",
-          "mode": "644"
-        },
-        {
-          "path": "files/fluidd/assets/Configure-C4NMMziF.js",
-          "sha256": "dedb34aac63dff42c16c287d46e8c45b5f8981329809691a5b130a094a8fb089",
+          "path": "files/fluidd/assets/codicon-Brq4_Ui5.ttf",
+          "sha256": "cc2472e239e17062e7760af87f8f5997720cc0d94aa014a615c418baaf6333a8",
           "mode": "644"
         },
         {
@@ -1357,13 +1372,18 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/Console-BxEnb97p.js",
-          "sha256": "65588fd5ef452b7c6e1e115d697f42912388860839c50e4434db6d52e5b9af75",
+          "path": "files/fluidd/assets/Configure-XPM2ov8i.js",
+          "sha256": "d49a12d9f5d0c5c3038382dfee4fad76aab7c999c6f4b9cbd5fe23c7678ec810",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/ConsoleCard-CN6vy4vu.js",
-          "sha256": "7d91c31f70735451489483490c3a5585f37e178c34ec0fc3fd0da8ea9c1d531b",
+          "path": "files/fluidd/assets/Console-DDOnU9kT.js",
+          "sha256": "eb29bc427d2112a2c8131cdaa08490a49fc2a887347b333231302afe69752333",
+          "mode": "644"
+        },
+        {
+          "path": "files/fluidd/assets/ConsoleCard-Bc7X3QAq.js",
+          "sha256": "7d3ebaac79a82f2a7ab68aaf256829892ef8d45958232967a9f797d1b2849770",
           "mode": "644"
         },
         {
@@ -1382,33 +1402,33 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/css.worker-yKcq13f2.js",
-          "sha256": "cd07798587ab4b6ba280a3d6ca2f13af27d51eab70a200a8656361ebf170853f",
+          "path": "files/fluidd/assets/css.worker-DOIiYeXg.js",
+          "sha256": "0dc18bc1f9e2001eb327e2938f4671f77af3ca60b39934989f6fe6ddd2262012",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/cssMode-DyBLRVXG.js",
-          "sha256": "3f23bf1e5a46ee7d4ce60146f65460a1435e380826488cd56c0977771f3683ad",
+          "path": "files/fluidd/assets/cssMode-Bk3bDAfW.js",
+          "sha256": "1009c25ce1581a40475d3fab84d7169b65e591997247a63404d089159e1a1e04",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/Dashboard-BCHPrNmB.css",
-          "sha256": "9ba3d34b77b4d655a5db584f3bafdf83a52f52234097e71e587b71625490f68c",
+          "path": "files/fluidd/assets/Dashboard-CpvUJ4FO.js",
+          "sha256": "830f12c7970f8868f271475c9d91e2a7e6ca962a13890227a3fdb695d090abcb",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/Dashboard-DNbt7e59.js",
-          "sha256": "918c239cc0c1c6a21aa358eb95eb2be13daa593b6e257a0dd9579759ee39037c",
+          "path": "files/fluidd/assets/Dashboard-kHrFlKRI.css",
+          "sha256": "99454d35d6d75056a8ed3dca789d865bd74dacf39aed08fb2cf03a61eca640c5",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/de-FpedikYx.js",
-          "sha256": "1e4a7e6930b8935e8f31c1f43b5fd3b8434e7b162dd4a8404766214eb086349d",
+          "path": "files/fluidd/assets/de-lDtOyod2.js",
+          "sha256": "3d8d59f469ffb056d5a1a926e681fa1d01aa42a6dbc43d75b6cd3d0f149bc4cd",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/DeviceCamera-CEgRSNHn.js",
-          "sha256": "daed4b35b5124c99983cf1f156d8a0b27d37b6bb3d3b1fd8fa1b34e34d1cd601",
+          "path": "files/fluidd/assets/DeviceCamera-C5P4MRbA.js",
+          "sha256": "e73e4904c657da988a6663a4b4eb7c2b3b05cf8344f27e84cdd3bc761646f600",
           "mode": "644"
         },
         {
@@ -1417,43 +1437,43 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/Diagnostics-Bjs4vM0F.js",
-          "sha256": "ffb3ee8fa0af648c531a995eb0201b2fe4d99da9a7d7f18c7d2fc05e366402a2",
+          "path": "files/fluidd/assets/Diagnostics-Dpymfn_M.js",
+          "sha256": "a89a628fbf792d75df954764f7731ef70649ad06ec9c97eee472f76279aa1c12",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/DiskUsageCard-2IC2soK7.js",
-          "sha256": "df7d20e69edd222a98cad4f866b8d86e9449dc0f6769b5e4d2d36322060a3f3c",
+          "path": "files/fluidd/assets/DiskUsageCard-DlSljMF0.js",
+          "sha256": "59283e5ead00631afffa5fe09d81a2d8cb6347637eb312dd856bae3f5807cba0",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/download-url-BCj14lMx.js",
-          "sha256": "02507f139cccfee225878ca9eb71dee9f29b1ad792f5ba22738b831a302eda1c",
+          "path": "files/fluidd/assets/download-url-BlFA96P0.js",
+          "sha256": "1f49720c25b9cae73cfd72cf591a981bcf4a6e2df724e213a2edde8c4b227cd8",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/dynamicImports-Bq7bSVRn.js",
-          "sha256": "34a0b6fbc91897494304bdf99d229821a847635f5cfec9f9e2af9adf5b298b3a",
+          "path": "files/fluidd/assets/dynamicImports-CVZGzoxj.js",
+          "sha256": "5b78349e1bb8292dd9fb07eaf92013a8be2f6747c8abfd51d0fa41fe9044700e",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/editor-CGi5ri4_.css",
-          "sha256": "2456a9ac9ce527b6ad17ad96cf686b852badb23b321d39e67ec09d1c562f92bb",
+          "path": "files/fluidd/assets/editor-BX3w1-Mx.css",
+          "sha256": "a439d15f4c48ab3510975ad69ee842730571205affe33a069e77efe8095ad933",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/editor.api2-BmVe3eMZ.js",
-          "sha256": "e8775b65ed061550ed94fa7ec21e53ac123938246b225af71d87cbb313f5247a",
+          "path": "files/fluidd/assets/editor.api-BwXaXPrM.js",
+          "sha256": "49d61f4f2b0171d0970217d266707fcd979d3de11a8a894eaa8193365327d3a9",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/editor.worker-tytyn86m.js",
-          "sha256": "631a8189a4026c0b53a286e16d873e8540a287ae5c774bb422a4161e87da6e59",
+          "path": "files/fluidd/assets/editor.worker-BgeVITW_.js",
+          "sha256": "cd2838428ce8b4b8bcab8ef6e2273bb36eb03508a271d60078e926509ef12480",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/en-DPc-vhny.js",
-          "sha256": "76bbd16769289c2852f9a075d5db01fa4f1d70752e6439a9e30c55dbdb0de596",
+          "path": "files/fluidd/assets/en-Clp5RoJg.js",
+          "sha256": "845261f0f382fef7c09816ed30f59e2533b7721286dbd31c57ccae7805a31217",
           "mode": "644"
         },
         {
@@ -1467,23 +1487,23 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/file-data-transfer-DJxdvQaG.js",
-          "sha256": "79a51912bc06f85a8ce104e4a9a5d1ff45cee24a2bdad58fad70c9cb9eef2083",
+          "path": "files/fluidd/assets/file-data-transfer-Cn4doo_o.js",
+          "sha256": "a0fc73dc173babdcb06e36cdac5e4e1aa4b397ef25c278ded0408f99a5dd70d9",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/files-m6EQBGUo.js",
-          "sha256": "f6a134bf0f232675e93a57cead5a9f0cc084ec857512a8db7d51da747c838fb1",
+          "path": "files/fluidd/assets/files-DX3xOyvl.js",
+          "sha256": "bea72ef9d2feece35ba08c7b19fe9d61800b75fe288de6b381c70edb78e5ba8d",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/FileSystem-B_trKwTi.css",
-          "sha256": "2e2439a843da4836ab6cf2823049902412f7fd291372d4a2304c4f0a28416eb5",
+          "path": "files/fluidd/assets/FileSystem-BDx5Zy-1.js",
+          "sha256": "9522d100948b13a6a13fcad9eaee05d609837bce4f61e5c1f43a6fc284f4b1c0",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/FileSystem-BTtS7WFc.js",
-          "sha256": "3536c781abe49ba452fb0d3149990f92a49d156c41839294d925ad2c339be3a8",
+          "path": "files/fluidd/assets/FileSystem-MsPQlN7e.css",
+          "sha256": "83e837fa28a66fb5f1c79b2dec68fcc1ff59bd0db0d8a6025f6685115c5feeec",
           "mode": "644"
         },
         {
@@ -1492,23 +1512,23 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/FullscreenCamera-CBFuXR8d.js",
-          "sha256": "49ed732b754980c9e3267dc7e2d5525ef751213d03d86e5cbafa74aa007e5e19",
+          "path": "files/fluidd/assets/FullscreenCamera-vJ7hT647.js",
+          "sha256": "70ceaca8c1818cb5bf3840034a3dba893e1010325bde2a1d062ef3938d0ebd5b",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/GcodePreview-ZPSXRabe.js",
-          "sha256": "ad263cf5ef0a2403eb4485cf131e842aa601809453fc4cfa1c54506d2382a82e",
+          "path": "files/fluidd/assets/GcodePreview-B6m6o45v.js",
+          "sha256": "b10792dbca079297cdb93435cd7a498a5caf6577edd5e79fc2312b79514dce95",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/GcodePreviewCard-BvZ1P1X7.css",
-          "sha256": "3c3bd56f42148a400a88851b7f2d60b2cd91e8e8339d7f41ca2a6af91d72e9c9",
+          "path": "files/fluidd/assets/GcodePreviewCard-YbICbvI1.css",
+          "sha256": "d285c060a30f27165fe292da37e69bf092b6fcbc0a2d85e54ff5e9e1e531338d",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/GcodePreviewCard-Dm_G6Z5X.js",
-          "sha256": "ad8e933878d7648e1b019f9ef198e84e4e1b7dc86c5eb2a343ba41166963dcf1",
+          "path": "files/fluidd/assets/GcodePreviewCard-ZrYeCn2L.js",
+          "sha256": "b1ddba5fda8cfafe932b9cd17fceda227fab2d5a54ef218db90c0bdc5d747a18",
           "mode": "644"
         },
         {
@@ -1517,18 +1537,18 @@
           "mode": "644"
         },
         {
+          "path": "files/fluidd/assets/History-D3F1jcMG.js",
+          "sha256": "b7d31a2af9eab70eae78ad204828915bcf53030aff493d6747479cc044660fcd",
+          "mode": "644"
+        },
+        {
           "path": "files/fluidd/assets/History-IqaLA2bn.css",
           "sha256": "58e4ef3a2f11e265c3403e07ba88ffe3bd88a962f24e79107543a05d1904ab00",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/History-WA13spqe.js",
-          "sha256": "fef82c03ca2121364d962b4d3ac5c99686fd3ba6bf1fe396c3e592b7c0ec7bca",
-          "mode": "644"
-        },
-        {
-          "path": "files/fluidd/assets/HlsstreamCamera-CVXKb6Jl.js",
-          "sha256": "13e62d2eaf0b1b5d8f69cd504fbd222f0eeab6da494563929cc071f82a7f0268",
+          "path": "files/fluidd/assets/HlsstreamCamera-B4gaXEt6.js",
+          "sha256": "7c4ded1cdbbf16dc15862ad1055bff316e6882f7518607ffaa2e62a55e3ee09a",
           "mode": "644"
         },
         {
@@ -1537,28 +1557,28 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/Icons-DmS4BGhS.js",
-          "sha256": "e7ebb46974b40a863e5e5effe8f04dd5a0eeddcb12ad99e861cd96194ad4c3bd",
+          "path": "files/fluidd/assets/Icons-Bum3DfYN.js",
+          "sha256": "d4002a1fb54f3d2a67c5891a5987f0f54e25e2839d9e02dbeb0447bf8506743c",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/IframeCamera-DYmK-HOt.js",
-          "sha256": "1801672c35c62fcd80dfe880955de37e70363afb5edd6acad05c5db4a906833b",
+          "path": "files/fluidd/assets/IframeCamera-C5EC6R75.js",
+          "sha256": "0d4d4960d7cc61393e665e61c9903d7d4c17647bb875d86aa29e450e232afbfe",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/index-Bmc36AIW.js",
-          "sha256": "5b30660d1613f335c753e38b77b03fc3aa56c524ebd4cc590c0f22a047e9133a",
+          "path": "files/fluidd/assets/index-Bu1PCXqw.js",
+          "sha256": "8729b98850bd9c58609bd62fb745ea93f037a8583578159e17b4cd4248766c26",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/index-Dtw9dMof.css",
-          "sha256": "b3c6854f78d699c046e58a1de901d11780b232626a0dd36a26e242893154d046",
+          "path": "files/fluidd/assets/index-CSq3eKP4.css",
+          "sha256": "cc17ef965964a6da45277f187b11a3218f91963690459fbe11cf54d1d79498db",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/IpstreamCamera-BQWSINzQ.js",
-          "sha256": "c739e6f92533dc5c0ebdd50d2e8198b5f10602a6a1c7bbdf8f1aabfcaa56d516",
+          "path": "files/fluidd/assets/IpstreamCamera-DnCUzyof.js",
+          "sha256": "930d309208d7f246e949288b3023cd15cb01cbdec266099e0439cab4f05ce92a",
           "mode": "644"
         },
         {
@@ -1582,13 +1602,13 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/JobHistoryItemStatus-DHTogHUO.js",
-          "sha256": "6abffc9ad93ff0d9f8d6d38e4ffb318e34b3f5f6c7237c48dd4faf22ab033f90",
+          "path": "files/fluidd/assets/JobHistoryItemStatus-ng9lUiHI.js",
+          "sha256": "2e70161458a9b7b453aa1dd66aeea886088e63024cde678b7a57d897224e519b",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/JobQueueCard-BMZyzBSF.js",
-          "sha256": "aedde331fe990c7b2de5e4f2c37226ab270d81c490774792394ab8e1dd279cab",
+          "path": "files/fluidd/assets/JobQueueCard-BDdmGILc.js",
+          "sha256": "e5d4b38756a4d72a22fb6d74f793663f4626a3f9c2894a817fd7d2b610dbd9f1",
           "mode": "644"
         },
         {
@@ -1597,18 +1617,18 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/Jobs-B3qigtOA.js",
-          "sha256": "fa7a2ce6229a1037bcb081335e69d35a1303135f8884bdee6ab5b1e080c7afea",
+          "path": "files/fluidd/assets/Jobs-2DfoHZAW.js",
+          "sha256": "6fab96cece024f8ba28898a2acc957ad9d00d2afcdde7fe346f6042ae1fbc6ff",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/json.worker-Oa9UrkKE.js",
-          "sha256": "6a619a418d1f4d309ce13b9e700b522bfcdc56dc888df49318a5f83e8945571a",
+          "path": "files/fluidd/assets/json.worker-DxKNejQh.js",
+          "sha256": "eeeaacc3adafc1228da1875e2d7f985b7f0d0f96363606329fc4894abfcc2267",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/jsonMode-C5YSZh6U.js",
-          "sha256": "2be0cce43f8e0e5304607fe2420f1d9d51f6377aeb92777fc2ab171d9a7c3849",
+          "path": "files/fluidd/assets/jsonMode-BJomU87q.js",
+          "sha256": "f0f967354115a3628a2c675c19ffa17b7476026014bea79c1639f115043f237b",
           "mode": "644"
         },
         {
@@ -1617,23 +1637,23 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/lib-BPv9EiKI.js",
-          "sha256": "abbc558c5c63ec6e906f91acf09c4cb6ecbf82b0bcb2dc5f7652d6f49db700b4",
-          "mode": "644"
-        },
-        {
           "path": "files/fluidd/assets/lib-Cm30cL1j.css",
           "sha256": "8ca08745ec1468f86640e3f768fbf71bf86392fc6847020a6739a1ff8229d77c",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/lspLanguageFeatures-D_J5eBm-.js",
-          "sha256": "ef95dd2396d42ea08cd8b68d9f8ef58f7901d5cef52e8ecc3a99800f1e2dd823",
+          "path": "files/fluidd/assets/lib-DUiKwaNZ.js",
+          "sha256": "9ef7a039a8d1234e27ec9d0cb7cf4bc2b50bb2599402df580fddd0fac3f7ac45",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/MacroCategorySettings-Dcqx2nqs.js",
-          "sha256": "25c344403fcfac6d342a22a99bfb0af530f05cb1180923fe9c196ca6b5528fce",
+          "path": "files/fluidd/assets/lspLanguageFeatures-DIE4fFtl.js",
+          "sha256": "e8ed81d1ae1a5a088a6ea12d5c8b827d8e1a89a809d130912845a5afd29960d0",
+          "mode": "644"
+        },
+        {
+          "path": "files/fluidd/assets/MacroCategorySettings-BPIbIwnO.js",
+          "sha256": "bd8184dbf4ab58a278cabea0e0f6dee63f8105de912ef613940b11289bafd34b",
           "mode": "644"
         },
         {
@@ -1642,38 +1662,38 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/mjpegStream.worker-CkFbgHTR.js",
-          "sha256": "e0d9cdfd0f998ff4f0783f6443ac4bcf00d5d6164bf0b87a1929d1a619e117d3",
+          "path": "files/fluidd/assets/mjpegStream.worker-ChwoxWRk.js",
+          "sha256": "c3bc152cd54aa25cde6a0ac945e2ca20d5ed8e1a89b8c54d53b1841ac5585275",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/MjpegstreamerAdaptiveCamera-EG3hE4Lv.js",
-          "sha256": "dea72ceb8f5b3afb73dcb76e2d8ec3b13d95ff7a896cee88b2222da0d85f9a2a",
+          "path": "files/fluidd/assets/MjpegstreamerAdaptiveCamera-IEIkHUhC.js",
+          "sha256": "a5c2a9b452c864922fd1806a9ca8837941ac6ab3841bb63c903afbed1e9f0a10",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/MjpegstreamerCamera-DwDhWLeS.js",
-          "sha256": "67c83c17e505f84fa763dea9a66920f94d260811579a6a7a58e50de92e498b66",
+          "path": "files/fluidd/assets/MjpegstreamerCamera-1gy-91XF.js",
+          "sha256": "8637a113957d019a2457f6a71fc105a078037c66f3958487af1bba3999d2de70",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/module-DQ2W7G90.js",
-          "sha256": "32ffae3a0fea3c092854f08dcc5b2691c39d2e005b0254cc6aae9fad33fabd2a",
+          "path": "files/fluidd/assets/module-DsZQAuDE.js",
+          "sha256": "e480fbc31fe379214e2935a0292390ca8d6e1d20f62dec6e4e685810854b47aa",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/monacoCodeLensWorker-CeGXjSxG.js",
-          "sha256": "21c2e14390730ba0dbd242b98f9bee493fe1778aff7d805de4efb601ef2e4461",
+          "path": "files/fluidd/assets/monacoCodeLensWorker-CYKkRZ0m.js",
+          "sha256": "f4d732d81eb646038f6fb5db1c2f0da935795ad4e9dd81594be253f5638fda9f",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/monacoDocumentSymbolsWorker-B1RvxTw6.js",
-          "sha256": "1e145518277a64246991331fc07a3cfab13307c377585a23912abc483110f5ea",
+          "path": "files/fluidd/assets/monacoDocumentSymbolsWorker-Cf8lfi1X.js",
+          "sha256": "43637b8480750cf38c4f8ec6406450700feceb4491988b93738a29b90c345441",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/monacoFoldingRangesWorker-D4J5SrDs.js",
-          "sha256": "cefd7922c8ab2e1aa202ef34a8cff4ac73864c6d528161cf05c69d6077a4da10",
+          "path": "files/fluidd/assets/monacoFoldingRangesWorker-DZa2vRDG.js",
+          "sha256": "933a546ed3c3e4cb5057d50238a389b3f890dc5f184de9941314b0f1891c92e8",
           "mode": "644"
         },
         {
@@ -1682,13 +1702,13 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/NotFound-C79IZiYh.js",
-          "sha256": "1cfa59b02114797d3979bacc5c706c925c0ccf4f2efab7a68be0bdc2522c5f12",
+          "path": "files/fluidd/assets/NotFound-DC1Rnyfi.js",
+          "sha256": "3770ee1fbb2177828cdc17e1287fffb25e55e66279f9e27199fd6507a9440ae8",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/parseGcode.worker-BtTjVWHs.js",
-          "sha256": "7c563e0059fd622c5858da12f99d8766f58b52b81d673e39a9e281bc81dda1ce",
+          "path": "files/fluidd/assets/parseGcode.worker-Dt63y5U1.js",
+          "sha256": "0055d63d474fb855001c4de8cab46317c43b384d3aaec28cf0978747159adb04",
           "mode": "644"
         },
         {
@@ -2087,8 +2107,8 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/rolldown-runtime-CNC7AqOf.js",
-          "sha256": "d4a36920c7bab6ec97d0bdc5d1233622f28fe010198ca32bcdd80c8cb6b64aae",
+          "path": "files/fluidd/assets/rolldown-runtime-B0Z9INg1.js",
+          "sha256": "5e9b0d884d2ebb14e241ab38b43e41efb61bce2e74d71507b0b95b264fba4047",
           "mode": "644"
         },
         {
@@ -2097,13 +2117,18 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/sandboxedEval.worker-CMwFLJDA.js",
-          "sha256": "7827b88b632a4e53c64d707f47f556f607aa1f511c6e1a91fc88725abec57523",
+          "path": "files/fluidd/assets/sandboxedEval.worker-B3KytC-j.js",
+          "sha256": "26ddaa77426a2cc18f29b6e59e9cc6be69e7e31744aef292b8ce33f8ba75b208",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/services-DkE0LGL2.js",
-          "sha256": "1f51aee3616985ce55ed52285d8ccc542b492310adc51e0022c52f07df3749e0",
+          "path": "files/fluidd/assets/services-BiRK2vs_.js",
+          "sha256": "27d1c630f1bc3a6b34dbf0f3ffdc7674eb6bf0e78b635160ac819e017f4ecc18",
+          "mode": "644"
+        },
+        {
+          "path": "files/fluidd/assets/Settings-BJ3-8Ydr.js",
+          "sha256": "87714585a2a846320a4357d8054d9f832664926e55e3420cb1c282190bc56edd",
           "mode": "644"
         },
         {
@@ -2112,13 +2137,8 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/Settings-mEV_Qz1v.js",
-          "sha256": "084ff06c4d5869868046b57a1cec7a8d83e5756c5b549106d41304f36f95dc84",
-          "mode": "644"
-        },
-        {
-          "path": "files/fluidd/assets/setupMonaco-BsspMbCi.js",
-          "sha256": "3db8104af2d5ed913cad5973bbb21f444edb7ceb59cbb2b23ae49830fcf1cafa",
+          "path": "files/fluidd/assets/setupMonaco-DJnot0vu.js",
+          "sha256": "49fe601cb505200def62a056711970d9bd329a1956450c281cfd5615d717a6e5",
           "mode": "644"
         },
         {
@@ -2127,23 +2147,23 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/sleep-CEQq2wgp.js",
-          "sha256": "3688489ef83130415cde1b1e65345a1f9bbcb8853d5fcf1c1b5034da790d4fa2",
+          "path": "files/fluidd/assets/sleep-E0hixPFA.js",
+          "sha256": "5bcbd00abbc43397b44808597bf72695ed15ccc7d5675f047096c402a1d6f849",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/socketActions-D7Vpckss.js",
-          "sha256": "f5da401842d8c4299fd6256c6f17952d31d0e8464e20d4cd48a5344aee408abe",
+          "path": "files/fluidd/assets/socketActions-BjlocJGv.js",
+          "sha256": "4f84598087e87fb2014b4f677b8bfb5ba93356ce6584f7cb34c3ae9e546ed00d",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/state-D5EbeaNv.js",
-          "sha256": "ba64141bfbc2fdbb01467e80da00d9144bf615308462bbf1477e101e36619273",
+          "path": "files/fluidd/assets/state-CbSAzLJT.js",
+          "sha256": "b5b361bb5ecea7f9f3e5310f3fbcdbdf94956ee92f878066b83a1d4d544edf99",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/state-D95nW690.js",
-          "sha256": "c60e8ec08c8ed8784ca2d63396985fdfd8f18c21a598158bf9e81774e2c89786",
+          "path": "files/fluidd/assets/state-KvNEQDgW.js",
+          "sha256": "c9de49b315d1d874cd857e31ff916b8ecca6e6566c61720286a72d7cf360fb69",
           "mode": "644"
         },
         {
@@ -2152,8 +2172,8 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/System-DYxqWSEH.js",
-          "sha256": "cbb81bfcf8a01ecf8d0cd6c861748cc2370f54d182296e50fc5ff82f5d9e1bd0",
+          "path": "files/fluidd/assets/System-ClCjHHbW.js",
+          "sha256": "727f24dd22dd54460fb6cf14480cb6fdd0f4419316610129faa6a2cb65d3a3b2",
           "mode": "644"
         },
         {
@@ -2172,13 +2192,13 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/Timelapse-CFheisPX.js",
-          "sha256": "070f5ac8b82db5c84293e9c3fe04ee773af147b3e65060f72f425dd0174229da",
+          "path": "files/fluidd/assets/Timelapse-Crp_uDhv.js",
+          "sha256": "b48c143d69b13ce5c4826d1b66b5488bebf9856bd8baa19247d9086cf4b81867",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/TimelapseRenderSettingsDialog-Di8rM4OH.js",
-          "sha256": "3189cf864bde10e842ce85077051fd14eda44771749b2b296f55293c21a32c84",
+          "path": "files/fluidd/assets/TimelapseRenderSettingsDialog-BJvdYtkl.js",
+          "sha256": "20e7cb9a7d9b6d96dba0792fd3b1e7a85684561d8d2c7efe9a687cfe33a580e8",
           "mode": "644"
         },
         {
@@ -2192,8 +2212,8 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/Tune-D08ana1m.js",
-          "sha256": "ac572ebe575a4ac71d0ddba75c72a096c77ebddb5e6301b812dbaf1ab23e65b5",
+          "path": "files/fluidd/assets/Tune-DSRfhayj.js",
+          "sha256": "5aa116f11652ba34850eae7196861635330c48649a7e3b69335215e66aa8cb76",
           "mode": "644"
         },
         {
@@ -2207,8 +2227,13 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/Uv4LMjpegCamera-DL2tgzVZ.js",
-          "sha256": "34acfdc71264fd78422ca9e9d6ab299756828c58762649e2eff7c788e28981ef",
+          "path": "files/fluidd/assets/upperFirst-GyLnuIJO.js",
+          "sha256": "8958b1eb4566f2158bbeded468dff8cd72a2b5d03940ec47523388b886b353d0",
+          "mode": "644"
+        },
+        {
+          "path": "files/fluidd/assets/Uv4LMjpegCamera-BND_38bN.js",
+          "sha256": "bad4d7109c00114652a3b5e402648cca068d20d7547523af9341255b45280440",
           "mode": "644"
         },
         {
@@ -2222,38 +2247,38 @@
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/VModel-EJJ5Ow2-.js",
-          "sha256": "aa1743f3249c8e952a325b0eeb65cdbdefacd590dccaa7c2d826c52383752ff9",
+          "path": "files/fluidd/assets/VModel-Co6vAtf_.js",
+          "sha256": "fb444278d6e262c267f9b891a82acfff71876a4a2cb30e32e8dc45d92270b9f0",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/vue-echarts-chunk-BZd0vyDY.js",
-          "sha256": "e3579ae84f41057b3d1fc1ba9b63ba4c3268d9c2355330189aed8488af107712",
+          "path": "files/fluidd/assets/vue-echarts-chunk-DXc7mXac.js",
+          "sha256": "0e066a0b9d2ea0f6c546a0f4795380760b60cbad0e085f078578b59aeb492210",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/vue.runtime.esm-uXCn7sOw.js",
-          "sha256": "fd9a21865e58f225892f5ac8d6ed260e40e46382414f2d12f51710ec13b610ed",
+          "path": "files/fluidd/assets/vue.runtime.esm-BuK-KA7b.js",
+          "sha256": "43ac149604373e67584c137ec051ce4ff23bbb7f0fa62f00990fec5aa90ff187",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/Watch-BsFMHUzZ.js",
-          "sha256": "cc05b0c06db2d2f602932315b2b95502bc854da55742dbc23c358ba8501bfd95",
+          "path": "files/fluidd/assets/Watch-CG2UWV2X.js",
+          "sha256": "2125873b4033a47a3b299e96105bbb301d4b41c4f23bc0b3c4283cd6e17fc3d9",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/WebrtcCamerastreamerCamera-D4g-tIt7.js",
-          "sha256": "cd1a5e13dc89b72a9b6a198b4f0bccbae4a513149183dc5eaae054e7b2ff2ceb",
+          "path": "files/fluidd/assets/WebrtcCamerastreamerCamera-XxClFh6T.js",
+          "sha256": "3db472388a174c381ad4b3d74bee5a0dd5c597e4558c203fb37fe97fcc25d74d",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/WebrtcGo2RtcCamera-_JDK7Wwy.js",
-          "sha256": "32c502e38b4165ced2387f3027ef9cd98d3cdc9f324d2c2955cc85ce2a493a3e",
+          "path": "files/fluidd/assets/WebrtcGo2RtcCamera-Cl2gf8vV.js",
+          "sha256": "9370b778d528eedff2012b2a772b29e37ac9d8f2b9f5b086a7ae21c283abfa9a",
           "mode": "644"
         },
         {
-          "path": "files/fluidd/assets/WebrtcMediamtxCamera-wTTng3ln.js",
-          "sha256": "06c8b23345c10d408b16cea481d7eabec166c69dfadc315b661ac486eeb9f04a",
+          "path": "files/fluidd/assets/WebrtcMediamtxCamera-CSFnbKBP.js",
+          "sha256": "ba2761134033832c1f51256850c5b01b8b9dc0f52668af5fb4100e40d82590e7",
           "mode": "644"
         },
         {
@@ -2272,6 +2297,16 @@
           "mode": "644"
         },
         {
+          "path": "files/fluidd/b3d-afc-lane-toolbar.js",
+          "sha256": "3ba37e697bd6efd7ecabe8eeff052aedaa4122dd310726387887f2de6679e18e",
+          "mode": "644"
+        },
+        {
+          "path": "files/fluidd/b3d-afc-spoolman-header.js",
+          "sha256": "554d4a4559a2524f1fa7ce4327aad2df5869aeba63411758fcff41f689a324d9",
+          "mode": "644"
+        },
+        {
           "path": "files/fluidd/b3d-afc-toolmap.js",
           "sha256": "93e736bbe897a34b897b12ba3c4d5ac478742e6bb800a705f0c0dbb639196899",
           "mode": "644"
@@ -2283,7 +2318,7 @@
         },
         {
           "path": "files/fluidd/config.json",
-          "sha256": "999bd5921ff608fd6ecc38ad4e233462135cc62df992aca3c145c3fde8d7719b",
+          "sha256": "7078a2aa730a2d55e76fc1dc3648d01f90c6519657cdd172229da755103f1587",
           "mode": "644"
         },
         {
@@ -2443,12 +2478,17 @@
         },
         {
           "path": "files/fluidd/index.html",
-          "sha256": "6b0591bb5db90eaac943337371047724b32b1f9b8b67be8ce68a0bc9b8097f15",
+          "sha256": "27684d5349813e5358ceaa5a21f06013a90ec10bd05a283677d41ec07772a897",
           "mode": "644"
         },
         {
           "path": "files/fluidd/logo_annex.svg",
           "sha256": "edc582678200e21f3fb5bb9bde9ed26aa73d1947efe64b1c7a50255c4109ac66",
+          "mode": "644"
+        },
+        {
+          "path": "files/fluidd/logo_automated_layers.svg",
+          "sha256": "bc87e59e237e87cdeae1665ea7426a1f917301ab3d4c6e375131ceb6aeafec8e",
           "mode": "644"
         },
         {
@@ -2542,6 +2582,11 @@
           "mode": "644"
         },
         {
+          "path": "files/fluidd/logo_snapmaker.svg",
+          "sha256": "c427193d943fe9ccd58d321b7d051fdb02e858eec63cb6609fc00ad19db0f1bb",
+          "mode": "644"
+        },
+        {
           "path": "files/fluidd/logo_voron.svg",
           "sha256": "3614a61e111952642b0c9903404420ccd38bed92b08ae9db9cb97f77665d3590",
           "mode": "644"
@@ -2568,7 +2613,7 @@
         },
         {
           "path": "files/fluidd/release_info.json",
-          "sha256": "ec696265df8659cc5307ce6a21c97dd8f117d2a1a72dd0228db36984f1dfce7c",
+          "sha256": "d137f69da9cea160fefb55bcdbef703409c432e772364c906f5c8f8532c9b338",
           "mode": "644"
         },
         {
@@ -2578,7 +2623,7 @@
         },
         {
           "path": "files/fluidd/sw.js",
-          "sha256": "c25fd52047d253b0185f05c7033f727480e52777cd3bb16c0c7bfe25c3c50d8f",
+          "sha256": "62373ff2b5e3eaa87497e639cd5f128b8adce6afd6892e3db97ab061d3712906",
           "mode": "644"
         }
       ],

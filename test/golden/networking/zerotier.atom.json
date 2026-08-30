@@ -1,11 +1,11 @@
 {
   "name": "zerotier",
   "title": "ZeroTier",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Joins the printer to a ZeroTier mesh network, so you can reach Fluidd/Mainsail, the camera, and SSH from anywhere without opening a port on your router. Bring your own account: create a free network at my.zerotier.com, then paste its 16-hex-digit network id below. The printer authorizes itself the way any ZeroTier device does; approve it in ZeroTier Central like you would a laptop or phone. Bespok3d hosts no coordination service and never sees your network id or traffic. Runs zerotier-one as a managed service on top of the tun-module base (a real /dev/net/tun the ZeroTier virtual network interface needs).",
   "tagline": "Reach your printer from anywhere over a ZeroTier mesh network.",
   "category": "system",
-  "channel": "testing",
+  "channel": "stable",
   "publisher": "PLACEHOLDER",
   "printer_specific": false,
   "published_at": "2026-07-05",
@@ -43,5 +43,5 @@
     }
   ],
   "doc_url": "https://github.com/Bespok3d/networking/blob/main/zerotier/doc/README.md",
-  "download_url": "zerotier-0.1.1.b3"
+  "download_url": "zerotier-0.1.2.b3"
 }

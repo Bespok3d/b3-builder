@@ -1,11 +1,11 @@
 {
   "name": "tailscale",
   "title": "Tailscale",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Joins the printer to your Tailscale mesh network (tailnet), so you can reach Fluidd/Mainsail, the camera, and SSH from anywhere without opening a port on your router. Bring your own account: generate an auth key at login.tailscale.com/admin/settings/keys, then paste it below. The printer authorizes itself the way any Tailscale device does; it appears in your tailnet's device list like a laptop or phone. Bespok3d hosts no coordination service and never sees your auth key or traffic. Runs tailscaled as a managed service on top of the tun-module base (a real /dev/net/tun the tailscale0 network interface needs).",
   "tagline": "Reach your printer from anywhere over your Tailscale network.",
   "category": "system",
-  "channel": "testing",
+  "channel": "stable",
   "publisher": "PLACEHOLDER",
   "printer_specific": false,
   "published_at": "2026-07-05",
@@ -43,5 +43,5 @@
     }
   ],
   "doc_url": "https://github.com/Bespok3d/networking/blob/main/tailscale/doc/README.md",
-  "download_url": "tailscale-0.1.1.b3"
+  "download_url": "tailscale-0.1.2.b3"
 }

@@ -18,8 +18,12 @@ import { asArray, asBool, asObject, asString, copyIfPresent, fieldPresent } from
 // `log` tells a store reader that this plugin's running service writes output worth surfacing (a setup
 // link, a pairing code), so the store can offer it without downloading the package: an empty block takes
 // the service's own wrapper log, a filled one names its own path and its own named captures.
-const OPTIONAL_ENTRY_KEYS = ['icon', 'min_daemon_version', 'min_jinni_version', 'homepage', 'macros', 'config', 'sw_version', 'log']
-const COLLECTION_ENTRY_KEYS = ['icon', 'homepage']
+const OPTIONAL_ENTRY_KEYS = ['icon', 'min_daemon_version', 'min_jinni_version', 'homepage', 'macros', 'config', 'sw_version', 'log', 'migration']
+// `migration` is the publisher saying this id changes shape rather than just gaining a newer build:
+// which installed versions the change was written for, and the sentence the user reads before it runs.
+// A plugin declares it to change in place; a collection declares it to take over a retiring id. It must
+// reach the published index or the app has no way to know a change is owed.
+const COLLECTION_ENTRY_KEYS = ['icon', 'homepage', 'migration']
 // `author` is the human/org display name behind the entry ("bespoked"), distinct from `publisher` (the
 // signing-key fingerprint that PROVES the release): the two may name different parties. Every entry
 // shape carries it, so it lives in the base fields both a plugin atom and a collection start from.

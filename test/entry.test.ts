@@ -54,6 +54,21 @@ describe('author and sw_version on atoms', () => {
     expect(atom.author).toBe('bespoked')
     expect('sw_version' in atom).toBe(false)
   })
+
+  // The publisher says an installed plugin of this id is retiring into the set, from which versions,
+  // and in which words. Dropping that here leaves the app with no way to tell a user their plugin is
+  // about to be taken off, which is the one thing they must be told before it happens.
+  it('carries the declared takeover onto a collection', () => {
+    const migration = { from_version: '0.1.3', summary: 'The base layer owns the patching now.' }
+    const manifest = { name: 'u1-extras', title: 'U1 Extras', version: '0.2.0', kind: 'collection', members: [], migration }
+    const atom = buildCollectionAtom(manifest, 'u1-extras/doc.md')
+    expect(atom.migration).toEqual(migration)
+  })
+
+  it('leaves a collection that declares no takeover without the key', () => {
+    const manifest = { name: 'u1-extras', title: 'U1 Extras', version: '0.2.0', kind: 'collection', members: [] }
+    expect('migration' in buildCollectionAtom(manifest, 'u1-extras/doc.md')).toBe(false)
+  })
 })
 
 // A plugin whose service logs a setup link is unusable without that link, and the store decides whether

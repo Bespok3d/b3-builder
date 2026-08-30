@@ -1,5 +1,5 @@
 {
-  "tailscale-0.1.1.b3": {
+  "tailscale-0.1.2.b3": {
     "entries": [
       {
         "path": "files/authkey.tmpl",
@@ -25,13 +25,13 @@
     "manifest": {
       "name": "tailscale",
       "title": "Tailscale",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "sw_version": "1.98.8",
       "author": "bespoked",
       "description": "Joins the printer to your Tailscale mesh network (tailnet), so you can reach Fluidd/Mainsail, the camera, and SSH from anywhere without opening a port on your router. Bring your own account: generate an auth key at login.tailscale.com/admin/settings/keys, then paste it below. The printer authorizes itself the way any Tailscale device does; it appears in your tailnet's device list like a laptop or phone. Bespok3d hosts no coordination service and never sees your auth key or traffic. Runs tailscaled as a managed service on top of the tun-module base (a real /dev/net/tun the tailscale0 network interface needs).",
       "tagline": "Reach your printer from anywhere over your Tailscale network.",
       "category": "system",
-      "channel": "testing",
+      "channel": "stable",
       "printer_specific": false,
       "changelog": "doc/CHANGELOG.md",
       "published_at": "2026-07-05",
@@ -172,7 +172,7 @@
       "attributions": "# Attributions - tailscale\n\n**Plugin author:** Tailscale Inc., packaged by Bespok3d; the idea of a VPN on the U1 comes from the Extended Firmware overlay `66-app-vpn`, initial Tailscale support there by @mcristina422\n\nPuts the printer on a Tailscale network.\n\n| Upstream project | Author | Licence | Needed at runtime | Code ships in this package |\n| --- | --- | --- | --- | --- |\n| Tailscale client | Tailscale Inc. | BSD-3-Clause | yes | yes |\n\nThe official arm64 Tailscale build (currently 1.98.8) is downloaded from https://pkgs.tailscale.com\nat build time and shipped inside the package.\n\nThe binaries are Tailscale's own builds, shipped byte for byte as downloaded; nothing of\nTailscale's is stored in this repository. The licence text and the provenance note are in\n`vendor/tailscale/` at the root of this repository.\n\nPorted from the Extended Firmware overlay `66-app-vpn`, GPL-3.0, whose Tailscale work is credited to\n@mcristina422.\n"
     }
   },
-  "tun-module-0.1.0.b3": {
+  "tun-module-0.1.1.b3": {
     "entries": [
       {
         "path": "files/modules/tun-6.1.99.ko",
@@ -182,12 +182,12 @@
     "manifest": {
       "name": "tun-module",
       "title": "TUN kernel module",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": "bespoked",
       "description": "Loads the Linux `tun` kernel module so the printer has a working /dev/net/tun. Mesh-VPN plugins (ZeroTier needs it; Tailscale runs lighter with it) build a virtual network interface on top of it. The Snapmaker U1's stock kernel ships tun neither built in nor as a module, so this plugin carries a `tun.ko` cross-built against the exact running kernel (6.1.99 aarch64) and insmods it at boot, before the services that need it. Nothing to configure: install it (or install a VPN plugin that requires it) and /dev/net/tun is there.",
       "tagline": "Adds /dev/net/tun to the printer, the base a mesh VPN builds on.",
       "category": "system",
-      "channel": "testing",
+      "channel": "stable",
       "printer_specific": true,
       "changelog": "doc/CHANGELOG.md",
       "published_at": "2026-07-05",
@@ -251,7 +251,7 @@
       "attributions": "# Attributions - tun-module\n\n**Plugin author:** the Linux kernel contributors, built by Bespok3d from the printer kernel source\n\nLoads the kernel `tun` driver the VPN plugins need.\n\n| Upstream project | Author | Licence | Needed at runtime | Code ships in this package |\n| --- | --- | --- | --- | --- |\n| Linux kernel `tun` driver 6.1.99 | the Linux kernel contributors | GPL-2.0-only | yes | yes |\n\nThe module is cross-built at build time from the Rockchip kernel tree at commit\n`8533b2249e1550b233a4836d039d64e3bb2fed7a`, against the stock Snapmaker U1 kernel configuration, and\nshipped as a `.ko`. The licence text and the provenance note are in `vendor/linux-tun/` at the root\nof this repository.\n\nBecause Bespok3d builds this binary, Bespok3d owes its Corresponding Source: the pinned upstream\ncommit plus the `Dockerfile` and `junior-6.1.99.config` in `tun-module/toolchain/`, both published\nwith every release. The inventory entry is in `Bespok3d_history/doc/gpl-source-inventory.md`.\n\nRelated Extended Firmware overlay: `10-patch-kernel-modules` (paxx12), GPL-3.0.\n"
     }
   },
-  "zerotier-0.1.1.b3": {
+  "zerotier-0.1.2.b3": {
     "entries": [
       {
         "path": "files/bin/zerotier-one-aarch64",
@@ -269,13 +269,13 @@
     "manifest": {
       "name": "zerotier",
       "title": "ZeroTier",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "sw_version": "1.16.2",
       "author": "bespoked",
       "description": "Joins the printer to a ZeroTier mesh network, so you can reach Fluidd/Mainsail, the camera, and SSH from anywhere without opening a port on your router. Bring your own account: create a free network at my.zerotier.com, then paste its 16-hex-digit network id below. The printer authorizes itself the way any ZeroTier device does; approve it in ZeroTier Central like you would a laptop or phone. Bespok3d hosts no coordination service and never sees your network id or traffic. Runs zerotier-one as a managed service on top of the tun-module base (a real /dev/net/tun the ZeroTier virtual network interface needs).",
       "tagline": "Reach your printer from anywhere over a ZeroTier mesh network.",
       "category": "system",
-      "channel": "testing",
+      "channel": "stable",
       "printer_specific": false,
       "changelog": "doc/CHANGELOG.md",
       "published_at": "2026-07-05",

@@ -247,6 +247,25 @@ manifest (a zip's framing is non-deterministic, so the invariant is content, not
 - Do NOT make the rail pass by weakening the comparison or by faking output. Byte-equivalence is measured
   against the real legacy output; that is the whole point.
 
+## The base layer owns firmware patching (ADR-0043)
+
+**No plugin outside the base layer carries a `klipper-source` instrument entry.** Every file the
+printer maker ships has exactly one owning package, and those packages are that device family's base
+layer (`u1-base` for the Snapmaker U1). A feature plugin names the door it needs with a `require`
+entry against the service its owning base member provides, and calls that door from its own Klipper
+module.
+
+**This is enforced where plugins get published. It is never a printer check** (owner, 2026-08-22): the
+daemon does not refuse such an entry, so a publisher who ships one gets a broken printer rather than a
+refusal. This repo is publisher-facing, so this is where a publisher reads the rule: it is stated in
+`doc/anatomy-of-the-manifest.md` under "Patching something you do not own", and that wording is the
+one to keep current.
+
+`conflict_resolutions` is not the answer to a firmware difference and never was: the key has no reader
+anywhere in the system. A package that must differ per firmware release carries one diff per release
+shape in the `variants` array on its own `install.instrument` entry, matched on `when.fw_min`, first
+match wins.
+
 ## How to work a change
 
 1. **Understand first.** Read the relevant step file and the README. If the intent is unclear, ask one

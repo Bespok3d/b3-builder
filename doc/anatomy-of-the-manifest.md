@@ -242,14 +242,78 @@ installs on a printer you have never tested against.
 ### Patching something you do not own
 
 `install.instrument` applies a diff to a file that belongs to Klipper, Moonraker or the printer's
-firmware. It exists because sometimes there is no extension point. It comes with a cost: the
-printer's firmware changes, and your diff stops applying.
+firmware.
 
-If you need it, ship `conflict_resolutions` alongside it: a list of alternate patches with the
-firmware versions each one applies to, so your plugin keeps working across firmware releases instead
-of failing on the next one.
+**Your plugin does not carry a `klipper-source` instrument entry.** Every file the printer maker ships
+has exactly one owning package, and those packages are that device family's base layer (`u1-base` for
+the Snapmaker U1). No plugin outside the base layer carries a `klipper-source` entry.
+
+That is a publishing rule, enforced where plugins get published. It is never a printer check: the
+daemon does not refuse such an entry, so nothing on the printer will catch it for you (owner,
+2026-08-22).
+
+**What you write instead.** Name the door you need with a `require` entry against the service the base
+member that owns the file provides, and call that door from your own Klipper module:
+
+```json
+"require": [
+  { "service": "u1-base-fm175xx-reader", "cardinality": "one" }
+]
+```
+
+The daemon refuses a package whose required service nothing on the printer supplies, so your plugin
+cannot land ahead of the base member it calls into. A door that takes an `owner` argument is a
+registration set: several plugins may hold it at once, and stock behaviour returns when the last one
+lets go.
+
+**If the door you need does not exist yet**, that is a pull request on the base plugin that owns the
+file, in its repo under `plugins/`. A base release may only ADD a door.
+
+**Do not ship `conflict_resolutions`.** The key has no reader: the app and the daemon both ignore it,
+and every published plugin declares it empty. A package that must differ per firmware release carries
+one diff per release shape in the `variants` array on its own entry, matched on `when.fw_min` against
+the facts the printer reports, first match wins.
 
 Prefer a config fragment or an extra. Patch last.
+
+## When a release changes what your plugin does
+
+Most releases are a newer build of the same plugin, and the app shows them as an ordinary update.
+Some are not: your plugin stops doing something it used to do and needs other plugins alongside it,
+or it stops existing under its own id and a collection takes over. A version number cannot say which
+of those a release is, so you say it, in a top-level `migration` block. Leave it out and the app
+tells the user nothing: they take what looks like a routine update and get a different plugin.
+
+Two shapes, and only these two. Everything the user needs to understand is in what you write here.
+
+Your plugin retires and a collection takes its id over. Declare it on the collection's manifest:
+
+```json
+"migration": {
+  "from_version": "0.1.3",
+  "summary": "Smoother Motion used to change your printer's Klipper files itself. From 0.1.4 the printer's base layer does that instead, so Smoother Motion is now a set of three plugins. The old one has to come off before the three can go on."
+}
+```
+
+Your plugin keeps its id and changes what it does, bringing the plugins its new shape needs:
+
+```json
+"migration": {
+  "until_version": "0.1.14",
+  "requires_daemon": "0.14.0",
+  "summary": "RFID Spool Reader used to change your printer's Klipper files itself. From 0.1.14 the printer's base layer does that work instead, so this update also puts on the three base layer plugins that now hold those files. Your saved spool tags and your settings are kept."
+}
+```
+
+| Field | What it is |
+| --- | --- |
+| `summary` | What the user reads before the change runs. Plain language: what changes, and what is kept. Never a mechanism |
+| `from_version` | The oldest installed version this move was written for. Leave it out and every older copy is covered |
+| `until_version` | The version your new shape arrives in. Without it a plugin changing in place explains itself again on every release after this one |
+| `requires_daemon` | The daemon version the printer needs before the change can run. Leave it out and the highest `min_daemon_version` among the arriving plugins is used |
+
+The user gets no way to decline it, so write the `summary` as the explanation it is. The builder
+copies the whole block onto your catalog entry, so publishing it takes nothing else.
 
 ## What you never write
 

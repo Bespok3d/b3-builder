@@ -29,6 +29,16 @@ import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, describePackages, goldenP
 // re-captured from THIS tool, so they no longer carry the legacy claim. They still pin that the atom,
 // the sub-list and the packed payload do not move unless someone means them to, which is what catches a
 // regression from here on.
+//
+// Reconciled again on 2026-08-30, on the maintainer's instruction, after the live sources moved: fluidd
+// went 0.1.5 to 0.1.6 (upstream 1.37.3 to 1.37.4, so its packed payload changed content), and the three
+// networking plugins were released off the testing channel (zerotier 0.1.1 to 0.1.2, tailscale 0.1.1 to
+// 0.1.2, tun-module 0.1.0 to 0.1.1, each now stable) with their payload hashes unchanged. Read the diff
+// before trusting that: nothing outside a version, a channel, a download_url filename and fluidd's own
+// upstream bundle moved, which is what a plugin release looks like and not what a core regression looks
+// like. This costs nothing further than the 2026-08-05 reconciliation already cost: these two fixtures
+// stopped carrying the legacy claim then, and they go on pinning that the output does not move unless
+// someone means it to.
 
 const NETWORKING_IDENTITY = {
   atomRepo: 'Bespok3d/networking',
@@ -98,6 +108,11 @@ describe('publisher equivalence rail', () => {
   // captured from this tool. It still catches unintended movement in the collection path, and the legacy
   // claim for the plugin-entry and package paths is untouched, carried by the networking and fluidd cases
   // above. Nothing else in the file was regenerated: its plugins[] is still the frozen legacy capture.
+  //
+  // collections[] was reconciled again on 2026-08-30, on the same terms, after both collections took a new
+  // rfid-qidi member: all-the-tags went 0.1.2 to 0.1.3 (rewritten description, testing to stable,
+  // updated_at 2026-07-26 to 2026-08-15) and materials-tracker-plus went 0.1.1 to 0.1.2 (updated_at
+  // 2026-07-27 to 2026-08-13). plugins[] was left alone again.
   it('a repo with a collection: the collection entry reproduces the golden and packs no .b3', async () => {
     const outputDir = mkdtempSync(join(tmpdir(), 'b3-collections-'))
     const artifacts = await runPipeline({
