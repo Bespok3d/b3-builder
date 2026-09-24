@@ -1,171 +1,143 @@
-# Publishing a plugin
+# Publish a plugin to the Bespok3d index
 
-Your plugin works on a real printer. This page turns it into something other people can install.
+This is the canonical path for submitting signed plugin atoms to `Bespok3d/main-index`. Choose the section that matches your source repository. `b3-builder` builds and releases packages and atoms; the separate `main-index` Action submits the atoms. Neither Action grants a contributor write access to the upstream index.
 
-## What publishing actually is
+The development build exposes Publish key. A packaged-app end-to-end test has exercised key generation and publication through the real renderer, preload, main process, and GitHub connector against a simulated GitHub host. The repository path spells the fingerprint in lowercase, matching the signed atom; compare fingerprint hex without regard to letter case. A live GitHub publication has not been run: check the public file and fingerprint on GitHub before describing your key as published. The released desktop app does not yet discover arbitrary publisher keys or verify third-party publisher identity; that work is separate from this publishing path.
 
-You host your own plugin. There is no upload, no store submission, no review queue.
+## One plugin at the repository root
 
-```text
-you push a version tag
-  -> GitHub Actions builds, signs and packs your .b3
-  -> a GitHub release in YOUR repo holds it
-  -> a catalog entry pointing at that release goes into a list
-  -> the list is referenced from an index the app reads
-```
-
-The index is a directory of pointers. Your files never leave your repository.
-
-## 1. Get the repository in shape
-
-One plugin per directory, each with its own manifest:
+Use this path when `manifest.json` and `files/` are at the repository root. Keep the source manifest's `publisher` as `PLACEHOLDER`; a signed build stamps the actual key fingerprint into the packed manifest and atom.
 
 ```text
-my-plugins/
+fixture-root/
+  manifest.json
+  files/
+  doc/README.md
   .github/workflows/release.yml
-  cpu-temp/
-    manifest.json
-    files/
-    doc/README.md
-  fan-curve/
-    manifest.json
-    files/
-    doc/README.md
 ```
 
-A repository holding exactly one plugin works too: put the manifest at the root and pass
-`unit: plugin`.
+1. In the development build, connect your GitHub account, create a publishing key in Settings, and use Publish key. Download the public half from `<publisher>/bespok3d-publisher/keys/<fingerprint>/key.asc` on GitHub and run `gpg --show-keys --with-colons key.asc`; its `fpr` record must match Settings. Then use Download, Public key in Settings to export it for local signature checks. The private half stays local at this point.
+2. Use Settings, Keys, Download, Private key to export a temporary `.priv.asc` file. Store its entire armored text as the repository's Actions secret `REGISTRY_SIGNING_KEY`, then delete that export. Never commit it or pass the private key itself on a command line. [Signing details](signing-a-plugin.md).
+3. Build locally with a reference to that key, then inspect the package and raw atom:
 
-Check before you go further:
+   ```sh
+   PUBLISHER_REPO=your-account/your-repo
+   SIGNING_KEY_FILE=/path/to/exported.priv.asc
+   PUBLIC_KEY_FILE=/path/to/exported.pub.asc
+   PLUGIN_NAME=$(jq -r .name manifest.json)
+   PLUGIN_VERSION=$(jq -r .version manifest.json)
+   PACKAGE="dist/${PLUGIN_NAME}-${PLUGIN_VERSION}.b3"
+   gpg --import "$PUBLIC_KEY_FILE"
+   b3-builder build --unit plugin --source . --out dist --atom-repo "$PUBLISHER_REPO" --sign "$SIGNING_KEY_FILE"
+   unzip -l "$PACKAGE" | grep -E 'manifest.json(\.sig)?$'
+   unzip -p "$PACKAGE" manifest.json | jq -r .publisher
+   unzip -p "$PACKAGE" manifest.json > /tmp/published-manifest.json
+   unzip -p "$PACKAGE" manifest.json.sig > /tmp/published-manifest.json.sig
+   gpg --verify /tmp/published-manifest.json.sig /tmp/published-manifest.json
+   jq '{name, publisher, require, download_url}' "dist/${PLUGIN_NAME}.atom.json"
+   ```
 
-- `publisher` is the literal string `PLACEHOLDER` in every manifest. It stays that way.
-- `version` follows semantic versioning and is the version you actually tested.
-- `channel` is honest. See [channels.md](channels.md).
-- `doc/README.md` exists and reads like a store page.
-- No file you did not mean to ship is anywhere under `files/`.
+   The stamped `publisher` and atom `publisher` must match your key fingerprint. The raw atom keeps `require`; its local `download_url` is only a filename until the release Action uploads the package.
+4. Add this tag-triggered workflow. Replace all three Action placeholders with reviewed full commit SHAs; the builder and index commits must include the root-plugin release path and contributor PR mode. The builder creates a release for the root `.b3`, attaches declared documents, and finalizes its atom with the release asset URL. It does not assemble a sub-list.
 
-## 2. Add the release workflow
+   ```yaml
+   name: release
+   on:
+     push:
+       tags: ['plugin-*-v*']
 
-`.github/workflows/release.yml`:
+   jobs:
+     release:
+       runs-on: ubuntu-latest
+       permissions:
+         contents: write
+       steps:
+         - uses: actions/checkout@<reviewed-checkout-commit-sha>
+           with:
+             fetch-depth: 0
+         - uses: Bespok3d/b3-builder@<reviewed-builder-commit-sha>
+           with:
+             unit: plugin
+             atom-repo: ${{ github.repository }}
+             signing-key: ${{ secrets.REGISTRY_SIGNING_KEY }}
+         - uses: Bespok3d/main-index/.github/actions/register-atoms@<reviewed-index-commit-sha>
+           with:
+             submission: pull-request
+             contributor-token: ${{ secrets.CONTRIBUTOR_TOKEN }}
+             atoms-dir: dist
+   ```
 
-```yaml
-name: build-and-release
+5. Set `CONTRIBUTOR_TOKEN` from your own GitHub account. It must be able to create or use your fork of `Bespok3d/main-index` and open a PR; it needs no upstream contents-write grant. Do not pass the Action's maintainer `token` or the builder's `main-index-token` and `main-index-repo` inputs. After the release Action finishes, inspect the released `.b3` and the finalized `dist/<name>.atom.json`: its `download_url` must be the uploaded release asset API URL. The registration Action submits only `*.atom.json` to your fork.
 
-on:
-  push:
-    tags:
-      - 'plugin-*-v*'
-  workflow_dispatch:
+## A repository of plugin directories
 
-jobs:
-  build-and-release:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+Use this path when each sibling directory contains its own `manifest.json` and payload. Keep `publisher: "PLACEHOLDER"` in every source manifest. This official-index path submits raw atoms as a set; leave `list-name`, `list-publisher`, `list-ref-name`, `main-index-repo`, and `main-index-token` unset. Those inputs publish a separately owned sub-list and are not part of this atom PR flow.
 
-      - uses: Bespok3d/b3-builder@<commit-sha>
-        with:
-          unit: repo
-          atom-repo: ${{ github.repository }}
-          signing-key: ${{ secrets.REGISTRY_SIGNING_KEY }}
-          bake: 'true'
+```text
+fixture-plugins/
+  fixture-provider/manifest.json
+  fixture-provider/files/
+  fixture-consumer/manifest.json
+  fixture-consumer/files/
+  .github/workflows/release.yml
 ```
 
-Full input list in [github-actions.md](github-actions.md).
+1. In the development build, connect your GitHub account, create a publishing key in Settings, and publish its public half. Download `<publisher>/bespok3d-publisher/keys/<fingerprint>/key.asc` from GitHub and run `gpg --show-keys --with-colons key.asc`; its `fpr` record must match Settings. Then use Download, Public key to export it for local signature checks. Keep the private half local until you store it as the repository's `REGISTRY_SIGNING_KEY` Actions secret.
+2. Use Settings, Keys, Download, Private key to export a temporary `.priv.asc` file. Store its full armored contents in `REGISTRY_SIGNING_KEY`, then delete the export. Never commit the private key or put its contents on argv. Build and inspect **each** plugin locally:
 
-**Trigger on tags, never on pushes to a branch.** A branch trigger publishes whatever `main` happens
-to hold, including work in progress, straight onto other people's printers. This is not hypothetical;
-it is why the tag trigger is the documented one.
+   ```sh
+   PUBLISHER_REPO=your-account/your-repo
+   SIGNING_KEY_FILE=/path/to/exported.priv.asc
+   PUBLIC_KEY_FILE=/path/to/exported.pub.asc
+   gpg --import "$PUBLIC_KEY_FILE"
+   b3-builder build --unit repo --source . --out dist --atom-repo "$PUBLISHER_REPO" --sign "$SIGNING_KEY_FILE"
+   for package in dist/*.b3; do
+     unzip -l "$package" | grep -E 'manifest.json(\.sig)?$'
+     unzip -p "$package" manifest.json > /tmp/published-manifest.json
+     unzip -p "$package" manifest.json.sig > /tmp/published-manifest.json.sig
+     gpg --verify /tmp/published-manifest.json.sig /tmp/published-manifest.json
+     jq -r .publisher /tmp/published-manifest.json
+   done
+   for atom in dist/*.atom.json; do jq '{name, publisher, require, download_url}' "$atom"; done
+   ```
 
-## 3. Set up signing
+   Every packed `publisher` and raw atom `publisher` must match the same key fingerprint. A raw atom retains its service `require` entries for `main-index` to resolve.
+3. Add the tag-triggered workflow. Replace all three Action placeholders with reviewed full commit SHAs. The builder releases each `.b3`, attaches its declared documents, and finalizes every atom; no sub-list is assembled or registered.
 
-Follow [signing-a-plugin.md](signing-a-plugin.md) once. Ten minutes, and every release after this is
-signed automatically.
+   ```yaml
+   name: release
+   on:
+     push:
+       tags: ['plugin-*-v*']
 
-You can publish unsigned. Your plugin will install, and it will show as coming from an unknown
-publisher forever.
+   jobs:
+     release:
+       runs-on: ubuntu-latest
+       permissions:
+         contents: write
+       steps:
+         - uses: actions/checkout@<reviewed-checkout-commit-sha>
+           with:
+             fetch-depth: 0
+         - uses: Bespok3d/b3-builder@<reviewed-builder-commit-sha>
+           with:
+             unit: repo
+             atom-repo: ${{ github.repository }}
+             signing-key: ${{ secrets.REGISTRY_SIGNING_KEY }}
+             bake: 'true'
+         - uses: Bespok3d/main-index/.github/actions/register-atoms@<reviewed-index-commit-sha>
+           with:
+             submission: pull-request
+             contributor-token: ${{ secrets.CONTRIBUTOR_TOKEN }}
+             atoms-dir: dist
+   ```
 
-## 4. Release it
+   Use `bake: 'true'` when the manifests declare payloads built from source; plain pre-staged files need no bake. Set `CONTRIBUTOR_TOKEN` from your own GitHub account with fork and PR permissions, never upstream write permission. Inspect every released package and finalized atom. Each atom's `download_url` must name its corresponding uploaded release asset API URL. The registration Action copies the entire finalized `*.atom.json` set into your fork.
 
-The tag carries the plugin name and the version:
+## What the PR proves
 
-```sh
-git tag plugin-cpu-temp-v0.1.0
-git push origin plugin-cpu-temp-v0.1.0
-```
+For either path, `submission: pull-request` uses branch `atom-submission/<source-owner>-<source-repo>-<run-id>-<run-attempt>` from upstream `main`. A retry of the same run uses a lease on that branch. The Action copies only `*.atom.json`, runs an unsigned prospective `scripts/assemble.mjs` before any fork write, signs off the atom commit, and pushes only to the contributor fork. It opens a PR against `Bespok3d/main-index` `main`, titled `Submit atoms from <source-owner>/<source-repo>` with body `Generated atoms from <source-owner>/<source-repo>. Prospective index assembly passed.` An unchanged atom set opens no PR.
 
-Watch the Actions run. When it is green you have:
+The PR contains only `atoms/*.atom.json`, never a `.b3`, `index.json`, or signature. Prospective assembly and the PR check resolve raw `require` entries against available providers and reject an unresolved service. Maintainers review release links, publisher identity, service requirements, DCO sign-off, and the passing PR check. Acceptance into upstream `main` is a maintainer decision; index signing happens after acceptance.
 
-- A GitHub release in your repository, holding `cpu-temp-0.1.0.b3`.
-- Your README and CHANGELOG attached as release assets, so the store page shows the notes for the
-  version it is offering.
-- A catalog entry whose download URL points at that asset.
-
-**Worth copying:** a small guard script that refuses a tag naming a plugin the repo does not hold, or
-a version its manifest does not declare. A tag that disagrees with the manifest publishes a package
-the tag lies about, and afterwards nothing shows the disagreement. The `networking` plugin repo has
-one you can lift.
-
-## 5. Getting into the index
-
-Two paths.
-
-**Register your own list.** Your repository assembles its own list and registers it by reference. Pass
-`list-name`, `list-publisher` (your key fingerprint), `list-ref-name`, `main-index-repo` and
-`main-index-token`. The last one is a token with write access to the index of lists, which means
-whoever runs that index has to give you one.
-
-**Be added to somebody else's list.** Simpler: pass no list inputs at all and your run is atoms-only.
-It builds, tests, releases and leaves finished catalog entries behind for whoever collects them.
-
-For the Bespok3d official index, ask. It is a repository like any other and the conversation is a
-normal one.
-
-**Or neither.** Hand people the `.b3`. Dropping it on the app works and always will. Plenty of good
-plugins never need to be in an index.
-
-## 6. Releasing an update
-
-```sh
-# edit code, bump "version" in manifest.json, add a CHANGELOG entry
-git commit -am "cpu-temp 0.1.1: fix poll interval on cold boot"
-git tag plugin-cpu-temp-v0.1.1
-git push origin main --tags
-```
-
-Users are offered the update through the app. What you owe them:
-
-- **The version number tells the truth.** Breaking change means a major bump.
-- **The changelog says what changed for them**, not what changed in your code.
-- **New permissions are a real event.** The app re-prompts on a permissions change, and a user who
-  did not expect it will decline. Say why in the changelog.
-- **A config field you removed or renamed** loses that user's setting. Think before you rename.
-
-## 7. Maintaining it
-
-The thing that ages fastest is anything pinned to something you do not control: a firmware version you
-patch against, an upstream release you download, a kernel your module was built for. When the printer
-firmware moves, your plugin is what needs a new release, and your users will not know why it stopped
-working unless you tell them.
-
-If you stop maintaining a plugin, say so in its README. That is more useful to a user than silence.
-
-## The pre-publish checklist
-
-- [ ] Installed, worked, uninstalled cleanly, reinstalled, on a real printer.
-- [ ] `publisher` is `PLACEHOLDER` in the source manifest.
-- [ ] `version` matches the tag you are about to push.
-- [ ] `channel` is honest.
-- [ ] `doc/README.md` reads like a store page to a stranger.
-- [ ] `CHANGELOG.md` has an entry for this version, and the manifest declares it.
-- [ ] `doc/ATTRIBUTIONS.md` credits anyone whose code you ship, and the manifest's `attributions`
-      carries the same text.
-- [ ] No machine-specific values anywhere: no IP address, no serial number, no `/dev/video11`.
-- [ ] Nothing in `files/` you did not mean to ship.
-- [ ] Signing key in a repository secret, wired into the workflow.
-- [ ] `unzip -p dist/<name>-<version>.b3 manifest.json | jq -r .publisher` shows a real fingerprint on
-      a signed build.
+A local signed build proves the package signature, stamped fingerprint, and raw atom. Local URL finalization can prove the atom rewrite with a fixture URL. Local prospective assembly proves dependency handling. Only an explicitly authorized real GitHub run proves that a fork, release, and PR were created and its PR check passed. None of those GitHub outcomes has been claimed by the local checks in this guide.

@@ -1,8 +1,9 @@
 # The GitHub Action
 
 You do not have to write a release pipeline. b3-builder ships as a reusable GitHub Action, so your
-repo pulls one `uses:` line and gets the whole thing: build, bake, test, pack, sign, release, index,
-register.
+repo pulls one `uses:` line for build, bake, test, pack, sign, release, and atom finalization.
+Registration is a separate integration step. For the Bespok3d index, follow the
+[canonical guide](publishing-a-plugin.md) for either repository shape.
 
 This page is about that Action: what it does, what you pass it, and how to get the most out of it.
 
@@ -52,8 +53,13 @@ key; pin it, and move the pin when you have looked at what changed.
 | Release | Creates a GitHub release per plugin, tagged `<name>-v<version>`, with the `.b3` attached |
 | Attach docs | Uploads each plugin's `README.md` and `CHANGELOG.md` as release assets |
 | Finalize URLs | Rewrites each catalog entry's download and doc URLs to the real release asset URLs |
-| Publish the list | Signs and uploads the assembled `index.json` as a release asset |
-| Register | Adds a reference to your list in the index of lists |
+| Publish the list | For a repo with list identity, signs and uploads the assembled `index.json` as a release asset |
+| Register | For a repo with list identity and `main-index-token`, adds a reference to that index of lists |
+
+With `unit: plugin`, the Action uses the root directory for tests, package release, document assets,
+and atom finalization. It does not assemble or register a list. With `unit: repo` and no list
+identity, it processes each plugin directory and leaves finalized atoms for a separate registration
+step. The builder does not know the Bespok3d fork or PR contract.
 
 A release is cut only when a version tag is pushed. That is not a detail: an earlier setup published
 on every push to `main`, which handed enrolled printers packages built from work in progress. Trigger

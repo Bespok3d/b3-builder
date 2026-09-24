@@ -301,21 +301,24 @@ builds (and bakes) every plugin, runs each plugin's `tests/run.sh` (a failing te
 anything is released), cuts a GitHub release with the `.b3` asset per plugin, rewrites the
 assembled `index.json` so each entry's download URL points at its real release asset, uploads that
 signed `index.json` as an asset of the same releases, and optionally registers the list in an
-index-of-lists repo. That full pipeline is the `repo` unit (the default); with `unit: plugin` the
-Action only builds the artifacts: no tests, no release, no list asset, no registration.
+index-of-lists repo. That full pipeline is the `repo` unit (the default). With `unit: plugin`, the
+Action tests the root plugin, releases its signed `.b3` and declared document assets, and finalizes
+its atom. It does not assemble or register a list.
 
 A release writes nothing back into the plugin repo. The list ships the way the `.b3` files ship, as
 a release asset, so readers fetch it at
 `https://github.com/<owner>/<repo>/releases/latest/download/index.json`, an address that does not
 change when the next release lands.
 
-A complete `release.yml`:
+A repo-unit example for a publisher-owned list. For Bespok3d atom PR submission, use the
+[canonical publishing guide](doc/publishing-a-plugin.md) instead. Root-plugin repositories use
+`unit: plugin` and do not pass list inputs.
 
 ```yaml
 name: release
 on:
   push:
-    branches: [main]
+    tags: ['plugin-*-v*']
 
 permissions:
   contents: write
@@ -327,13 +330,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: Bespok3d/b3-builder@main
+      - uses: Bespok3d/b3-builder@<reviewed-commit-sha>
         with:
           unit: repo
           bake: 'true'
           atom-repo: ${{ github.repository }}
           list-name: My Plugins
-          list-publisher: my-org
+          list-publisher: <list-signing-key-fingerprint>
           list-ref-name: My Plugins
           main-index-repo: my-org/main-index
           main-index-token: ${{ secrets.MAIN_INDEX_TOKEN }}
@@ -341,7 +344,7 @@ jobs:
 
 | Input | Meaning | Default |
 | --- | --- | --- |
-| `unit` | `repo` (a repo of plugin dirs, full pipeline) or `plugin` (one plugin dir, build only) | `repo` |
+| `unit` | `repo` (a repo of plugin dirs, full pipeline) or `plugin` (a root plugin, release pipeline without a list) | `repo` |
 | `source` | source dir to build, relative to the checkout | `.` |
 | `out` | output dir for the `.b3` set and the built index | `dist` |
 | `atom-repo` | `owner/repo` slug the catalog doc links point at (required) | none |

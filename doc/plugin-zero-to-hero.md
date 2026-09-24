@@ -219,7 +219,10 @@ gpg --full-generate-key
 gpg --armor --export-secret-keys <your-key-id> > signing-key.asc
 ```
 
+The builder currently needs an unprotected private key; a passphrase-protected export fails signing.
 Paste the whole file into a repository secret named `REGISTRY_SIGNING_KEY`, then `rm signing-key.asc`.
+If you create the key in the desktop development build, use Publish key and check its public file
+and fingerprint on GitHub before claiming publication. See [publishing-a-plugin.md](publishing-a-plugin.md).
 
 This is what turns "some package claiming to be yours" into "provably the package you built".
 Step by step, including what to do when a key expires: [signing-a-plugin.md](signing-a-plugin.md).
@@ -229,7 +232,7 @@ Why it matters and what a user sees: [signatures.md](signatures.md).
 
 ```sh
 git tag plugin-runout-beep-v0.1.0
-git push origin main --tags
+git push origin plugin-runout-beep-v0.1.0
 ```
 
 The Action builds, signs, packs, creates a release, attaches the `.b3` and your docs, and writes the
@@ -244,9 +247,10 @@ A forty-character fingerprint means signed. `PLACEHOLDER` means the key did not 
 
 ## 10. Let people find it
 
-Anyone can install it right now by dropping the `.b3` from your release onto the app. To appear in the
-official store, your list gets registered in the index once, and every release after that is picked
-up automatically. See [publishing-a-plugin.md](publishing-a-plugin.md) and
+Anyone can install it by dropping the `.b3` from your release onto the app. To submit this root
+plugin to the Bespok3d index, send its finalized atom through the separate contributor-fork PR
+Action. The released app does not yet discover arbitrary publisher keys. See
+[publishing-a-plugin.md](publishing-a-plugin.md) and
 [plugin-sources.md](plugin-sources.md).
 
 When you are confident, change `channel` to `stable`, bump the version, and tag again. Until then,

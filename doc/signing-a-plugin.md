@@ -1,6 +1,12 @@
 # Signing, step by step
 
-From nothing to a correctly signed plugin. Fifteen minutes, once, and then it is automatic forever.
+From nothing to a correctly signed plugin. The complete Bespok3d submission paths are in
+[publishing-a-plugin.md](publishing-a-plugin.md).
+
+The development build offers Publish key at
+`<publisher>/bespok3d-publisher/keys/<fingerprint>/key.asc`. Its app path has passed a packaged-app
+test against a simulated GitHub host; check the real public file and fingerprint before claiming
+publication. A locally generated GPG key can also sign packages.
 
 If you want to know what a signature actually proves before you make one, read
 [signatures.md](signatures.md) first.
@@ -21,7 +27,7 @@ Answer:
 | Expiry | `2y` is sensible. You can extend it later; a key that never expires is a key you can never let go of |
 | Real name | The name you want users to associate with your plugins |
 | Email | An address you will still read in two years |
-| Passphrase | Yes, use one. It protects the key on your own disk |
+| Passphrase | Leave it empty for a key used by this builder; the current signer rejects passphrase-protected private keys. Protect the keyring and repository secret access instead |
 
 ## 2. Find the fingerprint
 
@@ -140,11 +146,13 @@ Expect `Good signature from "Jane Example <jane@example.com>"`. A warning that t
 certified by a trusted signature is normal and expected; it means your local GPG has no web of trust
 opinion about the key, not that the signature is bad.
 
-## 8. Publish your fingerprint somewhere people can find it
+## 8. Publish your public key when the key path is available
 
-A signature is only useful to someone who knows which fingerprint to expect. Put it in your plugin
-repository's README, on your project page, wherever people will look. It is public information; that
-is what a fingerprint is for.
+A fingerprint alone is not the public key needed to verify a signature. Keep the private key local or
+in the repository signing secret. The agreed Bespok3d publisher-key location is
+`<publisher>/bespok3d-publisher/keys/<fingerprint>/key.asc`; check the public file's fingerprint
+after publishing it through a proven development build. You may also display the fingerprint in your
+plugin README. The released desktop app does not yet discover arbitrary publisher keys.
 
 ## Rotating or losing a key
 

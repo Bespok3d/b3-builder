@@ -150,10 +150,16 @@ runs:
     - name: Test each plugin (a plugin with tests ships tests/run.sh)
       shell: bash
       env:
+        B3D_UNIT: ${{ inputs.unit }}
         B3D_SOURCE: ${{ inputs.source }}
       run: |
         set -euo pipefail
-        for dir in "$B3D_SOURCE"/*/; do
+        if [ "$B3D_UNIT" = "plugin" ]; then
+          test_dirs=("${B3D_SOURCE%/}/")
+        else
+          test_dirs=("$B3D_SOURCE"/*/)
+        fi
+        for dir in "${test_dirs[@]}"; do
           [ -f "${dir}tests/run.sh" ] || continue
           echo "Running ${dir}tests/run.sh"
           sh "${dir}tests/run.sh"
@@ -166,13 +172,19 @@ runs:
         GH_TOKEN: ${{ github.token }}
         B3D_SOURCE: ${{ inputs.source }}
         B3D_OUT: ${{ inputs.out }}
+        B3D_UNIT: ${{ inputs.unit }}
         B3D_EXCLUDE_DIRS: ${{ inputs.exclude-dirs }}
       run: |
         set -euo pipefail
         url_map="$(mktemp)"
         echo '{}' > "$url_map"
         release_tags="$(mktemp)"
-        for dir in "$B3D_SOURCE"/*/; do
+        if [ "$B3D_UNIT" = "plugin" ]; then
+          release_dirs=("${B3D_SOURCE%/}/")
+        else
+          release_dirs=("$B3D_SOURCE"/*/)
+        fi
+        for dir in "${release_dirs[@]}"; do
           [ -f "${dir}manifest.json" ] || continue
           base=$(basename "$dir")
           skip=""
@@ -219,8 +231,8 @@ runs:
         echo "B3D_URL_MAP=$url_map" >> "$GITHUB_ENV"
         echo "B3D_RELEASE_TAGS=$release_tags" >> "$GITHUB_ENV"
 
-    - name: Finalize atom download and doc URLs with the release asset URLs (repo unit)
-      if: ${{ inputs.unit == 'repo' && inputs.publish == 'true' }}
+    - name: Finalize atom download and doc URLs with the release asset URLs
+      if: ${{ inputs.publish == 'true' }}
       shell: bash
       env:
         B3D_ACTION_PATH: ${{ github.action_path }}
