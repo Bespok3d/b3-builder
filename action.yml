@@ -170,12 +170,16 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
+        B3D_ACTION_PATH: ${{ github.action_path }}
         B3D_SOURCE: ${{ inputs.source }}
         B3D_OUT: ${{ inputs.out }}
         B3D_UNIT: ${{ inputs.unit }}
         B3D_EXCLUDE_DIRS: ${{ inputs.exclude-dirs }}
       run: |
         set -euo pipefail
+        # A private repo's browser download address answers 404 even to a token request, so which
+        # address a published entry carries depends on who is publishing. Read it once for the run.
+        repo_visibility=$(gh api "repos/${GITHUB_REPOSITORY}" --jq '.private | if . then "private" else "public" end')
         url_map="$(mktemp)"
         echo '{}' > "$url_map"
         release_tags="$(mktemp)"
@@ -218,10 +222,14 @@ runs:
             cp "${dir}${doc_source}" "$B3D_OUT/${name}-${version}-${doc_name}"
             gh release upload "$tag" "$B3D_OUT/${name}-${version}-${doc_name}" --clobber
           done
-          # An asset's API URL (.url, not browser_download_url) is what the app fetches with a bearer
-          # token + Accept: application/octet-stream, which works for private repos and public alike.
-          asset_urls=$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag}" \
-            --jq '[.assets[] | {(.name): .url}] | add')
+          # Which address a published entry carries is decided in exactly one place,
+          # src/action/published-asset-url.ts: the tag-and-filename form for a public publisher (an
+          # asset id is minted per upload, so re-uploading the asset orphans every entry naming it)
+          # and the API asset form for a private one (its browser address is unfetchable with a token).
+          release_assets="$(mktemp)"
+          gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${tag}" --jq '.assets' > "$release_assets"
+          asset_urls=$(node "$B3D_ACTION_PATH/dist/action/published-asset-url.js" \
+            "$release_assets" "$GITHUB_REPOSITORY" "$tag" "$repo_visibility")
           echo "$asset_urls" | jq -e --arg fn "$asset" 'has($fn)' >/dev/null \
             || { echo "no asset URL for $asset after upload" >&2; exit 1; }
           tmp=$(mktemp)

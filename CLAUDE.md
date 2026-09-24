@@ -174,6 +174,13 @@ the index-of-lists. It exists so every repo pulls one `uses:` instead of hand-co
   `src/core/`. The `download_url` finalize lives in `src/action/inject-release-urls.ts` (the Action face,
   tested) precisely because a release asset URL is a CI artifact the core must never bake in: the core
   writes the placeholder filename (`co-repo-index` `buildAtoms`) and the Action fills the real value.
+- **The published asset address is the tag-and-filename form for a public publisher, and the API asset
+  form for a private one** (`src/action/published-asset-url.ts`, the ONE place the shape is chosen). A
+  GitHub asset id is minted per upload, so `gh release upload --clobber` of the same tag and filename
+  puts the file back at a new id and an address recorded in a published entry 404s forever. A private
+  repo's browser address answers 404 to a token request as well, so a private publisher keeps
+  `api.github.com/.../releases/assets/{id}`, which is the one a token plus `Accept: application/octet-stream`
+  can download. Do not inline a jq shape rule in `action.yml` again; extend the module and its test.
 - **Org identity + tokens arrive ONLY via Action inputs** (`atom-repo`, `list-name`, `list-publisher`,
   `list-ref-name`, `main-index-repo`, `main-index-token`), never a baked default. This is the same hard
   boundary the CLI honors, applied to the CI face. A hardcoded `Bespok3d/...` anywhere in the Action logic
