@@ -12,6 +12,7 @@ export type JsonObject = { [key: string]: JsonValue }
 // repo of plugin dirs (each immediate subdir holding a manifest.json). A plugin build produces one
 // .b3 plus its atom; a repo build produces one per dir, and assembles them into one leaf sub-list when
 // the request carries a list identity.
+export type ReleaseKind = 'draft' | 'prerelease' | 'live'
 export type BuildUnit = 'plugin' | 'repo'
 
 // Publisher/org identity, always passed IN, never baked into the tool. `atomRepo` is the owner/repo
@@ -45,6 +46,8 @@ export interface PluginBuildRequest {
   skipUnchanged?: boolean
   bake?: boolean
   signingKey?: string
+  releaseKind?: ReleaseKind
+  selectedIds?: string[]
 }
 
 // A repo-of-dirs build: every plugin dir to its .b3 + atom. A list identity additionally assembles the
@@ -69,6 +72,8 @@ export interface RepoBuildRequest {
   skipUnchanged?: boolean
   bake?: boolean
   signingKey?: string
+  releaseKind?: ReleaseKind
+  selectedIds?: string[]
 }
 
 export type BuildRequest = PluginBuildRequest | RepoBuildRequest

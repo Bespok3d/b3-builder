@@ -1,0 +1,125 @@
+name: build-and-release
+
+# Build, test, pack, release, index, and register every plugin in this repo through the one reusable
+# Bespok3d build Action (b3-builder). This repo no longer carries its own build/pack/atom/list scripts in
+# CI: the Action wraps the whole pipeline, so the only thing here is who this publisher is (org identity
+# via the Action inputs) and the token to register the sub-list. A plugin whose payload is a build output
+# (tun-module's docker-ko tun.ko, tailscale/zerotier's sha-pinned downloads) declares its `bake` class in
+# its manifest; `bake: 'true'` builds those payloads from source at CI time (ADR-0036: the printer never
+# bakes).
+on:
+  push:
+    tags:
+      # A release is published by a version tag and by nothing else. A push to main used to publish,
+      # which handed every enrolled printer a package built from whatever main happened to hold, work
+      # in progress included. scripts/tag_version_guard.sh refuses a tag naming a plugin this repo
+      # does not hold, or a number the plugin's manifest does not declare, so the tag cannot lie
+      # about what it publishes. The shared release-trigger detector fails the gate if a branch
+      # trigger is ever added back.
+      - 'plugin-*-v*'
+  workflow_dispatch:
+    inputs:
+      release-kind:
+        description: Release membership
+        type: choice
+        options: [draft, prerelease, live]
+        default: draft
+      publish:
+        description: Publish the verified outputs
+        type: boolean
+        default: false
+      prepared-run-id:
+        description: Reuse exact outputs from this earlier workflow run
+        type: string
+        default: ''
+
+concurrency:
+  group: unit-release-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write   # create releases + commit index.json on this repo
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the index.json push can rebase on a concurrent update
+
+      # The Run workflow button stays usable: this step, not a job level `if`, is what decides.
+      # A manual run against a release tag republishes it; a manual run against a branch is refused
+      # here, loudly, instead of skipping the job and reporting success.
+      - name: Refuse a ref that is not a plugin release tag
+        run: sh scripts/tag_version_guard.sh "${{ github.ref_name }}"
+
+      - name: Select the tag unit and release tier
+        id: release-selection
+        env:
+          REQUESTED_KIND: ${{ inputs.release-kind }}
+          SHOULD_PUBLISH: ${{ github.event_name == 'push' || inputs.publish }}
+        run: |
+          set -euo pipefail
+          selected_id="${GITHUB_REF_NAME#plugin-}"
+          selected_id="${selected_id%-v*}"
+          kind="$REQUESTED_KIND"
+          if [ -z "$kind" ]; then
+            case "$GITHUB_REF_NAME" in *-pre) kind=draft ;; *) kind=live ;; esac
+          fi
+          echo "publish=$SHOULD_PUBLISH" >> "$GITHUB_OUTPUT"
+          echo "selected-ids=$selected_id" >> "$GITHUB_OUTPUT"
+          echo "release-kind=$kind" >> "$GITHUB_OUTPUT"
+
+      - name: Download the prepared outputs
+        if: ${{ inputs.prepared-run-id != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: verified-unit-outputs
+          path: .
+          run-id: ${{ inputs.prepared-run-id }}
+          github-token: ${{ github.token }}
+
+      - name: Restore the exact prepared file modes
+        if: ${{ inputs.prepared-run-id != '' }}
+        run: tar -xzf verified-unit-outputs.tar.gz
+
+      - uses: Bespok3d/b3-builder@b698ae5fdf713ff7994c0c95e7d062c4a42547dd  # main @ 2026-09-25
+        with:
+          release-kind: ${{ steps.release-selection.outputs.release-kind }}
+          selected-ids: ${{ steps.release-selection.outputs.selected-ids }}
+          publish: ${{ steps.release-selection.outputs.publish }}
+          prepared-only: ${{ inputs.prepared-run-id != '' }}
+          require-signature: 'true'
+          register-commit: 3d4fa2adb4f39aa22b7112ff26fd9522db7b4827
+          unit: repo
+          # Per-repo Actions secret today (GitHub Free cannot org-secret private repos); becomes ONE org
+          # secret every repo inherits when the repos go public. See b3-builder README (secrets model).
+          signing-key: ${{ secrets.REGISTRY_SIGNING_KEY }}
+          bake: 'true'
+          atom-repo: ${{ github.repository }}
+          list-name: 'Bespok3d Networking'
+          list-publisher: '679939555819fb5f6423dc68c4388e76bfa9b4e0'
+          list-ref-name: 'Networking'
+          main-index-repo: Bespok3d/main-index
+          # Per-repo Actions secret today (GitHub Free cannot org-secret private repos); becomes ONE org
+          # secret every repo inherits when the repos go public. See b3-builder README (secrets model).
+          main-index-token: ${{ secrets.MAIN_INDEX_TOKEN }}
+
+      - uses: Bespok3d/main-index/.github/actions/register-atoms@3d4fa2adb4f39aa22b7112ff26fd9522db7b4827
+        if: ${{ steps.release-selection.outputs.publish == 'true' && steps.release-selection.outputs.release-kind != 'live' }}
+        with:
+          atoms-dir: dist/registration
+          selected-ids: ${{ steps.release-selection.outputs.selected-ids }}
+          release-kind: ${{ steps.release-selection.outputs.release-kind }}
+          token: ${{ secrets.MAIN_INDEX_TOKEN }}
+
+      - name: Preserve prepared file modes
+        run: tar -czf verified-unit-outputs.tar.gz dist
+
+      - name: Keep exact verified outputs for publication or promotion
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-unit-outputs
+          path: verified-unit-outputs.tar.gz
+          if-no-files-found: error

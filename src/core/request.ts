@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
 // SPDX-License-Identifier: AGPL-3.0-or-later
+import { releaseKind } from './build/release-kind.js'
 import type { AtomIdentity, BuildRequest, BuildUnit, ListIdentity } from './types.js'
 
 // The core owns what a valid publisher build request is, so both faces (the CLI and the GitHub Action)
@@ -20,6 +21,8 @@ export interface RawBuildInputs {
   skipUnchanged: boolean
   bake: boolean
   signingKey?: string
+  releaseKind?: string
+  selectedIds?: string[]
 }
 
 export function publisherRequest(inputs: RawBuildInputs): BuildRequest {
@@ -33,6 +36,8 @@ export function publisherRequest(inputs: RawBuildInputs): BuildRequest {
       skipUnchanged: inputs.skipUnchanged,
       bake: inputs.bake,
       signingKey: presentValue(inputs.signingKey),
+      releaseKind: releaseKind(inputs.releaseKind),
+      selectedIds: inputs.selectedIds,
     }
   }
   return {
@@ -45,6 +50,8 @@ export function publisherRequest(inputs: RawBuildInputs): BuildRequest {
     skipUnchanged: inputs.skipUnchanged,
     bake: inputs.bake,
     signingKey: presentValue(inputs.signingKey),
+      releaseKind: releaseKind(inputs.releaseKind),
+      selectedIds: inputs.selectedIds,
   }
 }
 

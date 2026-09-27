@@ -397,3 +397,45 @@ the individual authors named above.
 
 Bespok3d is built and maintained in the open, on stock printer firmware. If it saved you an
 afternoon, you can [buy me a coffee](https://buymeacoffee.com/unlucio).
+
+## Verified unit releases
+
+The Action accepts `release-kind: draft|prerelease|live` (Live by default) and an explicit
+space-separated `selected-ids`. Draft/prerelease versions end in `-pre`; Live versions do not.
+The manifest `channel` remains independent. The CLI exposes `--release-kind` and repeatable
+`--select`. Repository builds keep dependency context, while publication and registration use
+only the selected units. Atoms are named `<unit>.<release-kind>.atom.json`.
+
+Set `publish: 'false'` to build and verify without releasing. Preserve the complete output directory
+in an archive that retains file modes. A subsequent call with `prepared-only: 'true'` consumes those
+same outputs; it checks source and tooling commits, selected IDs, package inventories and signatures,
+and exact asset hashes before any release mutation. `register-commit` is the tested registration
+commit, and `require-signature: 'true'` makes missing package/evidence signatures a refusal. These
+inputs do not change which repository or signing identity the caller supplies.
+
+An existing release is reused only when its verified-build marker, source target, kind and asset
+bytes agree. Draft to prerelease changes the same release and adds the new tier atom without
+repacking or replacing assets. Unexpected tags/releases/assets fail; uploads never clobber.
+Published atom outputs for registration are restricted to `out/registration/`.
+
+For a co-repository Live sub-list, the previous signed Live list is merged with selected finalized
+entries, preserving unrelated entries and their resolved dependencies. Its baseline is frozen in
+the verified evidence. `allow-empty-baseline: 'true'` is only for a first publication with no Live
+release. Candidate atoms register directly into the candidate tier; the Live sub-list stays intact.
+The caller serializes publication per repository. Package/doc bytes are verified before upload;
+host-generated asset URLs are finalized in catalog metadata afterwards, before that metadata is
+signed and published.
+
+Version preparation is local and never commits or publishes:
+
+```sh
+node dist/action/version-main.js candidate manifest.json 1.2.3 [version.py]
+node dist/action/version-main.js live manifest.json 1.2.3-pre [version.py]
+node dist/action/version-main.js compare candidate.b3 live.b3 1.2.3-pre public-key.asc [daemon]
+```
+
+`version-source.js` exports `verifyVersionOnlyCommit` for comparing separately recorded candidate
+and Live commits against explicit manifest/runtime version fields. Package comparison permits only
+the manifest version, its signature, and the exact daemon `DAEMON_VERSION` assignment (plus that
+file's manifest checksum). It preserves paths, modes and all other payload bytes; timestamps and
+compression framing are not payload identity.

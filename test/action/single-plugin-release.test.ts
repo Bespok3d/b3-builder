@@ -4,33 +4,25 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { actionRequest } from '../../src/action/release-inputs.js'
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const compositeAction = readFileSync(join(repoRoot, 'action.yml'), 'utf8')
 
 describe('single-root-plugin Action release path', () => {
-  it('selects the root plugin while retaining repo-unit directory iteration', () => {
-    expect(compositeAction).toContain('B3D_UNIT: ${{ inputs.unit }}')
+  it('passes root-plugin identity and selection into the same verified publisher as repo builds', () => {
+    const request = actionRequest({ B3D_SOURCE: '.', B3D_OUT: 'dist', B3D_UNIT: 'plugin', B3D_ATOM_REPO: 'publisher/repo', B3D_SELECTED_IDS: 'root-plugin', B3D_RELEASE_KIND: 'draft' })
+    expect(request).toMatchObject({ unit: 'plugin', identity: { atomRepo: 'publisher/repo' }, selectedIds: ['root-plugin'], releaseKind: 'draft' })
     expect(compositeAction).toContain('test_dirs=("${B3D_SOURCE%/}/")')
     expect(compositeAction).toContain('test_dirs=("$B3D_SOURCE"/*/)')
-    expect(compositeAction).toContain('release_dirs=("${B3D_SOURCE%/}/")')
-    expect(compositeAction).toContain('release_dirs=("$B3D_SOURCE"/*/)')
   })
-
-  it('releases the signed root package and its declared document assets', () => {
-    expect(compositeAction).toContain('B3D_SIGNING_KEY: ${{ inputs.signing-key }}')
-    expect(compositeAction).toContain('gh release upload "$tag" "$B3D_OUT/$asset" --clobber')
-    expect(compositeAction).toContain('for doc_asset in "${changelog_source}:CHANGELOG.md" "doc/README.md:README.md"; do')
-    expect(compositeAction).toContain('cp "${dir}${doc_source}" "$B3D_OUT/${name}-${version}-${doc_name}"')
+  it('builds only when outputs were not prepared and verifies before publication', () => {
+    expect(compositeAction).toContain("if: ${{ inputs.prepared-only != 'true' }}")
+    expect(compositeAction).toContain('dist/action/release-main.js" prepare')
+    expect(compositeAction).toContain('dist/action/release-main.js" publish')
+    expect(compositeAction).not.toContain('--clobber')
   })
-
-  it('finalizes root atoms but keeps assembled-list finalization repo-only', () => {
-    expect(compositeAction).toMatch(/name: Finalize atom download[\s\S]*?if: \$\{\{ inputs\.publish == 'true' \}\}/)
-    expect(compositeAction).toContain("if: ${{ inputs.unit == 'repo' && inputs.list-name != '' && inputs.publish == 'true' }}")
-  })
-
-  it('keeps registration and list assets out of the plugin unit', () => {
-    expect(compositeAction).toMatch(/if: \$\{\{ inputs\.unit == 'repo' && inputs\.list-name != '' && inputs\.publish == 'true' \}\}/)
-    expect(compositeAction).toMatch(/if: \$\{\{ inputs\.unit == 'repo' && inputs\.main-index-token != '' && inputs\.list-name != '' && inputs\.publish == 'true' \}\}/)
+  it('keeps Live sub-list registration out of plugin units and candidate releases', () => {
+    expect(compositeAction).toContain("inputs.unit == 'repo' && inputs.main-index-token != '' && inputs.list-name != '' && inputs.publish == 'true' && inputs.release-kind == 'live'")
   })
 })

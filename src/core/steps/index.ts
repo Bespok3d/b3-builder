@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
 // SPDX-License-Identifier: AGPL-3.0-or-later
+import { stampReleaseKinds, atomFilename } from '../build/release-kind.js'
 import { join } from 'node:path'
 import type { JsonObject, PipelineContext } from '../types.js'
 import { isListIdentity } from '../types.js'
 import { assembleSubList, buildAtoms } from '../build/co-repo-index.js'
 import { readProviderSources } from '../build/service-providers.js'
 import { sourcesFor } from '../build/discovery.js'
-import { asString } from '../build/json.js'
 import { writeSignedIndexFile } from '../build/signed-index.js'
 import { assertUniqueAtoms } from '../build/unique-atoms.js'
 import { writeJsonFile } from '../build/write-json.js'
@@ -25,8 +25,8 @@ import { writeJsonFile } from '../build/write-json.js'
 export async function buildRegistry(context: PipelineContext): Promise<PipelineContext> {
   const { request, publisher } = context
   const sources = sourcesFor(request)
-  const atoms = publishedBy(buildAtoms(sources, request.identity.atomRepo), publisher)
-  atoms.forEach((atom) => writeJsonFile(join(request.outputDir, `${asString(atom.name)}.atom.json`), atom))
+  const atoms = stampReleaseKinds(publishedBy(buildAtoms(sources, request.identity.atomRepo), publisher), request)
+  atoms.forEach((atom) => writeJsonFile(join(request.outputDir, atomFilename(atom)), atom))
   if (request.unit === 'plugin') return { ...context, atoms, subList: null }
   assertUniqueAtoms(sources)
   if (!isListIdentity(request.identity)) return { ...context, atoms, subList: null }

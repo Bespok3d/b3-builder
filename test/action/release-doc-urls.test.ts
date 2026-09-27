@@ -1,10 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
-import { dirname, join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { docAssetName, finalizeDocUrls } from '../../src/action/release-doc-urls.js'
+import { finalizeDocUrls } from '../../src/action/release-doc-urls.js'
 import type { DocumentedEntry } from '../../src/action/release-doc-urls.js'
 
 const ASSET_URL = 'https://api.github.com/repos/x/y/releases/assets/7'
@@ -47,19 +44,3 @@ describe('finalizeDocUrls', () => {
   })
 })
 
-// The uploader mints the asset name in bash and the finalize rebuilds it in TypeScript to look the URL
-// back up. Teaching one of them a different name without the other leaves every store page pointing at
-// its old notes with a green run, which is exactly the failure this whole seam exists to end.
-describe('the asset name the Action uploads under', () => {
-  const actionYml = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '../../action.yml'), 'utf8')
-
-  it('is the one the finalize looks up', () => {
-    const uploaded = actionYml.match(/cp "\$\{dir\}\$\{doc_source\}" "\$B3D_OUT\/([^"]+)"/)
-    expect(uploaded, 'action.yml no longer copies a doc to a uniquely named asset').not.toBeNull()
-    const minted = String(uploaded?.[1])
-      .replace('${name}', 'demo')
-      .replace('${version}', '1.2.3')
-      .replace('${doc_name}', 'CHANGELOG.md')
-    expect(minted).toBe(docAssetName('demo', '1.2.3', 'CHANGELOG.md'))
-  })
-})

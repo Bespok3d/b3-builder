@@ -29,6 +29,8 @@ export function requestFromArgs(args: string[], env: NodeJS.ProcessEnv): BuildRe
       'skip-unchanged': { type: 'boolean' },
       bake: { type: 'boolean' },
       sign: { type: 'string' },
+      'release-kind': { type: 'string' },
+      select: { type: 'string', multiple: true },
     },
     allowPositionals: false,
   })
@@ -45,6 +47,8 @@ export function requestFromArgs(args: string[], env: NodeJS.ProcessEnv): BuildRe
     providerSources: values.providers ?? [],
     skipUnchanged: values['skip-unchanged'] ?? false,
     bake: values.bake ?? false,
+    releaseKind: values['release-kind'],
+    selectedIds: values.select,
     signingKey: resolveSigningKey(values.sign, env[SIGNING_KEY_VAR]),
   })
 }
