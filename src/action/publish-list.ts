@@ -17,7 +17,7 @@ export async function publishList(evidence: ReleaseEvidence, atoms: JsonObject[]
   const publicKey = await publicHalfOfSigningKey(key)
   writeFileSync(join(outputDir, 'index.json'), bytes)
   for (const unit of evidence.units.filter((unit) => unit.atom.kind !== 'collection')) {
-    const tag = releaseTag(unit)
+    const tag = releaseTag(unit, evidence)
     await placeSignature(tag, outputDir, bytes, key, publicKey, host)
     uploadMetadata(tag, 'index.json', outputDir, host)
     uploadMetadata(tag, 'index.json.sig', outputDir, host)

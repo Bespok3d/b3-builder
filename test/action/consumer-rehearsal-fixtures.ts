@@ -14,7 +14,7 @@ export function fixtureFile(root: string, path: string, contents: string): void 
 export function consumerFixture(family: 'daemon' | 'jinni'): { root: string; name: string; manifest: string; runtime?: string } {
   const root = mkdtempSync(join(tmpdir(), `${family}-consumer-`))
   const repo = family === 'daemon' ? 'daemon' : 'adapters'
-  const name = family === 'daemon' ? 'bespok3d-daemon' : 'jinni-snapmaker-u1'
+  const name = family === 'daemon' ? 'bespok3d-daemon' : 'bespok3d-jinni-snapmaker-u1'
   const manifest = family === 'daemon' ? 'manifest.json' : 'snapmaker-u1/jinni/manifest.json'
   mkdirSync(join(root, 'scripts'))
   ;['stage-package.sh', family === 'daemon' ? 'tag_version_guard.py' : 'tag_version_guard.sh'].forEach((script) => writeFileSync(join(root, 'scripts', script), consumerSource(`${repo}/scripts/${script}`)))

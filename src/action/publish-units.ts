@@ -13,7 +13,7 @@ import { finalizeDownloadUrl } from './inject-release-urls.js'
 import type { PublishablePlugin } from './inject-release-urls.js'
 import { finalizeDocUrls } from './release-doc-urls.js'
 
-export function releaseTag(unit: ReleaseUnit): string { return `${unit.name}-v${unit.version}` }
+export function releaseTag(unit: ReleaseUnit, evidence?: ReleaseEvidence): string { return evidence?.releaseTag ?? `${unit.name}-v${unit.version}` }
 
 export function releaseMarker(evidence: ReleaseEvidence, unit: ReleaseUnit): string {
   const identity = { source: evidence.sourceCommit, builder: evidence.builderCommit, unit: unit.name, version: unit.version, assets: unit.assets }
@@ -22,9 +22,9 @@ export function releaseMarker(evidence: ReleaseEvidence, unit: ReleaseUnit): str
 
 export function preflightReleases(evidence: ReleaseEvidence, kind: ReleaseKind, host: ReleaseHost): void {
   evidence.units.filter((unit) => unit.atom.kind !== 'collection').forEach((unit) => {
-    const target = host.target(releaseTag(unit))
-    if (target !== undefined && target !== evidence.sourceCommit) throw new Error(`existing tag points at different source: ${releaseTag(unit)}`)
-    const existing = host.inspect(releaseTag(unit))
+    const target = host.target(releaseTag(unit, evidence))
+    if (target !== undefined && target !== evidence.sourceCommit) throw new Error(`existing tag points at different source: ${releaseTag(unit, evidence)}`)
+    const existing = host.inspect(releaseTag(unit, evidence))
     if (existing) inspectExisting(evidence, unit, kind, existing, host)
   })
 }
@@ -38,7 +38,7 @@ function inspectExisting(evidence: ReleaseEvidence, unit: ReleaseUnit, kind: Rel
   const actualKind = releaseKindOf(existing)
   const promotion = actualKind === 'draft' && kind === 'prerelease'
   if (existing.target_commitish !== evidence.sourceCommit || existing.body !== releaseMarker(evidence, unit) || (actualKind !== kind && !promotion)) {
-    throw new Error(`unexpected existing release: ${releaseTag(unit)}`)
+    throw new Error(`unexpected existing release: ${releaseTag(unit, evidence)}`)
   }
   existing.assets.forEach((asset) => {
     if (['index.json', 'index.json.sig'].includes(asset.name) && evidence.builtList) return
@@ -57,7 +57,7 @@ export function publishUnits(evidence: ReleaseEvidence, kind: ReleaseKind, outpu
 }
 
 function publishUnit(evidence: ReleaseEvidence, unit: ReleaseUnit, kind: ReleaseKind, outputDir: string, visibility: RepositoryVisibility, host: ReleaseHost): JsonObject {
-  const tag = releaseTag(unit)
+  const tag = releaseTag(unit, evidence)
   if (unit.atom.kind === 'collection') return writeAtom(outputDir, { ...unit.atom, release_kind: kind })
   const existing = host.inspect(tag)
   if (!existing) host.create(tag, evidence.sourceCommit, kind, releaseMarker(evidence, unit))
@@ -75,7 +75,7 @@ function publishUnit(evidence: ReleaseEvidence, unit: ReleaseUnit, kind: Release
 }
 
 export function finalizedUnitAtom(repository: string, unit: ReleaseUnit, kind: ReleaseKind, visibility: RepositoryVisibility, release: ExistingRelease): JsonObject {
-  const urls = publishableAssetUrlMap(release.assets, repository, releaseTag(unit), visibility === 'private' || kind === 'draft' ? 'private' : 'public')
+  const urls = publishableAssetUrlMap(release.assets, repository, release.tag_name, visibility === 'private' || kind === 'draft' ? 'private' : 'public')
   const finalized = finalizeDocUrls(finalizeDownloadUrl(unit.atom as unknown as PublishablePlugin, urls), urls)
   return { ...finalized, release_kind: kind } as JsonObject
 }

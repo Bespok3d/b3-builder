@@ -85,6 +85,9 @@ inputs:
   release-kind:
     description: draft, prerelease or live; non-live versions must end in -pre
     default: live
+  release-tag:
+    description: Exact prospective tag bound into nonpublishing preparation evidence
+    default: ''
   selected-ids:
     description: Space-separated unit IDs to publish; other units only supply build context
     required: true
@@ -114,9 +117,11 @@ runs:
         node-version: ${{ inputs.node-version }}
 
     - name: Set up Docker buildx (for docker-c / docker-ko bakes)
+      if: ${{ inputs.prepared-only != 'true' }}
       uses: docker/setup-buildx-action@v3
 
     - name: Expose the Actions layer cache to buildx
+      if: ${{ inputs.prepared-only != 'true' }}
       uses: crazy-max/ghaction-github-runtime@v3
 
     - name: Build the b3-builder core
@@ -149,6 +154,8 @@ runs:
         B3D_BAKE: ${{ inputs.bake }}
         B3D_SIGNING_KEY: ${{ inputs.signing-key }}
         B3D_RELEASE_KIND: ${{ inputs.release-kind }}
+        B3D_RELEASE_TAG: ${{ inputs.release-tag }}
+        B3D_PUBLISH: ${{ inputs.publish }}
         B3D_SELECTED_IDS: ${{ inputs.selected-ids }}
         B3D_REQUIRE_SIGNATURE: ${{ inputs.require-signature }}
         B3D_BUILDER_COMMIT: ${{ github.action_ref }}
@@ -198,6 +205,8 @@ runs:
         B3D_BAKE: ${{ inputs.bake }}
         B3D_SIGNING_KEY: ${{ inputs.signing-key }}
         B3D_RELEASE_KIND: ${{ inputs.release-kind }}
+        B3D_RELEASE_TAG: ${{ inputs.release-tag }}
+        B3D_PUBLISH: ${{ inputs.publish }}
         B3D_SELECTED_IDS: ${{ inputs.selected-ids }}
         B3D_REQUIRE_SIGNATURE: ${{ inputs.require-signature }}
         B3D_BUILDER_COMMIT: ${{ github.action_ref }}

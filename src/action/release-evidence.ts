@@ -13,11 +13,14 @@ import { sha256, verifyPackage } from './verify-package.js'
 export interface ReleaseUnit {
   name: string; version: string; sourceDigest: string; atom: JsonObject; assets: Record<string, string>
 }
+export interface PreparationIdentity { tag: string; runId: number; runAttempt: number }
 export interface ReleaseEvidence {
+  releaseTag?: string; preparation?: PreparationIdentity
   sourceCommit: string; builderCommit: string; registerCommit: string; kind: ReleaseKind; repository: string
   units: ReleaseUnit[]; baseline?: JsonObject; builtList?: JsonObject; baselineDigest?: string
 }
 export interface ReleaseIdentity {
+  releaseTag?: string; preparation?: PreparationIdentity
   sourceCommit: string; builderCommit: string; registerCommit: string; requireSignature: boolean
 }
 
@@ -31,6 +34,7 @@ export async function prepareEvidence(request: BuildRequest, atoms: JsonObject[]
   assertToolingIdentity(identity)
   const publicKey = request.signingKey ? await publicHalfOfSigningKey(request.signingKey) : undefined
   const selected = selectedAtoms(atoms, request.selectedIds)
+  if (identity.releaseTag && (selected.length !== 1 || !identity.releaseTag.endsWith(`-v${selected[0]!.version}`))) throw new Error('explicit consumer tag requires its exact single selected version')
   const units = await Promise.all(selected.map((atom) => prepareUnit(request, atom, identity, publicKey)))
   const evidence: ReleaseEvidence = { ...identity, kind: request.releaseKind ?? 'live', repository: request.identity.atomRepo, units, ...(baseline ? { baseline, baselineDigest, builtList: JSON.parse(readFileSync(join(request.outputDir, 'index.json'), 'utf8')) as JsonObject } : {}) }
   const bytes = Buffer.from(`${JSON.stringify(evidence, null, 2)}\n`)
@@ -70,6 +74,7 @@ export async function verifyEvidence(request: BuildRequest, identity: ReleaseIde
   await verifyEvidenceSignature(request.outputDir, bytes, publicKey, identity.requireSignature)
   if (evidence.sourceCommit !== identity.sourceCommit || evidence.builderCommit !== identity.builderCommit || evidence.registerCommit !== identity.registerCommit || evidence.repository !== request.identity.atomRepo) throw new Error('release artifact/source/tooling binding mismatch')
   if (evidence.kind !== request.releaseKind && !(evidence.kind === 'draft' && request.releaseKind === 'prerelease')) throw new Error('release artifact kind mismatch')
+  if (identity.releaseTag && (evidence.releaseTag !== identity.releaseTag || evidence.preparation?.tag !== identity.releaseTag)) throw new Error('prepared prospective tag mismatch')
   const selected = selectedAtoms(sourcesFor(request).map((source) => source.manifest), request.selectedIds).map((manifest) => manifest.name).sort()
   if (JSON.stringify(selected) !== JSON.stringify(evidence.units.map((unit) => unit.name).sort())) throw new Error('release selected unit set mismatch')
   await Promise.all(evidence.units.map((unit) => verifyUnit(request, identity, unit, publicKey)))

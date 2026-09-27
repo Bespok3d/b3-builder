@@ -27,8 +27,20 @@ on:
         description: Publish the verified outputs
         type: boolean
         default: false
-      prepared-run-id:
-        description: Reuse exact outputs from this earlier workflow run
+      prospective-tag:
+        description: Exact future release tag, no tag must exist for preparation
+        type: string
+        required: true
+      selected-ids:
+        description: One explicit unit ID for this release tag
+        type: string
+        required: true
+      expected-source-sha:
+        description: Exact source commit to prepare or publish
+        type: string
+        required: true
+      prepared-receipt:
+        description: Approved receipt JSON, required only for publication
         type: string
         default: ''
 
@@ -47,51 +59,58 @@ jobs:
         with:
           fetch-depth: 0
 
-      # The Run workflow button stays usable: this step, not a job level `if`, is what decides.
-      # A manual run against a release tag republishes it; a manual run against a branch is refused
-      # here, loudly, instead of skipping the job and reporting success.
-      - name: Refuse a ref that is not a plugin release tag
-        run: sh scripts/tag_version_guard.sh "${{ github.ref_name }}"
-
-      - name: Select the tag unit and release tier
+      - name: Resolve preparation or exact approved artifact
         id: release-selection
+        uses: Bespok3d/b3-builder/.github/actions/release-context@b698ae5fdf713ff7994c0c95e7d062c4a42547dd
+        with:
+          manifest-path: ''
+          tag-prefix: plugin-{unit}
+          prospective-tag: ${{ inputs.prospective-tag }}
+          selected-ids: ${{ inputs.selected-ids }}
+          expected-source-sha: ${{ inputs.expected-source-sha }}
+          release-kind: ${{ inputs.release-kind }}
+          publish: ${{ inputs.publish }}
+          prepared-receipt: ${{ inputs.prepared-receipt }}
+          register-commit: 3d4fa2adb4f39aa22b7112ff26fd9522db7b4827
+
+      - name: Refuse a ref that is not a plugin release tag
         env:
-          REQUESTED_KIND: ${{ inputs.release-kind }}
-          SHOULD_PUBLISH: ${{ github.event_name == 'push' || inputs.publish }}
-        run: |
-          set -euo pipefail
-          selected_id="${GITHUB_REF_NAME#plugin-}"
-          selected_id="${selected_id%-v*}"
-          kind="$REQUESTED_KIND"
-          if [ -z "$kind" ]; then
-            case "$GITHUB_REF_NAME" in *-pre) kind=draft ;; *) kind=live ;; esac
-          fi
-          echo "publish=$SHOULD_PUBLISH" >> "$GITHUB_OUTPUT"
-          echo "selected-ids=$selected_id" >> "$GITHUB_OUTPUT"
-          echo "release-kind=$kind" >> "$GITHUB_OUTPUT"
+          RELEASE_TAG: ${{ steps.release-selection.outputs.release-tag }}
+        run: sh scripts/tag_version_guard.sh "$RELEASE_TAG"
+
+      - name: Preserve plugin source and baked payloads in the prepared artifact
+        if: ${{ steps.release-selection.outputs.prepared-only != 'true' }}
+        env:
+          TOOL_ROOT: ${{ steps.release-selection.outputs.tool-root }}
+        run: node "$TOOL_ROOT/dist/action/release-context-main.js" stage-plugin-source
 
       - name: Download the prepared outputs
-        if: ${{ inputs.prepared-run-id != '' }}
+        if: ${{ steps.release-selection.outputs.prepared-only == 'true' }}
         uses: actions/download-artifact@v4
         with:
-          name: verified-unit-outputs
+          artifact-ids: ${{ steps.release-selection.outputs.prepared-artifact-id }}
           path: .
-          run-id: ${{ inputs.prepared-run-id }}
+          merge-multiple: true
+          run-id: ${{ steps.release-selection.outputs.prepared-run-id }}
           github-token: ${{ github.token }}
 
       - name: Restore the exact prepared file modes
-        if: ${{ inputs.prepared-run-id != '' }}
-        run: tar -xzf verified-unit-outputs.tar.gz
+        if: ${{ steps.release-selection.outputs.prepared-only == 'true' }}
+        env:
+          TOOL_ROOT: ${{ steps.release-selection.outputs.tool-root }}
+        run: node "$TOOL_ROOT/dist/action/release-context-main.js" restore
 
       - uses: Bespok3d/b3-builder@b698ae5fdf713ff7994c0c95e7d062c4a42547dd  # main @ 2026-09-25
         with:
           release-kind: ${{ steps.release-selection.outputs.release-kind }}
+          release-tag: ${{ steps.release-selection.outputs.release-tag }}
           selected-ids: ${{ steps.release-selection.outputs.selected-ids }}
           publish: ${{ steps.release-selection.outputs.publish }}
-          prepared-only: ${{ inputs.prepared-run-id != '' }}
+          prepared-only: ${{ steps.release-selection.outputs.prepared-only }}
           require-signature: 'true'
           register-commit: 3d4fa2adb4f39aa22b7112ff26fd9522db7b4827
           unit: repo
+          source: dist/package
           # Per-repo Actions secret today (GitHub Free cannot org-secret private repos); becomes ONE org
           # secret every repo inherits when the repos go public. See b3-builder README (secrets model).
           signing-key: ${{ secrets.REGISTRY_SIGNING_KEY }}
@@ -113,11 +132,32 @@ jobs:
           token: ${{ secrets.MAIN_INDEX_TOKEN }}
 
       - name: Preserve prepared file modes
+        if: ${{ steps.release-selection.outputs.publish != 'true' }}
         run: tar -czf verified-unit-outputs.tar.gz dist
 
       - name: Keep exact verified outputs for publication or promotion
+        id: prepared-artifact
+        if: ${{ steps.release-selection.outputs.publish != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: verified-unit-outputs
           path: verified-unit-outputs.tar.gz
+          if-no-files-found: error
+
+      - name: Create the exact artifact approval receipt
+        if: ${{ steps.release-selection.outputs.publish != 'true' }}
+        env:
+          TOOL_ROOT: ${{ steps.release-selection.outputs.tool-root }}
+          B3D_ARTIFACT_ID: ${{ steps.prepared-artifact.outputs.artifact-id }}
+          B3D_ARTIFACT_DIGEST: ${{ steps.prepared-artifact.outputs.artifact-digest }}
+        run: node "$TOOL_ROOT/dist/action/release-context-main.js" receipt
+
+      - name: Keep the receipt and exact annotated-tag message for approval
+        if: ${{ steps.release-selection.outputs.publish != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-unit-receipt
+          path: |
+            prepared-release-receipt.json
+            prepared-release-tag-message.txt
           if-no-files-found: error

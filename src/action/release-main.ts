@@ -27,7 +27,7 @@ async function main(phase: string | undefined, env: NodeJS.ProcessEnv): Promise<
   if (phase !== 'publish') throw new Error('phase must be prepare or publish')
   const evidence = await verifyEvidence(request, identity)
   if (listBuild) {
-    const ownReleases = Object.fromEntries(evidence.units.map((unit) => [releaseTag(unit), releaseMarker(evidence, unit)]))
+    const ownReleases = Object.fromEntries(evidence.units.map((unit) => [releaseTag(unit, evidence), releaseMarker(evidence, unit)]))
     const baseline = await readLiveBaseline(request.identity.atomRepo, await publicHalfOfSigningKey(request.signingKey ?? ''), env.B3D_ALLOW_EMPTY_BASELINE === 'true', ownReleases)
     if (baseline.digest !== evidence.baselineDigest) throw new Error('Live list changed after preparation; prepare against current baseline')
   }

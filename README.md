@@ -439,3 +439,31 @@ and Live commits against explicit manifest/runtime version fields. Package compa
 the manifest version, its signature, and the exact daemon `DAEMON_VERSION` assignment (plus that
 file's manifest checksum). It preserves paths, modes and all other payload bytes; timestamps and
 compression framing are not payload identity.
+
+### Pre-tag preparation and normal tag publication
+
+The consumer `release-context` Action distinguishes an explicit nonpublishing dispatch from
+publication. A preparation dispatch supplies `prospective-tag`, one `selected-ids` value,
+`expected-source-sha`, `release-kind`, and `publish: false`. The checkout must match that SHA.
+The consumer's unchanged tag guard checks the prospective tag even though it does not exist yet.
+Plugin source and baked payloads are staged into `dist/package`; the complete `dist` tree is retained
+in `verified-unit-outputs.tar.gz` so publication restores the exact modes and source fingerprints.
+
+After uploading that artifact, the workflow creates `prepared-release-receipt.json` and
+`prepared-release-tag-message.txt`, retained together as the `verified-unit-receipt` artifact.
+The receipt binds the repository, source commit, prospective tag, selected unit, tier, tooling pins,
+preparation run/attempt, immutable artifact ID/digest, and exact archive/evidence hashes. Review the
+completed successful preparation run and freeze that receipt in the operation's evidence.
+
+A normal tag push must use an annotated tag whose message is the prepared tag-message file. The
+context Action verifies the peeled commit, named successful preparation attempt, artifact ownership,
+expiry and digest. It selects that exact artifact ID, never the newest build for a source SHA.
+Publication always uses `prepared-only: true`; missing preparation is a refusal, never a rebuild.
+The signed evidence binds the prospective tag, and the release is published under that same tag.
+A later dispatch can promote the same draft using `publish: true`, `release-kind: prerelease`, and
+the original receipt in `prepared-receipt`; source, tag, selection and artifacts remain identical.
+
+`dist/action/prepared-receipt.js` exports receipt parsing, context/metadata verification and
+`tagReceiptMessage`. `dist/action/prepared-artifact.js` verifies archive/evidence hashes and restores
+the prepared tree; the normal builder verifier then checks evidence and package signatures before
+publication. These helpers support a caller's whole-operation preflight without publishing.

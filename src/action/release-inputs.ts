@@ -16,7 +16,7 @@ export function actionRequest(env: NodeJS.ProcessEnv): BuildRequest {
 }
 
 export function actionIdentity(env: NodeJS.ProcessEnv): ReleaseIdentity {
-  return { sourceCommit: required(env, 'GITHUB_SHA'), builderCommit: required(env, 'B3D_BUILDER_COMMIT'), registerCommit: required(env, 'B3D_REGISTER_COMMIT'), requireSignature: env.B3D_REQUIRE_SIGNATURE === 'true' }
+  return { sourceCommit: required(env, 'GITHUB_SHA'), builderCommit: required(env, 'B3D_BUILDER_COMMIT'), registerCommit: required(env, 'B3D_REGISTER_COMMIT'), requireSignature: env.B3D_REQUIRE_SIGNATURE === 'true', ...preparationIdentity(env) }
 }
 
 function required(env: NodeJS.ProcessEnv, name: string): string {
@@ -26,3 +26,12 @@ function required(env: NodeJS.ProcessEnv, name: string): string {
 }
 
 function words(value: string | undefined): string[] { return value?.trim().split(/\s+/).filter(Boolean) ?? [] }
+
+function preparationIdentity(env: NodeJS.ProcessEnv): Pick<ReleaseIdentity, 'releaseTag' | 'preparation'> {
+  if (!env.B3D_RELEASE_TAG) return {}
+  if (env.B3D_PUBLISH !== 'false') return { releaseTag: env.B3D_RELEASE_TAG }
+  const runId = Number(required(env, 'GITHUB_RUN_ID'))
+  const runAttempt = Number(required(env, 'GITHUB_RUN_ATTEMPT'))
+  if (env.GITHUB_EVENT_NAME !== 'workflow_dispatch' || !Number.isSafeInteger(runId) || runId < 1 || !Number.isSafeInteger(runAttempt) || runAttempt < 1) throw new Error('receipt requires a nonpublishing workflow dispatch identity')
+  return { releaseTag: env.B3D_RELEASE_TAG, preparation: { tag: env.B3D_RELEASE_TAG, runId, runAttempt } }
+}
