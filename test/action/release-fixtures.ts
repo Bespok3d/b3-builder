@@ -6,6 +6,7 @@ import type { ExistingRelease, ReleaseHost } from '../../src/action/github-relea
 import type { ReleaseAssetAddress } from '../../src/action/published-asset-url.js'
 
 export class FixtureHost implements ReleaseHost {
+  constructor(private readonly assetBase = 'https://api.github.com/repos/test/repo/releases/assets') {}
   releases = new Map<string, ExistingRelease>()
   bytes = new Map<string, Buffer>()
   effects: string[] = []
@@ -20,7 +21,7 @@ export class FixtureHost implements ReleaseHost {
     paths.forEach((path) => {
       const name = basename(path)
       this.effects.push(`upload ${tag}/${name}`)
-      const url = `https://api.github.com/repos/test/repo/releases/assets/${this.bytes.size + 1}`
+      const url = `${this.assetBase}/${this.bytes.size + 1}`
       this.bytes.set(url, readFileSync(path))
       this.releases.get(tag)!.assets.push({ name, url })
     })

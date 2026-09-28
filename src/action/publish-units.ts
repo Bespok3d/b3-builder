@@ -85,7 +85,7 @@ function verifyExistingAtom(evidence: ReleaseEvidence, unit: ReleaseUnit, releas
   const atom = JSON.parse(host.download(asset).toString('utf8')) as JsonObject
   const kind = atom.release_kind as ReleaseKind
   if (!['draft', 'prerelease', 'live'].includes(kind) || atomFilename(atom) !== filename) throw new Error(`unexpected existing atom: ${filename}`)
-  const visibility = String(atom.download_url).startsWith('https://api.github.com/') ? 'private' : 'public'
+  const visibility = release.assets.some((published) => published.url === atom.download_url) ? 'private' : 'public'
   const expected = finalizedUnitAtom(evidence.repository, unit, kind, visibility, release)
   if (JSON.stringify(atom) !== JSON.stringify(expected)) throw new Error(`existing atom differs: ${filename}`)
 }

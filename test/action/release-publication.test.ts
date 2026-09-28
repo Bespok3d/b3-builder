@@ -21,6 +21,16 @@ function releaseFixture(kind: 'draft' | 'prerelease' | 'live' = 'draft') {
 }
 
 describe('verified unit publication', () => {
+  it('replays private assets from another release host without deriving a GitHub URL', () => {
+    const { out, evidence } = releaseFixture()
+    const host = new FixtureHost('https://test-host.example/attachments')
+    publishUnits(evidence, 'draft', out, 'private', host)
+    publishUnits(evidence, 'prerelease', out, 'private', host)
+    const effects = [...host.effects]
+    publishUnits(evidence, 'prerelease', out, 'private', host)
+    expect(host.effects).toEqual(effects)
+    expect(host.inspect('selected-v1.0.0-pre')!.prerelease).toBe(true)
+  })
   it.each(['live', 'draft', 'prerelease'] as const)('creates %s against the built commit', (kind) => {
     const args = createReleaseArgs('test/repo', 'selected-v1', '1'.repeat(40), kind, 'verified')
     expect(args.slice(args.indexOf('--target'), args.indexOf('--target') + 2)).toEqual(['--target', '1'.repeat(40)])
