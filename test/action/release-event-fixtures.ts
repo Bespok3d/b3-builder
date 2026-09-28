@@ -51,8 +51,10 @@ function pluginCheckout(repo: string): { root: string; name: string } {
   const root = mkdtempSync(join(tmpdir(), 'plugin-event-'))
   fixtureFile(root, 'selected/manifest.json', JSON.stringify({ name: 'selected', version: '1.0.0-pre', publisher: 'PLACEHOLDER' }))
   fixtureFile(root, 'selected/files/payload', 'selected source')
-  fixtureFile(root, 'unrelated/manifest.json', JSON.stringify({ name: 'unrelated', version: '4.0.0', publisher: 'PLACEHOLDER' }))
-  fixtureFile(root, 'unrelated/files/payload', 'unrelated source')
+  if (repo !== 'plugins/spoolman-klipper-helper') {
+    fixtureFile(root, 'unrelated/manifest.json', JSON.stringify({ name: 'unrelated', version: '4.0.0', publisher: 'PLACEHOLDER' }))
+    fixtureFile(root, 'unrelated/files/payload', 'unrelated source')
+  }
   fixtureFile(root, 'scripts/tag_version_guard.sh', consumerSource(`${repo}/scripts/tag_version_guard.sh`).toString())
   return { root, name: 'selected' }
 }
