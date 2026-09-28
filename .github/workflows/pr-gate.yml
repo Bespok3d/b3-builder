@@ -42,7 +42,7 @@ jobs:
           # The all-the-tags plugin tree lives in the repo named material-tags; the harness reads it at
           # the ../plugins/all-the-tags path, so the checkout is renamed here.
           repository: Bespok3d/material-tags
-          ref: 7735ab884ea9d3e7203e97b9b3c255705f037477
+          ref: 6eada0b08c8688fcbeaaf9db2414e546c743df51
           path: plugins/all-the-tags
 
       - uses: actions/checkout@v4
@@ -50,6 +50,150 @@ jobs:
           repository: Bespok3d/fluidd-plugin
           ref: 9e4370a0feaae3494ee7e7ef22d04e7995eb574b
           path: plugins/fluidd-plugin
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/main-index
+          ref: e265b453c6d7fbdede5d6b2e6be841511704c1e5
+          path: main-index
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/daemon
+          ref: 320a23f666a9c5cb266c9a9b03dd26f236b3245a
+          path: consumers/daemon
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/adapters
+          ref: eecd5040bed319e53c2c0c3203486ce40f233454
+          path: consumers/adapters
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/material-tags
+          ref: 9928f87c71244739d00f8a2fdffa15482f189671
+          path: consumers/plugins/all-the-tags
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/fluidd-plugin
+          ref: 14f0e5846d69a3f25cadc72cd0ae3c770989e943
+          path: consumers/plugins/fluidd-plugin
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/fluidd-timelapse
+          ref: e7bf0ce2a61bfdc6eb40fe4c635d6fa767a68328
+          path: consumers/plugins/fluidd-timelapse
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/mainsail-plugin
+          ref: 0130af68389d1ed5b16d72243a1092f55cf80bf5
+          path: consumers/plugins/mainsail-plugin
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/moonraker-auth
+          ref: dd08607392512105adb643281413681e35663831
+          path: consumers/plugins/moonraker-auth
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/networking
+          ref: bee45c5f9a35bd027d140a687ca2c74abeacd083
+          path: consumers/plugins/networking
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/octoeverywhere
+          ref: 4e7113b6a393da04bf36bc463c6f3e620c9e0384
+          path: consumers/plugins/octoeverywhere-plugin
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/panda-breath
+          ref: bc261425886299cee154cb40374d0b9915955f60
+          path: consumers/plugins/panda-breath-plugin
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/reference-python-plugins
+          ref: c9fb7f95c6c794963ee7849bfe9c3f79dc7c65b8
+          path: consumers/plugins/reference-python-plugins
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/spoolman-klipper-helper
+          ref: fb2beeec4adb9bfc2b106c4a5a892be02501b3de
+          path: consumers/plugins/spoolman-klipper-helper
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/u1-afc-lite
+          ref: 7bc760d1aa5c974d3a5f006fef307c8d0b6732a7
+          path: consumers/plugins/u1-afc-lite
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/u1-base
+          ref: f4a79e87a68599e73d641f9e2c774a97092815e7
+          path: consumers/plugins/u1-base
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/u1-camera-configs
+          ref: d65da8a71eb126b3a28f0023997d6cc7cc01f86a
+          path: consumers/plugins/u1-camera-configs
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/u1-enhanced-rfid
+          ref: fc43324ba6e9c3337e31b8eb1a12247f8cc8df73
+          path: consumers/plugins/u1-enhanced-rfid
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/u1-extras
+          ref: 3b22dff56ee5c0ca9a1cdc29b72316ee45251a09
+          path: consumers/plugins/u1-extras
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/u1-faulty-toolhead
+          ref: 1ebaf73a5e1ee7b0f3da60e8783fc22c1468d771
+          path: consumers/plugins/u1-faulty-toolhead
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/u1-force-macros
+          ref: bff042d14185b1af18506a806477b470348bee11
+          path: consumers/plugins/u1-force-macros
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/u1-hw-camera
+          ref: d35d95f7ad0c0e33b30f4c8ca7e6cbfc86bf117d
+          path: consumers/plugins/u1-hw-camera
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/u1-klipper-config-enhancers
+          ref: 9f0557d060d6297bf77dab62c315171cdbd62344
+          path: consumers/plugins/u1-klipper-config-enhancers
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/u1-motion-tweaks
+          ref: 1f8efd01954cc7f5fdd3c978f8d74feef7e3db97
+          path: consumers/plugins/u1-motion-tweaks
+
+      - uses: actions/checkout@v4
+        with:
+          repository: Bespok3d/u1-remote-screen
+          ref: 4ccb48cb8585c354ea6f7b3b35b9f9c141dd39e1
+          path: consumers/plugins/u1-remote-screen
 
       - uses: actions/setup-node@v4
         with:
@@ -83,4 +227,6 @@ jobs:
 
       - name: Run the gate
         working-directory: b3-builder
+        env:
+          B3D_CONSUMER_WORKSPACE: ${{ github.workspace }}/consumers
         run: bash scripts/check.sh

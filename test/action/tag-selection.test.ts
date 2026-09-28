@@ -16,8 +16,13 @@ function tagRequest(sourceDir: string, tag: string) {
   return actionRequest({ B3D_SOURCE: sourceDir, B3D_OUT: join(mkdtempSync(join(tmpdir(), 'tag-output-')), 'dist'), B3D_UNIT: 'repo', B3D_ATOM_REPO: 'fixture/publisher', GITHUB_REF_TYPE: 'tag', GITHUB_REF_NAME: tag })
 }
 
+function basePublisherSource(): string {
+  const workspace = process.env.B3D_CONSUMER_WORKSPACE ?? resolve(import.meta.dirname, '../../..')
+  return resolve(workspace, 'plugins/u1-base')
+}
+
 it('selects only the tagged package from an unchanged real multi-plugin publisher', () => {
-  const source = resolve(import.meta.dirname, '../../../plugins/u1-base')
+  const source = basePublisherSource()
   const selected = tagRequest(source, 'plugin-u1-base-print-task-config-v0.1.0')
   expect(selected.selectedIds).toEqual(['u1-base-print-task-config'])
   expect(selected.releaseKind).toBe('live')
@@ -34,7 +39,7 @@ it('infers a candidate release from its tagged version and leaves the rest of th
 })
 
 it('prepares and publishes the exact signed package of a previously unchanged U1 base repository', async () => {
-  const source = resolve(import.meta.dirname, '../../../plugins/u1-base')
+  const source = basePublisherSource()
   const request = tagRequest(source, 'plugin-u1-base-print-task-config-v0.1.0')
   const { privateKey } = await generateKey({ type: 'ecc', userIDs: [{ name: 'fixture publisher' }], format: 'armored' })
   const signed = { ...request, signingKey: privateKey }

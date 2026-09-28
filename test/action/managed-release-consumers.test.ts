@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { parseDocument } from 'yaml'
 import { expect, it } from 'vitest'
@@ -13,7 +13,9 @@ const publishers = [
 ]
 
 it.each(publishers)('%s prepares and publishes only the selected release via the shared Action', (publisher) => {
-  const path = resolve(import.meta.dirname, `../../../plugins/${publisher}/.github/workflows/release.yml`)
+  const workspace = process.env.B3D_CONSUMER_WORKSPACE ?? resolve(import.meta.dirname, '../../..')
+  const path = resolve(workspace, `plugins/${publisher}/.github/workflows/release.yml`)
+  expect(existsSync(path)).toBe(true)
   const document = parseDocument(readFileSync(path, 'utf8'))
   expect(document.errors).toEqual([])
   const workflow = document.toJS() as { jobs: Record<string, { permissions: Record<string, string>; steps: { id?: string; uses?: string; if?: string; with?: Record<string, string> }[] }> }
