@@ -8,6 +8,7 @@ import { expect, it } from 'vitest'
 import { restorePreparedArtifact } from '../../src/action/prepared-artifact.js'
 import type { PreparedReceipt } from '../../src/action/prepared-receipt.js'
 import { sha256 } from '../../src/action/verify-package.js'
+import { verifyApprovedPreparedRun } from '../../src/action/verify-approved-prepared-run.js'
 
 function preparedArchive(): { root: string; receipt: PreparedReceipt } {
   const root = mkdtempSync(join(tmpdir(), 'restore-artifact-'))
@@ -37,6 +38,16 @@ it('restores the exact approved evidence after archive validation', () => {
   const { root, receipt } = preparedArchive()
   restorePreparedArtifact(root, receipt)
   expect(sha256(readFileSync(join(root, 'dist/release-evidence.json')))).toBe(receipt.evidenceSha256)
+})
+
+it('refuses prepared-output publication without a receipt, and binds an approved receipt to the publisher commit', () => {
+  const { root, receipt } = preparedArchive()
+  restorePreparedArtifact(root, receipt)
+  const identity = { sourceCommit: receipt.sourceCommit, builderCommit: receipt.builderCommit, registerCommit: receipt.registerCommit, releaseTag: receipt.tag, requireSignature: true }
+  writeFileSync(join(root, '.b3-release-context.json'), JSON.stringify({ context: { ...receipt, publish: true, preparedOnly: true } }))
+  expect(() => verifyApprovedPreparedRun(join(root, 'dist'), identity)).toThrow('requires an approved receipt')
+  writeFileSync(join(root, '.b3-release-context.json'), JSON.stringify({ context: { ...receipt, publish: true, preparedOnly: true }, receipt }))
+  expect(() => verifyApprovedPreparedRun(join(root, 'dist'), { ...identity, builderCommit: 'f'.repeat(40) })).toThrow('differs from publication tooling')
 })
 
 it.each([

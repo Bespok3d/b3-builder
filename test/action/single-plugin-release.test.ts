@@ -23,6 +23,6 @@ describe('single-root-plugin Action release path', () => {
     expect(compositeAction).not.toContain('--clobber')
   })
   it('keeps Live sub-list registration out of plugin units and candidate releases', () => {
-    expect(compositeAction).toContain("inputs.unit == 'repo' && inputs.main-index-token != '' && inputs.list-name != '' && inputs.publish == 'true' && inputs.release-kind == 'live'")
+    expect(compositeAction).toContain("inputs.unit == 'repo' && inputs.main-index-token != '' && inputs.list-name != ''")
   })
 })

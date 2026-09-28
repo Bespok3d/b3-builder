@@ -9,7 +9,7 @@ import { consumerSource } from './consumer-source.js'
 afterEach(() => vi.unstubAllEnvs())
 it('runs with local snapshots and rejects missing or changed actual consumer source', () => {
   vi.stubEnv('B3D_CONSUMER_WORKSPACE', '')
-  const path = 'daemon/.github/workflows/release.yml'
+  const path = 'daemon/scripts/stage-package.sh'
   const snapshot = consumerSource(path)
   const workspace = mkdtempSync(join(tmpdir(), 'consumer-drift-'))
   vi.stubEnv('B3D_CONSUMER_WORKSPACE', workspace)

@@ -23,5 +23,6 @@ it('discovers a unit by manifest identity when its directory has a different nam
   fixtureFile(root, 'arbitrary-directory/manifest.json', JSON.stringify({ name: 'selected', version: '1.0.0-pre' }))
   expect(consumerContext(dispatch(), root).selectedIds).toEqual(['selected'])
   const push = { ...dispatch(), eventName: 'push', refType: 'tag', refName: 'plugin-selected-v1.0.0-pre', selectedIds: '', requestedKind: 'prerelease' }
-  expect(consumerContext(push, root)).toMatchObject({ selectedIds: ['selected'], releaseKind: 'prerelease', preparedOnly: true })
+  expect(consumerContext(push, root)).toMatchObject({ selectedIds: ['selected'], releaseKind: 'prerelease', preparedOnly: false, publish: true })
+  expect(consumerContext({ ...push, preparedTag: true }, root).preparedOnly).toBe(true)
 })

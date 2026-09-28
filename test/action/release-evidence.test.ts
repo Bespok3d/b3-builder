@@ -64,3 +64,16 @@ it('publishes the selected candidate while an unrelated real package asset stays
   expect(host.inspect('unrelated-v0.9.0')).toEqual(before)
   expect(host.download(before!.assets[0]!)).toEqual(bytes)
 })
+
+it('publishes an ordinary version tag without a preparation receipt using the exact selected output', async () => {
+  const { FixtureHost } = await import('./release-fixtures.js')
+  const { publishUnits } = await import('../../src/action/publish-units.js')
+  const { request, artifacts } = await prepared()
+  const ordinaryTag = { ...identity, releaseTag: 'plugin-selected-v1.0.0-pre' }
+  const evidence = await prepareEvidence(request, artifacts.atoms, ordinaryTag)
+  expect(evidence.preparation).toBeUndefined()
+  await expect(verifyEvidence(request, ordinaryTag)).resolves.toMatchObject({ releaseTag: ordinaryTag.releaseTag })
+  const host = new FixtureHost()
+  publishUnits(evidence, 'draft', request.outputDir, 'private', host)
+  expect(host.inspect(ordinaryTag.releaseTag)).toBeDefined()
+})

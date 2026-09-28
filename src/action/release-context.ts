@@ -9,7 +9,7 @@ import type { ReleaseKind } from '../core/types.js'
 export interface ConsumerEvent {
   eventName: string; refType: string; refName: string; repository: string; sourceCommit: string
   manifestPath: string; tagPrefix: string; prospectiveTag: string; selectedIds: string; expectedSource: string
-  requestedKind: string; publish: boolean; builderCommit: string; registerCommit: string
+  requestedKind: string; publish: boolean; builderCommit: string; registerCommit: string; preparedTag?: boolean
 }
 export interface ReleaseContext {
   repository: string; sourceCommit: string; tag: string; selectedIds: string[]; releaseKind: ReleaseKind
@@ -31,7 +31,7 @@ export function consumerContext(event: ConsumerEvent, root: string): ReleaseCont
   const kind = releaseKind(event.requestedKind || (matches[0]!.version.endsWith('-pre') ? 'draft' : 'live'))
   assertReleaseVersion(matches[0]!.version, kind)
   ;[event.sourceCommit, event.builderCommit, event.registerCommit].forEach((commit) => { if (!/^[0-9a-f]{40}$/.test(commit)) throw new Error('exact source and tooling pins required') })
-  return { repository: event.repository, sourceCommit: event.sourceCommit, tag, selectedIds, releaseKind: kind, builderCommit: event.builderCommit, registerCommit: event.registerCommit, publish: push || event.publish, preparedOnly: push || event.publish }
+  return { repository: event.repository, sourceCommit: event.sourceCommit, tag, selectedIds, releaseKind: kind, builderCommit: event.builderCommit, registerCommit: event.registerCommit, publish: push || event.publish, preparedOnly: Boolean(event.preparedTag) || (!push && event.publish) }
 }
 function consumerManifests(root: string, manifestPath: string): UnitManifest[] {
   if (!manifestPath) return discoverRepoSources(root).map((source) => source.manifest as unknown as UnitManifest)

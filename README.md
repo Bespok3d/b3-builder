@@ -296,11 +296,11 @@ module's vermagic is checked against the declared one; on mismatch the build ref
 
 ## GitHub Action reference
 
-The composite Action gives a plugin repo its whole release pipeline from one `uses:`. A run
-builds (and bakes) every plugin, runs each plugin's `tests/run.sh` (a failing test aborts before
-anything is released), cuts a GitHub release with the `.b3` asset per plugin, rewrites the
-assembled `index.json` so each entry's download URL points at its real release asset, uploads that
-signed `index.json` as an asset of the same releases, and optionally registers the list in an
+The composite Action gives a plugin repo its whole release pipeline from one `uses:`. A release run
+builds (and bakes) every plugin for dependency context, tests the selected plugin, then publishes
+only that plugin's verified assets. A preview run tests every plugin and publishes nothing. It rewrites the
+assembled `index.json` so each entry's download URL points at its real release asset, uploads the
+signed selected-plugin list as an asset of that release, and optionally registers the list in an
 index-of-lists repo. That full pipeline is the `repo` unit (the default). With `unit: plugin`, the
 Action tests the root plugin, releases its signed `.b3` and declared document assets, and finalizes
 its atom. It does not assemble or register a list.
@@ -309,6 +309,14 @@ A release writes nothing back into the plugin repo. The list ships the way the `
 a release asset, so readers fetch it at
 `https://github.com/<owner>/<repo>/releases/latest/download/index.json`, an address that does not
 change when the next release lands.
+
+An ordinary version-tag push selects the plugin and version named by its tag and builds normally.
+For publication from a prepared run, `managed-release: 'true'` verifies the approved receipt's
+source, selected unit, tooling commits, successful preparation run and exact artifact digest before
+restoring that artifact. Publication verifies its signed evidence and package bytes without baking
+or packing again. The prepared archive and its receipt are separate run artifacts. Repos with custom
+staging (the daemon and printer adapters) pass `manifest-path`, `tag-prefix` and `stage-command` to
+the same Action, so preparation and receipt verification stay shared.
 
 A repo-unit example for a publisher-owned list. For Bespok3d atom PR submission, use the
 [canonical publishing guide](doc/publishing-a-plugin.md) instead. Root-plugin repositories use
@@ -357,7 +365,15 @@ jobs:
 | `provider-indexes` | space-separated published index.json locations read for services provided in other repos | empty |
 | `bake` | produce each plugin's payload from source via its bake steps | `'false'` |
 | `skip-unchanged` | reuse an existing `.b3` whose content is unchanged | `'false'` |
-| `node-version` | Node.js version the pipeline runs on | `'20'` |
+| `selected-ids` | explicit units for dispatch; a version-tag push selects its own unit | tag-derived |
+| `release-kind` | `draft`, `prerelease`, or `live` | inferred from the selected version |
+| `managed-release` | handle preparation, exact prepared publication, and ordinary tag pushes inside the Action | `'false'` |
+| `manifest-path` / `tag-prefix` | caller manifest and version-tag convention for managed releases | repo discovery / `plugin-{unit}` |
+| `stage-command` | stage a non-plugin-directory package for a managed release | discover and stage plugin dirs |
+| `expected-source-sha` | exact commit required for a manual managed run | empty |
+| `prepared-receipt` | receipt JSON required for manual publication of a prepared run | empty |
+| `register-commit` | full commit of the registration action used by the caller | builder commit for builder-owned list registration |
+| `node-version` | Node.js version the pipeline runs on | `'24'` |
 
 Tokens: the releases and the list asset use the workflow's own `github.token`, which needs
 `permissions: contents: write` (as in the example). Registering into a separate index-of-lists repo

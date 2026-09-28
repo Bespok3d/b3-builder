@@ -13,9 +13,19 @@ import { githubReleaseHost } from './github-release.js'
 import { releaseTag, releaseMarker } from './publish-units.js'
 import { readLiveBaseline } from './published-baseline.js'
 import { publishRelease } from './publish-release.js'
+import { verifyApprovedPreparedRun } from './verify-approved-prepared-run.js'
 
 async function main(phase: string | undefined, env: NodeJS.ProcessEnv): Promise<void> {
   const request = actionRequest(env)
+  if (phase === 'preview') {
+    await runPipeline({ ...request, selectedIds: undefined, releaseKind: undefined })
+    return
+  }
+  if (phase === 'select') {
+    if (!request.selectedIds?.length) throw new Error('selected-ids must explicitly name units on dispatch')
+    process.stdout.write(`${request.selectedIds.join(' ')}\n${request.releaseKind}\n`)
+    return
+  }
   const identity = actionIdentity(env)
   const listBuild = isListIdentity(request.identity) && request.releaseKind === 'live'
   if (phase === 'prepare') {
@@ -25,6 +35,7 @@ async function main(phase: string | undefined, env: NodeJS.ProcessEnv): Promise<
     return
   }
   if (phase !== 'publish') throw new Error('phase must be prepare or publish')
+  if (env.B3D_PREPARED_ONLY === 'true') verifyApprovedPreparedRun(request.outputDir, identity, env)
   const evidence = await verifyEvidence(request, identity)
   if (listBuild) {
     const ownReleases = Object.fromEntries(evidence.units.map((unit) => [releaseTag(unit, evidence), releaseMarker(evidence, unit)]))

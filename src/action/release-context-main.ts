@@ -22,8 +22,9 @@ function metadata<T>(path: string): T { return JSON.parse(execFileSync('gh', ['a
 function plan(): void {
   const sourceCommit = git(['rev-parse', 'HEAD'])
   if (sourceCommit !== environment('GITHUB_SHA')) throw new Error('checkout/event source mismatch')
-  const pushedReceipt = environment('GITHUB_EVENT_NAME') === 'push' ? parseReceipt(tagContents(environment('GITHUB_REF_NAME'), sourceCommit)) : undefined
-  const context = consumerContext({ eventName: environment('GITHUB_EVENT_NAME'), refType: environment('GITHUB_REF_TYPE'), refName: environment('GITHUB_REF_NAME'), repository: environment('GITHUB_REPOSITORY'), sourceCommit, manifestPath: environment('B3D_MANIFEST_PATH'), tagPrefix: environment('B3D_TAG_PREFIX'), prospectiveTag: environment('B3D_PROSPECTIVE_TAG'), selectedIds: environment('B3D_SELECTED_IDS'), expectedSource: environment('B3D_EXPECTED_SOURCE'), requestedKind: pushedReceipt?.releaseKind ?? environment('B3D_RELEASE_KIND'), publish: environment('B3D_PUBLISH') === 'true', builderCommit: environment('B3D_BUILDER_COMMIT'), registerCommit: environment('B3D_REGISTER_COMMIT') }, process.cwd())
+  const tagMessage = environment('GITHUB_EVENT_NAME') === 'push' ? tagContents(environment('GITHUB_REF_NAME'), sourceCommit) : undefined
+  const pushedReceipt = tagMessage ? parseReceipt(tagMessage) : undefined
+  const context = consumerContext({ eventName: environment('GITHUB_EVENT_NAME'), refType: environment('GITHUB_REF_TYPE'), refName: environment('GITHUB_REF_NAME'), repository: environment('GITHUB_REPOSITORY'), sourceCommit, manifestPath: environment('B3D_MANIFEST_PATH'), tagPrefix: environment('B3D_TAG_PREFIX'), prospectiveTag: environment('B3D_PROSPECTIVE_TAG'), selectedIds: environment('B3D_SELECTED_IDS'), expectedSource: environment('B3D_EXPECTED_SOURCE'), requestedKind: pushedReceipt?.releaseKind ?? environment('B3D_RELEASE_KIND'), publish: environment('B3D_PUBLISH') === 'true', builderCommit: environment('B3D_BUILDER_COMMIT'), registerCommit: environment('B3D_REGISTER_COMMIT'), preparedTag: Boolean(pushedReceipt) }, process.cwd())
   git(['check-ref-format', `refs/tags/${context.tag}`])
   const receipt = context.preparedOnly ? publicationReceipt(context, pushedReceipt) : undefined
   if (!context.preparedOnly && environment('B3D_PREPARED_RECEIPT')) throw new Error('preparation cannot silently ignore a supplied receipt')
@@ -39,12 +40,12 @@ function publicationReceipt(context: ReleaseContext, pushedReceipt?: PreparedRec
   assertPreparationMetadata(receipt, run, artifact)
   return receipt
 }
-function tagContents(tag: string, sourceCommit: string): string {
+function tagContents(tag: string, sourceCommit: string): string | undefined {
   const ref = `refs/tags/${tag}`
-  if (git(['cat-file', '-t', ref]) !== 'tag' || git(['rev-parse', `${ref}^{commit}`]) !== sourceCommit) throw new Error('tag must be annotated at the exact prepared source commit')
+  if (git(['rev-parse', `${ref}^{commit}`]) !== sourceCommit) throw new Error('tag points at a different source commit')
+  if (git(['cat-file', '-t', ref]) !== 'tag') return undefined
   const contents = git(['for-each-ref', '--format=%(contents)', ref])
-  if (!contents.startsWith('B3D-Prepared-Release\n')) throw new Error('annotated tag has no prepared release receipt')
-  return contents
+  return contents.startsWith('B3D-Prepared-Release\n') ? contents : undefined
 }
 function saved(): SavedContext { return JSON.parse(readFileSync(CONTEXT_FILE, 'utf8')) as SavedContext }
 function restore(): void {

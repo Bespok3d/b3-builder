@@ -19,16 +19,17 @@ it.each([
   expect(existsSync(join(fixture.root, '.b3-release-context.json'))).toBe(false)
   expect(existsSync(join(fixture.root, 'dist'))).toBe(false)
 })
-it('normal push refuses lightweight tags and annotations without a receipt before any artifact lookup', () => {
+it('ordinary tags build and publish normally without looking up a prepared artifact', () => {
   const fixture = consumerCheckout('daemon')
   const values: EventValues = { inputs: {}, github: { event_name: 'push', ref_type: 'tag', ref_name: fixture.tag, repository: 'fixture/consumer' }, steps: {} }
   const github = mockGithub({})
   const env = eventEnvironment('daemon', fixture, values, github)
   git(fixture.root, ['tag', fixture.tag])
-  expect(() => contextCli(fixture.root, 'plan', env)).toThrow('must be annotated')
+  expect(() => contextCli(fixture.root, 'plan', env)).not.toThrow()
+  expect(JSON.parse(readFileSync(join(fixture.root, '.b3-release-context.json'), 'utf8')).context).toMatchObject({ publish: true, preparedOnly: false, selectedIds: [fixture.name] })
   git(fixture.root, ['tag', '-d', fixture.tag])
   git(fixture.root, ['tag', '-a', fixture.tag, '-m', 'not a preparation receipt'])
-  expect(() => contextCli(fixture.root, 'plan', env)).toThrow('no prepared release receipt')
+  expect(() => contextCli(fixture.root, 'plan', env)).not.toThrow()
   expect(existsSync(join(github, 'calls'))).toBe(false)
 })
 it('normal push refuses an unavailable exact artifact without selecting a newer build or rebuilding', () => {

@@ -84,9 +84,27 @@ inputs:
     default: 'true'
   release-kind:
     description: draft, prerelease or live; non-live versions must end in -pre
-    default: live
+    default: ''
   release-tag:
     description: Exact prospective tag bound into nonpublishing preparation evidence
+    default: ''
+  managed-release:
+    description: Resolve tag or dispatch, stage sources, and issue or verify a prepared-run receipt
+    default: 'false'
+  manifest-path:
+    description: Single-package manifest in the caller checkout; empty discovers plugin directories
+    default: ''
+  tag-prefix:
+    description: Caller tag prefix, with {unit} replaced by the selected plugin name
+    default: plugin-{unit}
+  stage-command:
+    description: Caller-owned staging command; empty stages discovered plugin directories
+    default: ''
+  expected-source-sha:
+    description: Exact checkout commit required for a manual preparation or publication
+    default: ''
+  prepared-receipt:
+    description: Approved preparation receipt for manual publication
     default: ''
   selected-ids:
     description: Space-separated unit IDs to publish; other units only supply build context
@@ -107,6 +125,17 @@ inputs:
     description: Node.js version the build and the pipeline run on
     required: false
     default: '24'
+
+outputs:
+  publish:
+    description: Whether this run published the verified release
+    value: ${{ steps.context.outputs.publish || inputs.publish }}
+  selected-ids:
+    description: The exact unit selected by this release
+    value: ${{ steps.context.outputs.selected-ids || steps.selection.outputs.selected-ids }}
+  release-kind:
+    description: The resolved release tier
+    value: ${{ steps.context.outputs.release-kind || steps.selection.outputs.release-kind }}
 
 runs:
   using: composite
@@ -136,11 +165,121 @@ runs:
         npm ci
         npm run build
 
-    - name: Build and verify selected release outputs
-      if: ${{ inputs.prepared-only != 'true' }}
+    - name: Resolve the exact release or prepared artifact
+      id: context
+      if: ${{ inputs.managed-release == 'true' }}
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
+        B3D_ACTION_PATH: ${{ github.action_path }}
+        B3D_BUILDER_COMMIT: ${{ github.action_ref }}
+        B3D_REGISTER_COMMIT: ${{ inputs.register-commit || github.action_ref }}
+        B3D_MANIFEST_PATH: ${{ inputs.manifest-path }}
+        B3D_TAG_PREFIX: ${{ inputs.tag-prefix }}
+        B3D_PROSPECTIVE_TAG: ${{ inputs.release-tag }}
+        B3D_SELECTED_IDS: ${{ inputs.selected-ids }}
+        B3D_EXPECTED_SOURCE: ${{ inputs.expected-source-sha }}
+        B3D_RELEASE_KIND: ${{ inputs.release-kind }}
+        B3D_PUBLISH: ${{ inputs.publish }}
+        B3D_PREPARED_RECEIPT: ${{ inputs.prepared-receipt }}
+      run: node "$B3D_ACTION_PATH/dist/action/release-context-main.js" plan
+
+    - name: Stage plugin source for exact preparation
+      if: ${{ inputs.managed-release == 'true' && steps.context.outputs.prepared-only != 'true' && inputs.stage-command == '' }}
+      shell: bash
+      env:
+        B3D_ACTION_PATH: ${{ github.action_path }}
+      run: node "$B3D_ACTION_PATH/dist/action/release-context-main.js" stage-plugin-source
+
+    - name: Stage caller-owned package source
+      if: ${{ inputs.managed-release == 'true' && steps.context.outputs.prepared-only != 'true' && inputs.stage-command != '' }}
+      shell: bash
+      env:
+        B3D_STAGE_COMMAND: ${{ inputs.stage-command }}
+      run: bash -euo pipefail -c "$B3D_STAGE_COMMAND"
+
+    - name: Download the exact prepared archive
+      if: ${{ inputs.managed-release == 'true' && steps.context.outputs.prepared-only == 'true' }}
+      uses: actions/download-artifact@v4
+      with:
+        artifact-ids: ${{ steps.context.outputs.prepared-artifact-id }}
+        path: .
+        merge-multiple: true
+        run-id: ${{ steps.context.outputs.prepared-run-id }}
+        github-token: ${{ github.token }}
+
+    - name: Restore prepared bytes and file modes
+      if: ${{ inputs.managed-release == 'true' && steps.context.outputs.prepared-only == 'true' }}
+      shell: bash
+      env:
+        B3D_ACTION_PATH: ${{ github.action_path }}
+      run: node "$B3D_ACTION_PATH/dist/action/release-context-main.js" restore
+
+    - name: Resolve the selected tag and release kind
+      id: selection
+      if: ${{ inputs.managed-release != 'true' }}
+      shell: bash
+      env:
+        B3D_ACTION_PATH: ${{ github.action_path }}
+        B3D_ATOM_REPO: ${{ inputs.atom-repo }}
+        B3D_UNIT: ${{ inputs.unit }}
+        B3D_SOURCE: ${{ inputs.source }}
+        B3D_OUT: ${{ inputs.out }}
+        B3D_LIST_NAME: ${{ inputs.list-name }}
+        B3D_LIST_PUBLISHER: ${{ inputs.list-publisher }}
+        B3D_EXCLUDE_DIRS: ${{ inputs.exclude-dirs }}
+        B3D_SELECTED_IDS: ${{ inputs.selected-ids }}
+        B3D_RELEASE_KIND: ${{ inputs.release-kind }}
+        B3D_PUBLISH: ${{ inputs.publish }}
+        B3D_RELEASE_TAG: ${{ inputs.release-tag }}
+      run: |
+        set -euo pipefail
+        if [ "$B3D_PUBLISH" = false ] && [ -z "$B3D_RELEASE_TAG" ]; then
+          echo 'selected-ids=*' >> "$GITHUB_OUTPUT"
+          echo 'release-kind=' >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        selection="$(node "$B3D_ACTION_PATH/dist/action/release-main.js" select)"
+        echo "selected-ids=$(printf '%s' "$selection" | sed -n '1p')" >> "$GITHUB_OUTPUT"
+        echo "release-kind=$(printf '%s' "$selection" | sed -n '2p')" >> "$GITHUB_OUTPUT"
+
+    - name: Build and verify selected release outputs
+      if: ${{ (inputs.managed-release == 'true' && steps.context.outputs.prepared-only != 'true') || (inputs.managed-release != 'true' && inputs.prepared-only != 'true' && (inputs.publish == 'true' || inputs.release-tag != '')) }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        B3D_ACTION_PATH: ${{ github.action_path }}
+        B3D_ATOM_REPO: ${{ inputs.atom-repo }}
+        B3D_UNIT: ${{ inputs.unit }}
+        B3D_SOURCE: ${{ inputs.managed-release == 'true' && 'dist/package' || inputs.source }}
+        B3D_OUT: ${{ inputs.out }}
+        B3D_LIST_NAME: ${{ inputs.list-name }}
+        B3D_LIST_PUBLISHER: ${{ inputs.list-publisher }}
+        B3D_EXCLUDE_DIRS: ${{ inputs.exclude-dirs }}
+        B3D_PROVIDER_INDEXES: ${{ inputs.provider-indexes }}
+        B3D_SKIP_UNCHANGED: ${{ inputs.skip-unchanged }}
+        B3D_BAKE: ${{ inputs.bake }}
+        B3D_SIGNING_KEY: ${{ inputs.signing-key }}
+        B3D_RELEASE_KIND: ${{ steps.context.outputs.release-kind || steps.selection.outputs.release-kind }}
+        B3D_RELEASE_TAG: ${{ steps.context.outputs.release-tag || inputs.release-tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
+        B3D_PUBLISH: ${{ steps.context.outputs.publish || inputs.publish }}
+        B3D_SELECTED_IDS: ${{ steps.context.outputs.selected-ids || steps.selection.outputs.selected-ids }}
+        B3D_REQUIRE_SIGNATURE: ${{ inputs.require-signature }}
+        B3D_BUILDER_COMMIT: ${{ github.action_ref }}
+        B3D_REGISTER_COMMIT: ${{ inputs.register-commit || (inputs.managed-release == 'true' && github.action_ref) || '' }}
+        B3D_ALLOW_EMPTY_BASELINE: ${{ inputs.allow-empty-baseline }}
+        B3D_PREPARED_ONLY: ${{ inputs.prepared-only }}
+        B3D_CACHE_ARGS: --cache-from type=gha --cache-to type=gha,mode=max,ignore-error=true
+      run: |
+        set -euo pipefail
+        [ "$(git rev-parse HEAD)" = "$GITHUB_SHA" ] || { echo "checkout/source commit mismatch" >&2; exit 1; }
+        [ -n "$B3D_SELECTED_IDS" ] || { echo "selected-ids must explicitly name units" >&2; exit 1; }
+        node "$B3D_ACTION_PATH/dist/action/release-main.js" prepare
+
+    - name: Build preview packages without publication
+      if: ${{ inputs.managed-release != 'true' && inputs.publish == 'false' && inputs.release-tag == '' }}
+      shell: bash
+      env:
         B3D_ACTION_PATH: ${{ github.action_path }}
         B3D_ATOM_REPO: ${{ inputs.atom-repo }}
         B3D_UNIT: ${{ inputs.unit }}
@@ -152,29 +291,16 @@ runs:
         B3D_PROVIDER_INDEXES: ${{ inputs.provider-indexes }}
         B3D_SKIP_UNCHANGED: ${{ inputs.skip-unchanged }}
         B3D_BAKE: ${{ inputs.bake }}
-        B3D_SIGNING_KEY: ${{ inputs.signing-key }}
-        B3D_RELEASE_KIND: ${{ inputs.release-kind }}
-        B3D_RELEASE_TAG: ${{ inputs.release-tag }}
-        B3D_PUBLISH: ${{ inputs.publish }}
-        B3D_SELECTED_IDS: ${{ inputs.selected-ids }}
-        B3D_REQUIRE_SIGNATURE: ${{ inputs.require-signature }}
-        B3D_BUILDER_COMMIT: ${{ github.action_ref }}
-        B3D_REGISTER_COMMIT: ${{ inputs.register-commit }}
-        B3D_ALLOW_EMPTY_BASELINE: ${{ inputs.allow-empty-baseline }}
-        B3D_CACHE_ARGS: --cache-from type=gha --cache-to type=gha,mode=max,ignore-error=true
-      run: |
-        set -euo pipefail
-        [ "$(git rev-parse HEAD)" = "$GITHUB_SHA" ] || { echo "checkout/source commit mismatch" >&2; exit 1; }
-        [ -n "$B3D_SELECTED_IDS" ] || { echo "selected-ids must explicitly name units" >&2; exit 1; }
-        node "$B3D_ACTION_PATH/dist/action/release-main.js" prepare
+      run: node "$B3D_ACTION_PATH/dist/action/release-main.js" preview
 
     - name: Test each plugin
-      if: ${{ inputs.prepared-only != 'true' }}
+      if: ${{ inputs.managed-release == 'true' && steps.context.outputs.prepared-only != 'true' || inputs.managed-release != 'true' && inputs.prepared-only != 'true' }}
       shell: bash
       env:
         B3D_ATOM_REPO: ${{ inputs.atom-repo }}
         B3D_UNIT: ${{ inputs.unit }}
-        B3D_SOURCE: ${{ inputs.source }}
+        B3D_SOURCE: ${{ inputs.managed-release == 'true' && 'dist/package' || inputs.source }}
+        B3D_SELECTED_IDS: ${{ steps.context.outputs.selected-ids || steps.selection.outputs.selected-ids }}
       run: |
         set -euo pipefail
         if [ "$B3D_UNIT" = "plugin" ]; then
@@ -183,19 +309,27 @@ runs:
           test_dirs=("$B3D_SOURCE"/*/)
         fi
         for dir in "${test_dirs[@]}"; do
+          [ -f "${dir}manifest.json" ] || continue
+          unit_id="$(jq -r '.name' "${dir}manifest.json")"
+          if [ "$B3D_SELECTED_IDS" != '*' ]; then
+            case " $B3D_SELECTED_IDS " in
+              *" $unit_id "*) ;;
+              *) continue ;;
+            esac
+          fi
           [ -f "${dir}tests/run.sh" ] || continue
           sh "${dir}tests/run.sh"
         done
 
     - name: Publish exact verified outputs
-      if: ${{ inputs.publish == 'true' }}
+      if: ${{ inputs.managed-release == 'true' && steps.context.outputs.publish == 'true' || inputs.managed-release != 'true' && inputs.publish == 'true' }}
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
         B3D_ACTION_PATH: ${{ github.action_path }}
         B3D_ATOM_REPO: ${{ inputs.atom-repo }}
         B3D_UNIT: ${{ inputs.unit }}
-        B3D_SOURCE: ${{ inputs.source }}
+        B3D_SOURCE: ${{ inputs.managed-release == 'true' && 'dist/package' || inputs.source }}
         B3D_OUT: ${{ inputs.out }}
         B3D_LIST_NAME: ${{ inputs.list-name }}
         B3D_LIST_PUBLISHER: ${{ inputs.list-publisher }}
@@ -204,14 +338,15 @@ runs:
         B3D_SKIP_UNCHANGED: ${{ inputs.skip-unchanged }}
         B3D_BAKE: ${{ inputs.bake }}
         B3D_SIGNING_KEY: ${{ inputs.signing-key }}
-        B3D_RELEASE_KIND: ${{ inputs.release-kind }}
-        B3D_RELEASE_TAG: ${{ inputs.release-tag }}
-        B3D_PUBLISH: ${{ inputs.publish }}
-        B3D_SELECTED_IDS: ${{ inputs.selected-ids }}
+        B3D_RELEASE_KIND: ${{ steps.context.outputs.release-kind || steps.selection.outputs.release-kind }}
+        B3D_RELEASE_TAG: ${{ steps.context.outputs.release-tag || inputs.release-tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
+        B3D_PUBLISH: ${{ steps.context.outputs.publish || inputs.publish }}
+        B3D_SELECTED_IDS: ${{ steps.context.outputs.selected-ids || steps.selection.outputs.selected-ids }}
         B3D_REQUIRE_SIGNATURE: ${{ inputs.require-signature }}
         B3D_BUILDER_COMMIT: ${{ github.action_ref }}
-        B3D_REGISTER_COMMIT: ${{ inputs.register-commit }}
+        B3D_REGISTER_COMMIT: ${{ inputs.register-commit || (inputs.managed-release == 'true' && github.action_ref) || '' }}
         B3D_ALLOW_EMPTY_BASELINE: ${{ inputs.allow-empty-baseline }}
+        B3D_PREPARED_ONLY: ${{ steps.context.outputs.prepared-only || inputs.prepared-only }}
         B3D_CACHE_ARGS: --cache-from type=gha --cache-to type=gha,mode=max,ignore-error=true
       run: |
         set -euo pipefail
@@ -220,7 +355,7 @@ runs:
         node "$B3D_ACTION_PATH/dist/action/release-main.js" publish
 
     - name: Register this sub-list in the index-of-lists (repo unit)
-      if: ${{ inputs.unit == 'repo' && inputs.main-index-token != '' && inputs.list-name != '' && inputs.publish == 'true' && inputs.release-kind == 'live' }}
+      if: ${{ inputs.unit == 'repo' && inputs.main-index-token != '' && inputs.list-name != '' && (steps.context.outputs.publish == 'true' || inputs.managed-release != 'true' && inputs.publish == 'true') && (steps.context.outputs.release-kind == 'live' || steps.selection.outputs.release-kind == 'live') }}
       shell: bash
       env:
         MAIN_INDEX_TOKEN: ${{ inputs.main-index-token }}
@@ -262,3 +397,36 @@ runs:
           echo "${MAIN_INDEX_REPO} push rejected; rebasing on remote (attempt ${attempt})"
           git pull --rebase --no-edit origin main
         done
+
+    - name: Preserve verified file modes for later publication
+      if: ${{ inputs.managed-release == 'true' && steps.context.outputs.publish == 'false' }}
+      shell: bash
+      run: tar -czf verified-unit-outputs.tar.gz dist
+
+    - name: Keep the exact prepared archive
+      id: prepared-artifact
+      if: ${{ inputs.managed-release == 'true' && steps.context.outputs.publish == 'false' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: verified-unit-outputs
+        path: verified-unit-outputs.tar.gz
+        if-no-files-found: error
+
+    - name: Create the approval receipt
+      if: ${{ inputs.managed-release == 'true' && steps.context.outputs.publish == 'false' }}
+      shell: bash
+      env:
+        B3D_ACTION_PATH: ${{ github.action_path }}
+        B3D_ARTIFACT_ID: ${{ steps.prepared-artifact.outputs.artifact-id }}
+        B3D_ARTIFACT_DIGEST: ${{ steps.prepared-artifact.outputs.artifact-digest }}
+      run: node "$B3D_ACTION_PATH/dist/action/release-context-main.js" receipt
+
+    - name: Keep the receipt and annotated-tag message
+      if: ${{ inputs.managed-release == 'true' && steps.context.outputs.publish == 'false' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: verified-unit-receipt
+        path: |
+          prepared-release-receipt.json
+          prepared-release-tag-message.txt
+        if-no-files-found: error

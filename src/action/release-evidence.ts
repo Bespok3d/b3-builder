@@ -74,7 +74,7 @@ export async function verifyEvidence(request: BuildRequest, identity: ReleaseIde
   await verifyEvidenceSignature(request.outputDir, bytes, publicKey, identity.requireSignature)
   if (evidence.sourceCommit !== identity.sourceCommit || evidence.builderCommit !== identity.builderCommit || evidence.registerCommit !== identity.registerCommit || evidence.repository !== request.identity.atomRepo) throw new Error('release artifact/source/tooling binding mismatch')
   if (evidence.kind !== request.releaseKind && !(evidence.kind === 'draft' && request.releaseKind === 'prerelease')) throw new Error('release artifact kind mismatch')
-  if (identity.releaseTag && (evidence.releaseTag !== identity.releaseTag || evidence.preparation?.tag !== identity.releaseTag)) throw new Error('prepared prospective tag mismatch')
+  if (identity.releaseTag && (evidence.releaseTag !== identity.releaseTag || (evidence.preparation && evidence.preparation.tag !== identity.releaseTag))) throw new Error('release tag mismatch')
   const selected = selectedAtoms(sourcesFor(request).map((source) => source.manifest), request.selectedIds).map((manifest) => manifest.name).sort()
   if (JSON.stringify(selected) !== JSON.stringify(evidence.units.map((unit) => unit.name).sort())) throw new Error('release selected unit set mismatch')
   await Promise.all(evidence.units.map((unit) => verifyUnit(request, identity, unit, publicKey)))

@@ -57,14 +57,10 @@ function pluginCheckout(repo: string): { root: string; name: string } {
   return { root, name: 'selected' }
 }
 export function eventEnvironment(repo: string, fixture: ReturnType<typeof consumerCheckout>, values: EventValues, ghPath?: string): NodeJS.ProcessEnv {
-  const step = releaseSteps(repo).find((entry) => entry.id === 'release-selection')!
-  const inputs = stepInputs(step, values)
-  const action = parseDocument(readFileSync(resolve(import.meta.dirname, '../../.github/actions/release-context/action.yml'), 'utf8'))
-  if (action.errors.length) throw new Error(String(action.errors))
-  const contextStep = (action.toJS().runs.steps as WorkflowStep[]).find((entry) => entry.id === 'context')!
-  if (!contextStep.run?.includes('node "$tool_root/dist/action/release-context-main.js" plan')) throw new Error('context action must execute the event planner')
-  const actionValues = { ...values, inputs, github: { ...values.github, action_ref: step.uses!.split('@')[1] } }
-  const configured = Object.fromEntries(Object.entries(contextStep.env!).map(([name, value]) => [name, String(expression(value, actionValues))]))
+  const action = releaseSteps(repo).find((entry) => entry.id === 'release')!
+  const push = values.github.event_name === 'push'
+  const inputs = values.inputs
+  const configured = { B3D_BUILDER_COMMIT: action.uses!.split('@')[1]!, B3D_REGISTER_COMMIT: String(action.with?.['register-commit']), B3D_MANIFEST_PATH: String(action.with?.['manifest-path'] ?? ''), B3D_TAG_PREFIX: String(action.with?.['tag-prefix'] ?? 'plugin-{unit}'), B3D_PROSPECTIVE_TAG: String(inputs['prospective-tag'] ?? ''), B3D_SELECTED_IDS: String(inputs['selected-ids'] ?? ''), B3D_EXPECTED_SOURCE: String(inputs['expected-source-sha'] ?? ''), B3D_RELEASE_KIND: String(inputs['release-kind'] ?? ''), B3D_PUBLISH: String(push || inputs.publish === true), B3D_PREPARED_RECEIPT: String(inputs['prepared-receipt'] ?? '') }
   return { ...process.env, ...configured, PATH: ghPath ? `${ghPath}:${process.env.PATH}` : process.env.PATH, GITHUB_EVENT_NAME: String(values.github.event_name), GITHUB_REF_TYPE: String(values.github.ref_type), GITHUB_REF_NAME: String(values.github.ref_name), GITHUB_REPOSITORY: String(values.github.repository), GITHUB_SHA: fixture.commit, GITHUB_RUN_ID: '101', GITHUB_RUN_ATTEMPT: '1', GITHUB_OUTPUT: join(fixture.root, 'github-output') }
 }
 

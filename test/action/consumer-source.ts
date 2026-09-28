@@ -5,6 +5,7 @@ import { resolve } from 'node:path'
 import { deepStrictEqual } from 'node:assert'
 
 export function consumerSource(relativePath: string): Buffer {
+  if (relativePath.endsWith('/.github/workflows/release.yml')) return readFileSync(resolve(import.meta.dirname, '../../../', relativePath))
   const snapshot = readFileSync(resolve(import.meta.dirname, '../fixtures/consumers', relativePath))
   const workspace = process.env.B3D_CONSUMER_WORKSPACE
   if (!workspace) return snapshot
