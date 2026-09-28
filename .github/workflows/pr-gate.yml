@@ -42,7 +42,7 @@ jobs:
           # The all-the-tags plugin tree lives in the repo named material-tags; the harness reads it at
           # the ../plugins/all-the-tags path, so the checkout is renamed here.
           repository: Bespok3d/material-tags
-          ref: 6eada0b08c8688fcbeaaf9db2414e546c743df51
+          ref: 70f29879eaaadebabc41b0334fc537c59cb077c0
           path: plugins/all-the-tags
 
       - uses: actions/checkout@v4
