@@ -60,7 +60,7 @@ runs:
   steps:
     - uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '24'
     - name: Resolve the exact release operation
       id: context
       shell: bash

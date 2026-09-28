@@ -106,7 +106,7 @@ inputs:
   node-version:
     description: Node.js version the build and the pipeline run on
     required: false
-    default: '20'
+    default: '24'
 
 runs:
   using: composite
