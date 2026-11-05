@@ -10,13 +10,12 @@ import { releaseTag, uploadMetadata } from './publish-units.js'
 import { mergePublishedList } from './published-baseline.js'
 
 export async function publishList(evidence: ReleaseEvidence, atoms: JsonObject[], outputDir: string, key: string, host: ReleaseHost): Promise<void> {
-  if (evidence.units.every((unit) => unit.atom.kind === 'collection')) throw new Error('selected list update has no package release to host it')
   if (!evidence.baseline || !evidence.builtList) throw new Error('verified Live list baseline or built list missing')
   const merged = mergePublishedList(evidence.builtList, atoms, evidence.baseline)
   const bytes = Buffer.from(`${JSON.stringify(merged, null, 2)}\n`)
   const publicKey = await publicHalfOfSigningKey(key)
   writeFileSync(join(outputDir, 'index.json'), bytes)
-  for (const unit of evidence.units.filter((unit) => unit.atom.kind !== 'collection')) {
+  for (const unit of evidence.units) {
     const tag = releaseTag(unit, evidence)
     await placeSignature(tag, outputDir, bytes, key, publicKey, host)
     uploadMetadata(tag, 'index.json', outputDir, host)

@@ -32,7 +32,7 @@ describe('finalizeDocUrls', () => {
     expect(finalized.changelog_url).toBe(camera.changelog_url)
   })
 
-  it('leaves a collection as built: it publishes no release, so there is no asset to point at', () => {
+  it('leaves an entry as built when none of its doc assets is in the map', () => {
     const collection = { name: 'all-the-tags', version: '0.2.0', kind: 'collection', doc_url: 'all-the-tags/doc/README.md' }
     expect(finalizeDocUrls(collection, {}).doc_url).toBe('all-the-tags/doc/README.md')
   })

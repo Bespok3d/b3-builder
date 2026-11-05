@@ -21,7 +21,7 @@ export function releaseMarker(evidence: ReleaseEvidence, unit: ReleaseUnit): str
 }
 
 export function preflightReleases(evidence: ReleaseEvidence, kind: ReleaseKind, host: ReleaseHost): void {
-  evidence.units.filter((unit) => unit.atom.kind !== 'collection').forEach((unit) => {
+  evidence.units.forEach((unit) => {
     const target = host.target(releaseTag(unit, evidence))
     if (target !== undefined && target !== evidence.sourceCommit) throw new Error(`existing tag points at different source: ${releaseTag(unit, evidence)}`)
     const existing = host.inspect(releaseTag(unit, evidence))
@@ -58,7 +58,6 @@ export function publishUnits(evidence: ReleaseEvidence, kind: ReleaseKind, outpu
 
 function publishUnit(evidence: ReleaseEvidence, unit: ReleaseUnit, kind: ReleaseKind, outputDir: string, visibility: RepositoryVisibility, host: ReleaseHost): JsonObject {
   const tag = releaseTag(unit, evidence)
-  if (unit.atom.kind === 'collection') return writeAtom(outputDir, { ...unit.atom, release_kind: kind })
   const existing = host.inspect(tag)
   if (!existing) host.create(tag, evidence.sourceCommit, kind, releaseMarker(evidence, unit))
   const present = new Set(existing?.assets.map((asset) => asset.name) ?? [])
@@ -68,10 +67,18 @@ function publishUnit(evidence: ReleaseEvidence, unit: ReleaseUnit, kind: Release
   if (!uploaded) throw new Error(`release missing after upload: ${tag}`)
   inspectExisting(evidence, unit, kind, uploaded, host)
   if (Object.keys(unit.assets).some((name) => !uploaded.assets.some((asset) => asset.name === name))) throw new Error(`release assets incomplete: ${tag}`)
-  const atom = writeAtom(outputDir, finalizedUnitAtom(evidence.repository, unit, kind, visibility, uploaded))
+  const atom = writeAtom(outputDir, publishedUnitAtom(evidence.repository, unit, kind, visibility, uploaded))
   uploadMetadata(tag, atomFilename(atom), outputDir, host)
   if (existing?.draft && kind === 'prerelease') host.promote(existing)
   return atom
+}
+
+// A collection ships no payload, so its entry has no download address to finalize and is published as
+// built. It still gets a release of its own: that release carries its documents and, when the
+// collection is the only unit a tag selects, it is the release that hosts the published list.
+export function publishedUnitAtom(repository: string, unit: ReleaseUnit, kind: ReleaseKind, visibility: RepositoryVisibility, release: ExistingRelease): JsonObject {
+  if (unit.atom.kind === 'collection') return { ...unit.atom, release_kind: kind }
+  return finalizedUnitAtom(repository, unit, kind, visibility, release)
 }
 
 export function finalizedUnitAtom(repository: string, unit: ReleaseUnit, kind: ReleaseKind, visibility: RepositoryVisibility, release: ExistingRelease): JsonObject {
@@ -86,7 +93,7 @@ function verifyExistingAtom(evidence: ReleaseEvidence, unit: ReleaseUnit, releas
   const kind = atom.release_kind as ReleaseKind
   if (!['draft', 'prerelease', 'live'].includes(kind) || atomFilename(atom) !== filename) throw new Error(`unexpected existing atom: ${filename}`)
   const visibility = release.assets.some((published) => published.url === atom.download_url) ? 'private' : 'public'
-  const expected = finalizedUnitAtom(evidence.repository, unit, kind, visibility, release)
+  const expected = publishedUnitAtom(evidence.repository, unit, kind, visibility, release)
   if (JSON.stringify(atom) !== JSON.stringify(expected)) throw new Error(`existing atom differs: ${filename}`)
 }
 
