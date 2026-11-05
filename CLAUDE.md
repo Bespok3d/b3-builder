@@ -195,10 +195,12 @@ the index-of-lists. It exists so every repo pulls one `uses:` instead of hand-co
 
 - **A release never writes into the plugin repo.** The assembled list ships as a release asset
   (`index.json` + `index.json.sig`), uploaded AFTER `inject-release-urls` rewrote and signed it, so the
-  signature covers the exact bytes a reader is served. A repo unit has no release of its own (one is cut per
-  plugin), so the list rides EVERY release the run touched and `releases/latest/download/index.json` always
-  answers with the current one. Do not reintroduce a commit step here: it raced the repo's own pushes and it
-  put a signature over bytes nobody was served.
+  signature covers the exact bytes a reader is served. A repo unit has no release of its own (one is cut
+  per selected unit, a collection included: a collection ships no `.b3`, but its release carries its
+  documents, its entry and the list, so a tag that selects only a collection still publishes it), so the
+  list rides EVERY release the run touched and `releases/latest/download/index.json` always answers with
+  the current one. Do not reintroduce a commit step here: it raced the repo's own pushes and it put a
+  signature over bytes nobody was served.
 - **The one remaining git push, into the index-of-lists, is push-race hardened** (5-attempt rebase-retry).
   Do not weaken it back to a bare push.
 - **`exclude-dirs` is caller curation, not a variant concept.** A repo with a dev-only variant dir that

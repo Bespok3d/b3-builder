@@ -28,9 +28,9 @@ export function docAssetName(pluginName: string, version: string, docFilename: s
   return `${pluginName}-${version}-${docFilename}`
 }
 
-// A collection publishes no release (no payload, so nothing to release), so its doc assets are absent
-// from the map and its entry keeps the placeholder the core wrote, which is the truthful answer: there
-// is no released copy to point at.
+// An entry whose doc assets are absent from the map keeps the placeholder the core wrote, which is the
+// truthful answer: there is no released copy to point at. A collection's entry is published as built
+// (publish-units.ts), so its doc fields are never rewritten here.
 export function finalizeDocUrls<EntryShape extends DocumentedEntry>(
   entry: EntryShape,
   assetUrlByFilename: Record<string, string>,

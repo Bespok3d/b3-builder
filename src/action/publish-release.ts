@@ -13,7 +13,6 @@ export async function publishRelease(evidence: ReleaseEvidence, kind: ReleaseKin
   preflightReleases(evidence, kind, host)
   if (liveList) {
     if (!key) throw new Error('Live list publication requires a signing key')
-    if (evidence.units.every((unit) => unit.atom.kind === 'collection')) throw new Error('selected list update has no package release to host it')
     await preflightPublishedList(evidence, key, visibility, host)
   }
   const atoms = publishUnits(evidence, kind, outputDir, visibility, host)

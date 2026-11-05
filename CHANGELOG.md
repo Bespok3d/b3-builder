@@ -6,6 +6,16 @@ What changed in the builder, for a publisher using the CLI or the GitHub Action.
 
 ## Unreleased
 
+### A collection can be released on its own tag
+
+A collection ships no `.b3`, so its tag used to publish no release at all, and with the managed
+release path, which selects exactly one unit per tag, a collection could never reach a published list:
+the run either refused with "selected list update has no package release to host it" or, on older
+pins, finished green and published nothing. A collection is now released like any other selected
+unit. Its tag cuts a release carrying the collection's documents, its entry and the signed list, with
+the collection merged into `collections[]` and every other published entry kept as it was. Its entry
+is still published as built: a collection has no download address to finalize.
+
 ### A published entry points at an address that survives a re-upload
 
 Every catalog entry used to carry the release asset's API address
