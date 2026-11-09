@@ -16,11 +16,15 @@ export const DEP_DECLARATION_NAMES = ['requirements.txt', 'klipper_requirements.
 
 const EXCLUDED_NAMES = new Set(['.DS_Store'])
 
+// Caches Python tools write next to the code they run on. mypy and pytest drop a .gitignore inside
+// theirs, so git hides them and only the packer can keep them out of the package.
+const EXCLUDED_DIR_NAMES = new Set(['__pycache__', '.mypy_cache', '.pytest_cache', '.ruff_cache'])
+
 function isExcluded(fileName: string): boolean {
   return EXCLUDED_NAMES.has(fileName) || fileName.endsWith('.pyc')
 }
 
-// The payload files under root, skipping __pycache__ dirs and build junk (*.pyc, .DS_Store). This one
+// The payload files under root, skipping tool cache dirs and build junk (*.pyc, .DS_Store). This one
 // walk drives BOTH what goes into the zip and what gets checksummed into manifest.json, so every packed
 // member under files/ is a member of files[]. The legacy shell packers used two divergent walks (`zip
 // -qr` archived junk that build_files_array never checksummed), which shipped unlisted, unsigned files
@@ -31,7 +35,7 @@ export function walkPackedFiles(root: string): string[] {
   const entries = readdirSync(root, { withFileTypes: true })
   return entries.flatMap((entry) => {
     const full = join(root, entry.name)
-    if (entry.isDirectory()) return entry.name === '__pycache__' ? [] : walkPackedFiles(full)
+    if (entry.isDirectory()) return EXCLUDED_DIR_NAMES.has(entry.name) ? [] : walkPackedFiles(full)
     return entry.isFile() && !isExcluded(entry.name) ? [full] : []
   })
 }
