@@ -16,13 +16,13 @@ function tagRequest(sourceDir: string, tag: string) {
   return actionRequest({ B3D_SOURCE: sourceDir, B3D_OUT: join(mkdtempSync(join(tmpdir(), 'tag-output-')), 'dist'), B3D_UNIT: 'repo', B3D_ATOM_REPO: 'fixture/publisher', GITHUB_REF_TYPE: 'tag', GITHUB_REF_NAME: tag })
 }
 
-function basePublisherSource(): string {
+function publisherSource(repo: string): string {
   const workspace = process.env.B3D_CONSUMER_WORKSPACE ?? resolve(import.meta.dirname, '../../..')
-  return resolve(workspace, 'plugins/u1-base')
+  return resolve(workspace, 'plugins', repo)
 }
 
 it('selects only the tagged package from an unchanged real multi-plugin publisher', () => {
-  const source = basePublisherSource()
+  const source = publisherSource('u1-base')
   const selected = tagRequest(source, 'plugin-u1-base-print-task-config-v0.1.0')
   expect(selected.selectedIds).toEqual(['u1-base-print-task-config'])
   expect(selected.releaseKind).toBe('live')
@@ -38,21 +38,24 @@ it('infers a candidate release from its tagged version and leaves the rest of th
   expect(selected.releaseKind).toBe('draft')
 })
 
-it('prepares and publishes the exact signed package of a previously unchanged U1 base repository', async () => {
-  const source = basePublisherSource()
-  const request = tagRequest(source, 'plugin-u1-base-print-task-config-v0.1.0')
+it.each([
+  { repo: 'u1-base', tag: 'plugin-u1-base-print-task-config-v0.1.0', selected: 'u1-base-print-task-config', version: '0.1.0' },
+  { repo: 'moonraker-auth', tag: 'plugin-moonraker-auth-v0.1.1', selected: 'moonraker-auth', version: '0.1.1' },
+])('prepares and publishes the exact signed package of $repo', async ({ repo, tag, selected, version }) => {
+  const source = publisherSource(repo)
+  const request = tagRequest(source, tag)
   const { privateKey } = await generateKey({ type: 'ecc', userIDs: [{ name: 'fixture publisher' }], format: 'armored' })
   const signed = { ...request, signingKey: privateKey }
-  const identity = { sourceCommit: '1'.repeat(40), builderCommit: '2'.repeat(40), registerCommit: '3'.repeat(40), releaseTag: 'plugin-u1-base-print-task-config-v0.1.0', preparation: { tag: 'plugin-u1-base-print-task-config-v0.1.0', runId: 101, runAttempt: 1 }, requireSignature: true }
+  const identity = { sourceCommit: '1'.repeat(40), builderCommit: '2'.repeat(40), registerCommit: '3'.repeat(40), releaseTag: tag, preparation: { tag, runId: 101, runAttempt: 1 }, requireSignature: true }
   const built = await runPipeline(signed)
   const evidence = await prepareEvidence(signed, built.atoms, identity)
   expect(evidence.preparation).toEqual(identity.preparation)
-  const selectedPackage = join(signed.outputDir, 'u1-base-print-task-config-0.1.0.b3')
+  const selectedPackage = join(signed.outputDir, `${selected}-${version}.b3`)
   const verifiedBytes = readFileSync(selectedPackage)
   await verifyEvidence(signed, identity)
   const host = new FixtureHost()
   publishUnits(evidence, 'live', signed.outputDir, 'public', host)
-  expect(evidence.units.map((unit) => unit.name)).toEqual(['u1-base-print-task-config'])
+  expect(evidence.units.map((unit) => unit.name)).toEqual([selected])
   expect(host.download(host.inspect(identity.releaseTag)!.assets.find((asset) => asset.name.endsWith('.b3'))!)).toEqual(verifiedBytes)
   expect(readFileSync(selectedPackage)).toEqual(verifiedBytes)
   expect(host.releases.size).toBe(1)

@@ -36,4 +36,16 @@ describe('buildFilesArray', () => {
     const entries = buildFilesArray(pluginDir)
     expect(entries.map((entry) => entry.path)).toEqual(['files/plugin.py'])
   })
+
+  it('excludes the mypy, pytest and ruff caches from the checksummed manifest payload', () => {
+    const pluginDir = mkdtempSync(join(tmpdir(), 'b3-payload-'))
+    const extrasDir = join(pluginDir, 'files', 'extras')
+    const cacheDirNames = ['.mypy_cache', '.pytest_cache', '.ruff_cache']
+    cacheDirNames.forEach((cacheDirName) => mkdirSync(join(extrasDir, cacheDirName), { recursive: true }))
+    cacheDirNames.forEach((cacheDirName) => writeFileSync(join(extrasDir, cacheDirName, '.gitignore'), '*'))
+    writeFileSync(join(extrasDir, 'AFC.py'), 'print(1)')
+
+    const entries = buildFilesArray(pluginDir)
+    expect(entries.map((entry) => entry.path)).toEqual(['files/extras/AFC.py'])
+  })
 })

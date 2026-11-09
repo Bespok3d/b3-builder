@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2026 unlucio and the Bespok3d contributors
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { execFileSync } from 'node:child_process'
-import { readFileSync, rmSync } from 'node:fs'
+import { readFileSync, readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { generateKey } from 'openpgp'
 import { expect, it } from 'vitest'
@@ -36,6 +36,7 @@ it.each(scenarios)('$repo $kind prepares, receipts and publishes only the exact 
   const env = eventEnvironment(repo, fixture, values)
   expect(contextCli(fixture.root, 'plan', env)).toMatchObject({ 'selected-ids': fixture.name, 'prepared-only': 'false' })
   stageSource(repo, fixture.root, env)
+  if (repo === 'plugins/spoolman-klipper-helper') expect(readdirSync(join(fixture.root, 'dist/package'))).toEqual(['selected'])
   const { privateKey } = await generateKey({ type: 'ecc', userIDs: [{ name: 'fixture' }], format: 'armored' })
   const request: BuildRequest = { unit: 'repo', sourceDir: join(fixture.root, 'dist/package'), outputDir: join(fixture.root, 'dist'), identity: { atomRepo: 'fixture/consumer' }, signingKey: privateKey, selectedIds: [fixture.name], releaseKind: kind }
   const built = await runPipeline(request)
@@ -66,4 +67,25 @@ it.each(scenarios)('$repo $kind prepares, receipts and publishes only the exact 
   await verifyEvidence({ ...request, releaseKind: 'prerelease' }, actionIdentity({ ...promotion, B3D_RELEASE_TAG: fixture.tag, B3D_REQUIRE_SIGNATURE: 'true' }))
   publishUnits(evidence, 'prerelease', request.outputDir, 'public', host)
   expect(readFileSync(packagePath)).toEqual(preparedBytes)
+})
+
+it('an ordinary version tag builds and publishes its selected package without a preparation receipt', async () => {
+  const fixture = consumerCheckout('plugins/networking', '1.0.0')
+  git(fixture.root, ['tag', '-a', fixture.tag, '-m', 'ordinary version tag'])
+  const push = eventEnvironment('plugins/networking', fixture, { inputs: {}, github: { event_name: 'push', ref_type: 'tag', ref_name: fixture.tag, repository: 'fixture/consumer' }, steps: {} })
+  expect(contextCli(fixture.root, 'plan', push)).toMatchObject({ publish: 'true', 'prepared-only': 'false', 'selected-ids': fixture.name })
+  stageSource('plugins/networking', fixture.root, push)
+  const { privateKey } = await generateKey({ type: 'ecc', userIDs: [{ name: 'fixture' }], format: 'armored' })
+  const request: BuildRequest = { unit: 'repo', sourceDir: join(fixture.root, 'dist/package'), outputDir: join(fixture.root, 'dist'), identity: { atomRepo: 'fixture/consumer' }, signingKey: privateKey, selectedIds: [fixture.name], releaseKind: 'live' }
+  const built = await runPipeline(request)
+  const identity = actionIdentity({ ...push, B3D_RELEASE_TAG: fixture.tag, B3D_REQUIRE_SIGNATURE: 'true' })
+  const prepared = await prepareEvidence(request, built.atoms, identity)
+  expect(prepared.preparation).toBeUndefined()
+  const verifiedBytes = readFileSync(join(request.outputDir, `${fixture.name}-${fixture.version}.b3`))
+  const evidence = await verifyEvidence(request, identity)
+  const host = new FixtureHost()
+  publishUnits(evidence, 'live', request.outputDir, 'public', host)
+  expect(evidence.units.map((unit) => unit.name)).toEqual([fixture.name])
+  expect(host.download(host.inspect(fixture.tag)!.assets.find((asset) => asset.name.endsWith('.b3'))!)).toEqual(verifiedBytes)
+  expect(host.releases.size).toBe(1)
 })
