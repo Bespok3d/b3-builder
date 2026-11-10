@@ -132,6 +132,11 @@ describe('publisher equivalence rail', () => {
   // floor 0.2.0 to 0.2.2 and the spoolman floor 0.1.11 to 0.1.39. Only values moved, inside keys the
   // old entries already carried. plugins[] was left alone again.
   //
+  // collections[] was reconciled a fifth time on 2026-11-10, on the same terms, after the tag follow-ups:
+  // both collections went to 0.2.0, the rfid-generic-ndef, rfid-opentag, rfid-openprinttag and
+  // rfid-tigertag floors 0.1.0 to 0.2.0, rfid-bambu 0.2.2 to 0.3.0, rfid-creality 0.2.2 to 0.2.3 and
+  // spoolman 0.1.39 to 0.1.40. Only values moved. plugins[] was left alone again.
+  //
   // This repo needs the org index passed in, and that is the point of the case. Its rfid plugins require
   // `rfid-service`, which rfid-ntag provides from ANOTHER repo, so a build that only knows what it builds
   // itself cannot name a provider. The legacy scripts wrote the service name into deps instead, which is

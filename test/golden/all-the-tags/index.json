@@ -256,7 +256,7 @@
     {
       "name": "all-the-tags",
       "title": "All the Tags",
-      "version": "0.1.8",
+      "version": "0.2.0",
       "description": "Installs the whole RFID filament-tag reading stack in one click: the NFC reader and hub, every shipped tag-standard decoder, and Spoolman tracking, so almost any spool you tap is identified and tracked. Includes the open standards (OpenTag3D, OpenPrintTag, generic NDEF JSON, TigerTag) plus full payload decoders for the proprietary tags (Bambu and Creality, with your own keys pasted into their config; without a key they fall back to UID-only tracking). QIDI needs no key at all: its tags sit on the Mifare factory default key, so those spools read out of the box. Anycubic decodes SKU, color, diameter, weight and temperatures, confirmed against real tags across three product lines. Creality now decodes material type, diameter, temperature range, color and weight, verified against a real tag (the Creality decoder is a recent release candidate, so color may not yet match every spool). The members install together with a single service restart.",
       "tagline": "Every spool, identified: the whole RFID tag-reading stack in one install.",
       "category": "filament",
@@ -264,7 +264,7 @@
       "publisher": "PLACEHOLDER",
       "printer_specific": true,
       "published_at": "2026-06-30",
-      "updated_at": "2026-09-13",
+      "updated_at": "2026-11-10",
       "author": "bespoked",
       "attributions": "",
       "license_url": "https://github.com/Bespok3d/material-tags/blob/dev/all-the-tags/doc/LICENSE",
@@ -275,19 +275,19 @@
         },
         {
           "id": "rfid-generic-ndef",
-          "version": ">=0.1.0"
+          "version": ">=0.2.0"
         },
         {
           "id": "rfid-opentag",
-          "version": ">=0.1.0"
+          "version": ">=0.2.0"
         },
         {
           "id": "rfid-openprinttag",
-          "version": ">=0.1.0"
+          "version": ">=0.2.0"
         },
         {
           "id": "rfid-tigertag",
-          "version": ">=0.1.0"
+          "version": ">=0.2.0"
         },
         {
           "id": "rfid-anycubic",
@@ -299,11 +299,11 @@
         },
         {
           "id": "rfid-bambu",
-          "version": ">=0.2.2"
+          "version": ">=0.3.0"
         },
         {
           "id": "rfid-creality",
-          "version": ">=0.2.2"
+          "version": ">=0.2.3"
         },
         {
           "id": "rfid-elegoo",
@@ -311,7 +311,7 @@
         },
         {
           "id": "spoolman",
-          "version": ">=0.1.39"
+          "version": ">=0.1.40"
         }
       ],
       "doc_url": "https://github.com/Bespok3d/material-tags/blob/main/all-the-tags/doc/README.md",
@@ -320,7 +320,7 @@
     {
       "name": "materials-tracker-plus",
       "title": "Materials Tracker Plus",
-      "version": "0.1.6",
+      "version": "0.2.0",
       "description": "Know what filament is loaded, how much of it is left, and see it in the right colour on screen. Installs the whole RFID tag-reading stack (the NFC reader and hub plus every shipped tag decoder, so almost any spool you tap is identified), Spoolman tracking to keep the remaining length up to date, AFC Lite for the automated filament changer, and the U1 G-code preview colours so the sliced preview shows each tool in its real filament colour. Anycubic and Creality now decode fully against real tags (Creality via a recent release candidate, so its color may not yet match every spool); Bambu and Creality need your own keys pasted into their config, and without a key they fall back to UID-only tracking; QIDI needs no key. Everything installs together with a single service restart. Early-access (testing) channel until the stack is verified end to end on a real printer.",
       "tagline": "Tap a spool, and the printer knows what it is, how much is left, and what colour it prints.",
       "category": "filament",
@@ -328,7 +328,7 @@
       "publisher": "PLACEHOLDER",
       "printer_specific": true,
       "published_at": "2026-07-27",
-      "updated_at": "2026-09-13",
+      "updated_at": "2026-11-10",
       "author": "bespoked",
       "attributions": "",
       "license_url": "https://github.com/Bespok3d/material-tags/blob/dev/materials-tracker-plus/doc/LICENSE",
@@ -339,19 +339,19 @@
         },
         {
           "id": "rfid-generic-ndef",
-          "version": ">=0.1.0"
+          "version": ">=0.2.0"
         },
         {
           "id": "rfid-opentag",
-          "version": ">=0.1.0"
+          "version": ">=0.2.0"
         },
         {
           "id": "rfid-openprinttag",
-          "version": ">=0.1.0"
+          "version": ">=0.2.0"
         },
         {
           "id": "rfid-tigertag",
-          "version": ">=0.1.0"
+          "version": ">=0.2.0"
         },
         {
           "id": "rfid-anycubic",
@@ -363,11 +363,11 @@
         },
         {
           "id": "rfid-bambu",
-          "version": ">=0.2.2"
+          "version": ">=0.3.0"
         },
         {
           "id": "rfid-creality",
-          "version": ">=0.2.2"
+          "version": ">=0.2.3"
         },
         {
           "id": "rfid-elegoo",
@@ -375,7 +375,7 @@
         },
         {
           "id": "spoolman",
-          "version": ">=0.1.39"
+          "version": ">=0.1.40"
         },
         {
           "id": "afc-lite",
