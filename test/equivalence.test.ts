@@ -39,6 +39,12 @@ import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, ORG_INDEX_FILE, describeP
 // like. This costs nothing further than the 2026-08-05 reconciliation already cost: these two fixtures
 // stopped carrying the legacy claim then, and they go on pinning that the output does not move unless
 // someone means it to.
+//
+// Reconciled again on 2026-11-10, on the maintainer's instruction ("run the gate, fix every failure"),
+// for the 0.7.7 release: fluidd went 0.1.6 to 0.1.9 (upstream 1.37.4 to 1.37.7). Only fluidd's own
+// upstream bundle under files/fluidd/, its version, sw_version, tagline, attributions text, updated_at
+// and download_url moved; the packed b3d-tool-buttons template and every other manifest key are
+// unchanged. Networking did not move and was not touched.
 
 const NETWORKING_IDENTITY = {
   atomRepo: 'Bespok3d/networking',
@@ -120,6 +126,11 @@ describe('publisher equivalence rail', () => {
   // rfid-ntag member floor 0.1.6 to 0.1.15, and the rfid-anycubic, rfid-creality and rfid-elegoo floors
   // 0.1.0, 0.1.0 and 0.1.2 to 0.2.2, 0.2.2 and 0.1.5). Only values moved, inside keys the old entries
   // already carried. plugins[] was left alone again.
+  //
+  // collections[] was reconciled a fourth time on 2026-11-10, on the same terms, for the 0.7.7 release:
+  // all-the-tags went 0.1.7 to 0.1.8 and materials-tracker-plus 0.1.5 to 0.1.6, the rfid-bambu member
+  // floor 0.2.0 to 0.2.2 and the spoolman floor 0.1.11 to 0.1.39. Only values moved, inside keys the
+  // old entries already carried. plugins[] was left alone again.
   //
   // This repo needs the org index passed in, and that is the point of the case. Its rfid plugins require
   // `rfid-service`, which rfid-ntag provides from ANOTHER repo, so a build that only knows what it builds
