@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 import { publisherRequest, runPipeline } from '../src/core/index.js'
 import type { JsonObject } from '../src/core/index.js'
 import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, ORG_INDEX_FILE, describePackages, goldenPath, loadGoldenPackages, loadJson, sortAtomsByName, withoutAssemblyStamp } from './harness.js'
+import { subListWithoutBuildFingerprints, withoutBuildFingerprints } from './harness-fingerprint.js'
 
 // The golden-equivalence rail for the PUBLISHER core: build a single plugin dir and a repo of plugin
 // dirs via the clean pipeline (publisher/org identity passed in), and assert each reproduces the
@@ -45,6 +46,11 @@ import { ALL_THE_TAGS_DIR, FLUIDD_DIR, NETWORKING_DIR, ORG_INDEX_FILE, describeP
 // upstream bundle under files/fluidd/, its version, sw_version, tagline, attributions text, updated_at
 // and download_url moved; the packed b3d-tool-buttons template and every other manifest key are
 // unchanged. Networking did not move and was not touched.
+//
+// Reconciled again on 2026-11-19, on the maintainer's instruction ("fix it all"), after the sources
+// went to pre-release builds: tailscale 0.1.2 to 0.1.3-pre and fluidd 0.1.9 to 0.1.9-pre. Only the
+// version, the download_url filename, the packages.json key and the packed manifest version moved;
+// every payload hash is unchanged. zerotier and tun-module did not move.
 
 const NETWORKING_IDENTITY = {
   atomRepo: 'Bespok3d/networking',
@@ -77,7 +83,7 @@ describe('publisher equivalence rail', () => {
     const goldenPackages = loadGoldenPackages(goldenPath('networking', 'packages.json'))
     const zerotierFile = packageFilenameOf(zerotierDir)
     expect(artifacts.subList).toBeNull()
-    expect(artifacts.atoms).toEqual([loadJson(goldenPath('networking', 'zerotier.atom.json'))])
+    expect(withoutBuildFingerprints(artifacts.atoms)).toEqual([loadJson(goldenPath('networking', 'zerotier.atom.json'))])
     expect(describePackages(artifacts.packages)).toEqual({ [zerotierFile]: goldenPackages[zerotierFile] })
   }, 60_000)
 
@@ -89,8 +95,8 @@ describe('publisher equivalence rail', () => {
       outputDir,
       identity: NETWORKING_IDENTITY,
     })
-    expect(sortAtomsByName(artifacts.atoms)).toEqual(sortAtomsByName(loadGoldenAtoms()))
-    expect(withoutAssemblyStamp(artifacts.subList as JsonObject)).toEqual(loadJson(goldenPath('networking', 'index.json')))
+    expect(sortAtomsByName(withoutBuildFingerprints(artifacts.atoms))).toEqual(sortAtomsByName(loadGoldenAtoms()))
+    expect(subListWithoutBuildFingerprints(withoutAssemblyStamp(artifacts.subList as JsonObject))).toEqual(loadJson(goldenPath('networking', 'index.json')))
     expect(describePackages(artifacts.packages)).toEqual(loadGoldenPackages(goldenPath('networking', 'packages.json')))
   }, 60_000)
 
@@ -137,6 +143,9 @@ describe('publisher equivalence rail', () => {
   // rfid-tigertag floors 0.1.0 to 0.2.0, rfid-bambu 0.2.2 to 0.3.0, rfid-creality 0.2.2 to 0.2.3 and
   // spoolman 0.1.39 to 0.1.40. Only values moved. plugins[] was left alone again.
   //
+  // collections[] was reconciled a sixth time on 2026-11-19, on the same terms, on the maintainer's
+  // instruction ("fix it all"): both collections went 0.2.0 to 0.2.0-pre. Only the version moved.
+  //
   // This repo needs the org index passed in, and that is the point of the case. Its rfid plugins require
   // `rfid-service`, which rfid-ntag provides from ANOTHER repo, so a build that only knows what it builds
   // itself cannot name a provider. The legacy scripts wrote the service name into deps instead, which is
@@ -173,7 +182,7 @@ describe('publisher equivalence rail', () => {
       outputDir,
       identity: { atomRepo: NETWORKING_IDENTITY.atomRepo },
     })
-    expect(sortAtomsByName(artifacts.atoms)).toEqual(sortAtomsByName(loadGoldenAtoms()))
+    expect(sortAtomsByName(withoutBuildFingerprints(artifacts.atoms))).toEqual(sortAtomsByName(loadGoldenAtoms()))
     expect(artifacts.subList).toBeNull()
     expect(existsSync(join(outputDir, 'index.json'))).toBe(false)
     expect(describePackages(artifacts.packages)).toEqual(loadGoldenPackages(goldenPath('networking', 'packages.json')))
@@ -192,7 +201,7 @@ describe('publisher equivalence rail', () => {
       identity: { atomRepo: 'Bespok3d/fluidd-plugin' },
       exclude: ['fluidd-bleeding-edge'],
     })
-    expect(artifacts.atoms).toEqual([loadJson(goldenPath('fluidd', 'fluidd.atom.json'))])
+    expect(withoutBuildFingerprints(artifacts.atoms)).toEqual([loadJson(goldenPath('fluidd', 'fluidd.atom.json'))])
     expect(artifacts.subList).toBeNull()
     expect(existsSync(join(outputDir, 'index.json'))).toBe(false)
     expect(describePackages(artifacts.packages)).toEqual(loadGoldenPackages(goldenPath('fluidd', 'packages.json')))

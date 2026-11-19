@@ -10,7 +10,7 @@ import { packPlugin, signManifestInPlace } from '../src/core/build/archive.js'
 import { verifyDetached } from '../src/core/build/sign-bytes.js'
 import type { JsonObject } from '../src/core/index.js'
 import { describeArchive } from './harness.js'
-import { stubPluginDir } from './stub-plugin.js'
+import { STUB_FINGERPRINT, stubPluginDir } from './stub-plugin.js'
 
 // manifest.json holds files[], so it can never carry its own hash, and its detached signature does not
 // exist until the manifest is final. Those two are the whole exemption list, and it is arithmetic, not
@@ -27,7 +27,7 @@ describe('packPlugin drops build-only manifest fields', () => {
     }
     const outputDir = mkdtempSync(join(tmpdir(), 'b3-archive-out-'))
 
-    const packed = packPlugin(manifest, stubPluginDir(manifest), outputDir)
+    const packed = packPlugin(manifest, stubPluginDir(manifest), outputDir, STUB_FINGERPRINT)
     const shipped = describeArchive(packed.path).manifest
 
     expect(shipped.bake).toBeUndefined()
@@ -53,7 +53,7 @@ describe('packPlugin lists every payload member it archives', () => {
     writeFileSync(join(pluginDir, 'doc/README.md'), 'how to use demo\n')
     const outputDir = mkdtempSync(join(tmpdir(), 'b3-archive-out-'))
 
-    const packed = packPlugin(manifest, pluginDir, outputDir)
+    const packed = packPlugin(manifest, pluginDir, outputDir, STUB_FINGERPRINT)
     const { privateKey } = await openpgp.generateKey({
       type: 'ecc',
       userIDs: [{ name: 'throwaway test key' }],
@@ -88,7 +88,7 @@ describe('packPlugin refuses a package with no payload', () => {
     writeFileSync(join(pluginDir, 'doc/README.md'), 'prose reaches no printer\n')
     const outputDir = mkdtempSync(join(tmpdir(), 'b3-archive-out-'))
 
-    expect(() => packPlugin(manifest, pluginDir, outputDir)).toThrow(/hollow-demo: the plugin dir holds no payload/)
+    expect(() => packPlugin(manifest, pluginDir, outputDir, STUB_FINGERPRINT)).toThrow(/hollow-demo: the plugin dir holds no payload/)
   })
 
   it('packs a plugin whose whole payload is a Python dep declaration', () => {
@@ -98,7 +98,7 @@ describe('packPlugin refuses a package with no payload', () => {
     writeFileSync(join(pluginDir, 'requirements.txt'), 'spoolman-client==1.0.0\n')
     const outputDir = mkdtempSync(join(tmpdir(), 'b3-archive-out-'))
 
-    const packed = packPlugin(manifest, pluginDir, outputDir)
+    const packed = packPlugin(manifest, pluginDir, outputDir, STUB_FINGERPRINT)
 
     expect(new AdmZip(packed.path).getEntries().map((entry) => entry.entryName)).toContain('requirements.txt')
   })
@@ -112,7 +112,7 @@ describe('signManifestInPlace', () => {
       install: { place: [{ class: 'system-bin', src: 'files/bin/demo-aarch64' }] },
     }
     const outputDir = mkdtempSync(join(tmpdir(), 'b3-archive-out-'))
-    const packed = packPlugin(manifest, stubPluginDir(manifest), outputDir)
+    const packed = packPlugin(manifest, stubPluginDir(manifest), outputDir, STUB_FINGERPRINT)
 
     const { privateKey, publicKey } = await openpgp.generateKey({
       type: 'ecc',

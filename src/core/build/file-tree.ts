@@ -59,7 +59,8 @@ export interface FileArrayEntry {
 
 // The manifest.files[] entries for EVERY member the packer puts in the .b3: the files/ tree, the doc/
 // tree, and the root-level ADR-0036 Python-dep declarations (requirements.txt / klipper_requirements.txt),
-// sorted by path. Plain string sort matches LC_ALL=C byte order for the ASCII paths every plugin ships.
+// sorted by path in code-unit order, which matches LC_ALL=C byte order for the ASCII paths every plugin
+// ships and never depends on the locale of the machine that builds.
 //
 // doc/ is listed even though the daemon never installs it, because an unlisted zip member is an unsigned
 // zip member: the signature covers manifest.json, and manifest.json vouches for a file only by listing its
@@ -80,7 +81,14 @@ export function buildFilesArray(pluginDir: string): FileArrayEntry[] {
       sha256: sha256OfFile(absPath),
       mode: normalizeMode(absPath),
     }))
-    .sort((earlier, later) => earlier.path.localeCompare(later.path))
+    .sort((earlier, later) => byCodeUnits(earlier.path, later.path))
+}
+
+// localeCompare follows the building machine's locale, so two hosts could fold the same sources into
+// two different fingerprints.
+export function byCodeUnits(earlier: string, later: string): number {
+  if (earlier === later) return 0
+  return earlier < later ? -1 : 1
 }
 
 function existsAsFile(path: string): boolean {

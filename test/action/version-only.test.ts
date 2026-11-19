@@ -7,6 +7,11 @@ import { prepareCandidateVersion, prepareVersion, replaceRuntimeVersion, compare
 import { packPlugin } from '../../src/core/build/archive.js'
 import { stubPluginDir } from '../stub-plugin.js'
 
+// The fingerprint digests the sources, version included, so a candidate and its live package always
+// carry different ones. Every promotion here is packed that way, as a real release is.
+const CANDIDATE_FINGERPRINT = 'c'.repeat(64)
+const LIVE_FINGERPRINT = 'e'.repeat(64)
+
 it('changes exactly the approved manifest literal and runtime assignment, preserving all surrounding bytes', () => {
   const source = stubPluginDir({ name: 'daemon-fixture', version: '1.2.3' })
   const manifestPath = join(source, 'manifest.json')
@@ -26,10 +31,10 @@ it.each(['files/version.py', 'files/bin/demo-aarch64'])('rejects a non-version c
   const candidateManifest = { name: 'daemon-fixture', version: '1.2.3-pre' }
   const source = stubPluginDir(candidateManifest)
   writeFileSync(join(source, 'files/version.py'), 'DAEMON_VERSION = "1.2.3-pre"\nOTHER = 1\n')
-  const candidate = packPlugin(candidateManifest, source, source)
+  const candidate = packPlugin(candidateManifest, source, source, CANDIDATE_FINGERPRINT)
   prepareVersion(join(source, 'manifest.json'), '1.2.3-pre', join(source, 'files/version.py'))
   writeFileSync(join(source, path), `${readFileSync(join(source, path), 'utf8')}# behavior mutation\n`)
-  const live = packPlugin({ ...candidateManifest, version: '1.2.3' }, source, source)
+  const live = packPlugin({ ...candidateManifest, version: '1.2.3' }, source, source, LIVE_FINGERPRINT)
   expect(() => comparePromotionPackages(candidate.path, live.path, '1.2.3-pre', true)).toThrow('non-version')
 })
 
@@ -37,10 +42,31 @@ it('rejects an archive permission-mode change despite identical payload bytes', 
   const { default: AdmZip } = await import('adm-zip')
   const manifest = { name: 'mode-fixture', version: '1.0.0-pre' }
   const source = stubPluginDir(manifest)
-  const candidate = packPlugin(manifest, source, source)
-  const live = packPlugin({ ...manifest, version: '1.0.0' }, source, source)
+  const candidate = packPlugin(manifest, source, source, CANDIDATE_FINGERPRINT)
+  const live = packPlugin({ ...manifest, version: '1.0.0' }, source, source, LIVE_FINGERPRINT)
   const archive = new AdmZip(live.path)
   archive.getEntry('files/bin/demo-aarch64')!.attr = 0o100755 << 16
   archive.writeZip(live.path)
   expect(() => comparePromotionPackages(candidate.path, live.path, '1.0.0-pre', false)).toThrow('modes changed')
+})
+
+it('accepts a clean promotion although the candidate and live fingerprints differ', () => {
+  const manifest = { name: 'clean-fixture', version: '1.0.0-pre' }
+  const source = stubPluginDir(manifest)
+  const candidate = packPlugin(manifest, source, source, CANDIDATE_FINGERPRINT)
+  const live = packPlugin({ ...manifest, version: '1.0.0' }, source, source, LIVE_FINGERPRINT)
+  expect(() => comparePromotionPackages(candidate.path, live.path, '1.0.0-pre', false)).not.toThrow()
+})
+
+it('rejects a promotion whose live package drops the fingerprint the candidate carries', async () => {
+  const { default: AdmZip } = await import('adm-zip')
+  const manifest = { name: 'dropped-fixture', version: '1.0.0-pre' }
+  const source = stubPluginDir(manifest)
+  const candidate = packPlugin(manifest, source, source, CANDIDATE_FINGERPRINT)
+  const live = packPlugin({ ...manifest, version: '1.0.0' }, source, source, LIVE_FINGERPRINT)
+  const archive = new AdmZip(live.path)
+  const { fingerprint: _dropped, ...liveManifest } = JSON.parse(archive.getEntry('manifest.json')!.getData().toString('utf8')) as Record<string, unknown>
+  archive.updateFile('manifest.json', Buffer.from(JSON.stringify(liveManifest)))
+  archive.writeZip(live.path)
+  expect(() => comparePromotionPackages(candidate.path, live.path, '1.0.0-pre', false)).toThrow('non-version manifest change')
 })

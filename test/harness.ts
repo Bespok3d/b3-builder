@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import AdmZip from 'adm-zip'
 import type { JsonObject, JsonValue, PackedPackage } from '../src/core/index.js'
+import { withoutBuildFingerprint } from './harness-fingerprint.js'
 
 // Shared machinery for the golden-equivalence harness: one implementation of "describe a .b3 by its
 // content", so the frozen golden (captured from the legacy scripts when they still existed) and the
@@ -74,8 +75,9 @@ function isDocPath(path: string): boolean {
 // (both golden and candidate pass through here identically), which tests the real invariant (the same
 // set of files with the same sha256 and mode) without forcing a ported packer to reproduce one
 // particular sort. Every other manifest array comes from the source manifest verbatim, so it matches
-// by construction.
-function normalizeManifest(manifest: JsonObject): JsonObject {
+// by construction. The build fingerprint is dropped here too (see harness-fingerprint.ts).
+function normalizeManifest(packedManifest: JsonObject): JsonObject {
+  const manifest = withoutBuildFingerprint(packedManifest)
   const files = manifest.files
   if (!Array.isArray(files)) return manifest
   const sorted = [...files]

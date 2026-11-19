@@ -1,5 +1,5 @@
 {
-  "fluidd-0.1.9.b3": {
+  "fluidd-0.1.9-pre.b3": {
     "entries": [
       {
         "path": "files/b3d-tool-buttons.js.tmpl",
@@ -1053,7 +1053,7 @@
     "manifest": {
       "name": "fluidd",
       "title": "Fluidd",
-      "version": "0.1.9",
+      "version": "0.1.9-pre",
       "sw_version": "1.37.7",
       "author": "bespoked",
       "description": "Swaps SM's outdated Fluidd for the current upstream release. You get input-shaper graphs, integrated config/G-code editors, tool-colour preview, modern mesh viz. Uninstall restores the SM-shipped copy automatically; no nginx config touched.",

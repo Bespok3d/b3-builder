@@ -6,6 +6,15 @@ What changed in the builder, for a publisher using the CLI or the GitHub Action.
 
 ## Unreleased
 
+### A rebuild at the same version is offered as an update
+
+Every package now carries a `fingerprint` in its manifest, covered by the package signature on a
+signed build, and its catalog entry carries the same value. The app compares what is installed with
+what is published, so a package rebuilt without a version bump still reaches printers. The builder
+version is part of the fingerprint: it moved to 0.1.0, so the first build with it repacks every
+package once, even with skip-unchanged on, and every package rebuilt with a newer builder is offered
+as an update.
+
 ### A collection can be released on its own tag
 
 A collection ships no `.b3`, so its tag used to publish no release at all, and with the managed

@@ -53,7 +53,7 @@ export function comparePromotionPackages(candidatePath: string, livePath: string
   if (JSON.stringify(candidatePaths) !== JSON.stringify(livePaths)) throw new Error('promotion package paths changed')
   if (JSON.stringify(payloadModes(candidate.modes)) !== JSON.stringify(payloadModes(live.modes))) throw new Error('promotion archive paths or modes changed')
   const runtime = daemon ? 'files/version.py' : undefined
-  const normalized = normalizedCandidate(candidate.manifest, candidate.entries, candidateVersion, targetVersion, runtime)
+  const normalized = withLiveFingerprint(normalizedCandidate(candidate.manifest, candidate.entries, candidateVersion, targetVersion, runtime), live.manifest)
   if (JSON.stringify(normalized) !== JSON.stringify(live.manifest)) throw new Error('non-version manifest change in promotion')
   candidatePaths.filter((path) => path !== 'manifest.json').forEach((path) => {
     const candidateBytes = candidate.entries.get(path)!
@@ -73,6 +73,14 @@ function normalizedCandidate(manifest: JsonObject, entries: Map<string, Buffer>,
   if (!runtimeEntry) throw new Error('daemon version.py is absent from manifest inventory')
   runtimeEntry.sha256 = sha256(Buffer.from(replaceRuntimeVersion(bytes.toString('utf8'), candidate, live)))
   return normalized
+}
+
+// The fingerprint digests the sources, version included, so a candidate and its promoted live package
+// differ there by construction. Every other manifest field and every payload byte is still compared.
+// When only one side carries a fingerprint, nothing is copied, so the comparison still fails.
+function withLiveFingerprint(normalized: JsonObject, live: JsonObject): JsonObject {
+  if (normalized.fingerprint === undefined || live.fingerprint === undefined) return normalized
+  return { ...normalized, fingerprint: live.fingerprint }
 }
 
 function payloadModes(entries: Record<string, number>): [string, number][] {

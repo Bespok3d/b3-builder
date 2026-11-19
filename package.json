@@ -1,6 +1,6 @@
 {
   "name": "@bespok3d/builder",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "The Bespok3d plugin build system: turn a plugin source dir into a gated, class-aware, signed .b3 plus its index atom, the same way locally (a b3-builder CLI) and in CI (a reusable GitHub Action) over one importable core.",
   "type": "module",
   "engines": {

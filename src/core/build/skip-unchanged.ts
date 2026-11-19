@@ -23,9 +23,9 @@ export function packIfChanged(
   const b3Path = join(outputDir, filename)
   const fingerprint = pluginFingerprint(pluginDir, builderVersion)
   if (existsSync(b3Path) && readSidecar(`${b3Path}${FINGERPRINT_SUFFIX}`) === fingerprint) {
-    return { filename, path: b3Path, skipped: true }
+    return { filename, path: b3Path, fingerprint, skipped: true }
   }
-  const packed = packPlugin(manifest, pluginDir, outputDir)
+  const packed = packPlugin(manifest, pluginDir, outputDir, fingerprint)
   writeFileSync(`${packed.path}${FINGERPRINT_SUFFIX}`, fingerprint)
   return { ...packed, skipped: false }
 }

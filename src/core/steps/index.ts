@@ -9,6 +9,7 @@ import { readProviderSources } from '../build/service-providers.js'
 import { sourcesFor } from '../build/discovery.js'
 import { writeSignedIndexFile } from '../build/signed-index.js'
 import { assertUniqueAtoms } from '../build/unique-atoms.js'
+import { withPackageFingerprints } from '../build/entry-fingerprint.js'
 import { writeJsonFile } from '../build/write-json.js'
 
 // Step 3 of 4: turn the packed set into its published registry form and write it to the output dir.
@@ -16,16 +17,18 @@ import { writeJsonFile } from '../build/write-json.js'
 // identity additionally assembles the atoms into one leaf sub-list (`index.json`), while an atoms-only
 // repo build (whose atoms register into a list it does not own) stops at the atoms. Both repo forms
 // guard against two dirs colliding on one name@version. Publisher/org identity (the atom doc_url repo,
-// the sub-list name and publisher) is taken from the request, never baked.
+// the sub-list name and publisher) is taken from the request, never baked. Each plugin atom, and so
+// each sub-list entry, carries the fingerprint its packed .b3 carries (see build/entry-fingerprint.ts).
 //
 // A keyed build signs that sub-list, the list-level counterpart of the manifest signature `pack` puts
 // inside each .b3, and on the same terms: the key is an input, so an unkeyed build publishes the list
 // unsigned rather than failing. An atom is not signed on its own, because an atom is never served: it
 // is a fragment the owning list (or the index-of-lists) assembles and signs as a whole.
 export async function buildRegistry(context: PipelineContext): Promise<PipelineContext> {
-  const { request, publisher } = context
+  const { request, publisher, packages } = context
   const sources = sourcesFor(request)
-  const atoms = stampReleaseKinds(publishedBy(buildAtoms(sources, request.identity.atomRepo), publisher), request)
+  const built = publishedBy(buildAtoms(sources, request.identity.atomRepo), publisher)
+  const atoms = stampReleaseKinds(withPackageFingerprints(built, packages), request)
   atoms.forEach((atom) => writeJsonFile(join(request.outputDir, atomFilename(atom)), atom))
   if (request.unit === 'plugin') return { ...context, atoms, subList: null }
   assertUniqueAtoms(sources)

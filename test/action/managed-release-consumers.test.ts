@@ -12,6 +12,22 @@ const publishers = [
   'u1-force-macros', 'u1-hw-camera', 'u1-klipper-config-enhancers', 'u1-motion-tweaks', 'u1-remote-screen',
 ]
 
+// The Action registers a list publisher's sub-list into the index-of-lists on a live release only (a repo
+// unit with a list-name and a main-index-token, as in action.yml), so such a repo registers its atoms
+// for a draft or prerelease and leaves live to its list. Any other repo reaches the index through its
+// atoms alone and registers them for every kind.
+const ATOM_REGISTRATION_ON_PUBLISH = "${{ steps.release.outputs.publish == 'true' }}"
+const ATOM_REGISTRATION_BEFORE_LIVE = "${{ steps.release.outputs.publish == 'true' && steps.release.outputs.release-kind != 'live' }}"
+
+function registersSubListOnLive(builderInputs: Record<string, string> | undefined): boolean {
+  return builderInputs?.unit === 'repo' && Boolean(builderInputs['list-name']) && Boolean(builderInputs['main-index-token'])
+}
+
+function expectedAtomRegistration(builderInputs: Record<string, string> | undefined): string {
+  if (registersSubListOnLive(builderInputs)) return ATOM_REGISTRATION_BEFORE_LIVE
+  return ATOM_REGISTRATION_ON_PUBLISH
+}
+
 it.each(publishers)('%s prepares and publishes only the selected release via the shared Action', (publisher) => {
   const workspace = process.env.B3D_CONSUMER_WORKSPACE ?? resolve(import.meta.dirname, '../../..')
   const path = resolve(workspace, `plugins/${publisher}/.github/workflows/release.yml`)
@@ -27,6 +43,6 @@ it.each(publishers)('%s prepares and publishes only the selected release via the
   const registration = job.steps.find((step) => step.uses?.includes('register-atoms@'))
   if (!registration) return
   expect(action.id).toBe('release')
-  expect(registration.if).toBe("${{ steps.release.outputs.publish == 'true' }}")
+  expect(registration.if).toBe(expectedAtomRegistration(action.with))
   expect(registration.with).toMatchObject({ 'selected-ids': '${{ steps.release.outputs.selected-ids }}', 'release-kind': '${{ steps.release.outputs.release-kind }}' })
 })

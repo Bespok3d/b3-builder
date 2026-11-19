@@ -33,7 +33,12 @@ export function packageFilename(manifest: JsonObject): string {
 // manifest.json.sig, which cannot be listed rather than are chosen not to be (files[] lives inside
 // manifest.json, and the signature post-dates it). A verifier rejects a .b3 with any other unlisted
 // member. The legacy shell packers walked twice and shipped junk unlisted; see walkPackedFiles.
-export function packPlugin(manifest: JsonObject, pluginDir: string, outputDir: string): PackedPackage {
+//
+// The manifest also carries `fingerprint`, the digest of the plugin's sources (see fingerprint.ts), so
+// the signature covers it and a printer can read back which build it has installed: a rebuild at an
+// unchanged version is told apart from what is published by this value, never by the version alone.
+// It overrides any value a source manifest declares, since only the build can know it.
+export function packPlugin(manifest: JsonObject, pluginDir: string, outputDir: string, fingerprint: string): PackedPackage {
   refuseEmptyPayload(manifest, pluginDir)
   const filename = packageFilename(manifest)
   const path = join(outputDir, filename)
@@ -41,6 +46,7 @@ export function packPlugin(manifest: JsonObject, pluginDir: string, outputDir: s
   const files = buildFilesArray(pluginDir)
   const packedManifest: JsonObject = {
     ...omitFields(manifest, BUILD_ONLY_MANIFEST_FIELDS),
+    fingerprint,
     files: files.map((entry) => ({ path: entry.path, sha256: entry.sha256, mode: entry.mode })),
   }
 
@@ -54,7 +60,7 @@ export function packPlugin(manifest: JsonObject, pluginDir: string, outputDir: s
   zip.addFile('manifest.json', Buffer.from(`${JSON.stringify(packedManifest, null, 2)}\n`))
   zip.writeZip(path)
 
-  return { filename, path }
+  return { filename, path, fingerprint }
 }
 
 function addTree(zip: AdmZip, pluginDir: string, treeRoot: string): void {

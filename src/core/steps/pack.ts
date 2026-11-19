@@ -5,6 +5,7 @@ import { packPlugin, signManifestInPlace, stampManifestPublisherInPlace } from '
 import { sourcesFor } from '../build/discovery.js'
 import { isCollection } from '../build/entry.js'
 import { packIfChanged } from '../build/skip-unchanged.js'
+import { pluginFingerprint } from '../build/fingerprint.js'
 import { refuseUnprovenPublisherClaims } from '../build/publisher-claim.js'
 import { builderVersion } from '../version.js'
 import type { PluginSource } from '../build/plugin-source.js'
@@ -21,6 +22,9 @@ import type { PluginSource } from '../build/plugin-source.js'
 // hand-declares a real key fingerprint is refused outright rather than packed with an unbacked claim (see
 // build/publisher-claim.ts).
 //
+// Every build, skip-unchanged or not, computes each plugin's fingerprint over the same builder version
+// and writes it into the packed manifest, so a package carries the same value whichever way it was built.
+//
 // A kind:collection source is discovered like any other but has no payload to archive (it is pure
 // install-orchestration metadata that reaches the device only through the index), so it is passed over
 // here and here only. Skipping it is what the legacy pack.sh did too.
@@ -28,21 +32,21 @@ export async function pack(context: PipelineContext): Promise<PipelineContext> {
   const { request, publisher } = context
   const sources = sourcesFor(request).filter((source) => !isCollection(source.manifest))
   refuseUnprovenPublisherClaims(sources, request.signingKey)
-  const version = request.skipUnchanged === true ? builderVersion() : ''
-  const packages = await Promise.all(sources.map((source) => packSource(source, request, version, publisher)))
+  const currentBuilderVersion = builderVersion()
+  const packages = await Promise.all(sources.map((source) => packSource(source, request, currentBuilderVersion, publisher)))
   return { ...context, packages }
 }
 
 async function packSource(
   source: PluginSource,
   request: BuildRequest,
-  version: string,
+  currentBuilderVersion: string,
   publisher: string | undefined,
 ): Promise<PackedPackage> {
   const packed =
     request.skipUnchanged === true
-      ? packIfChanged(source.manifest, source.dir, request.outputDir, version)
-      : packPlugin(source.manifest, source.dir, request.outputDir)
+      ? packIfChanged(source.manifest, source.dir, request.outputDir, currentBuilderVersion)
+      : packPlugin(source.manifest, source.dir, request.outputDir, pluginFingerprint(source.dir, currentBuilderVersion))
   if (request.signingKey === undefined || publisher === undefined) return packed
   stampManifestPublisherInPlace(packed.path, publisher)
   await signManifestInPlace(packed.path, request.signingKey)

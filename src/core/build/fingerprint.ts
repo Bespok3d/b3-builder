@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 import { createHash } from 'node:crypto'
 import { join, relative } from 'node:path'
-import { buildFilesArray, sha256OfFile, walkPackedFiles } from './file-tree.js'
+import { buildFilesArray, byCodeUnits, sha256OfFile, walkPackedFiles } from './file-tree.js'
 import { readManifest } from './plugin-source.js'
 
 // The change-detection fingerprint for a plugin dir: a sha256 folding together everything that
@@ -34,7 +34,7 @@ export function pluginFingerprint(pluginDir: string, builderVersion: string): st
 // A content digest of one filtered tree (path + content sha256, path-sorted for stability). A missing
 // root walks to [], yielding the stable empty digest, so a plugin without a doc/ dir is not special.
 function hashFilteredTree(root: string): string {
-  const files = [...walkPackedFiles(root)].sort((earlier, later) => earlier.localeCompare(later))
+  const files = [...walkPackedFiles(root)].sort(byCodeUnits)
   const digest = files.reduce(
     (hash, absPath) => hash.update(relative(root, absPath)).update('\0').update(sha256OfFile(absPath)).update('\0'),
     createHash('sha256'),

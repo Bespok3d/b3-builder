@@ -80,10 +80,13 @@ export type BuildRequest = PluginBuildRequest | RepoBuildRequest
 
 // One packed .b3 written to the output dir: its filename (`<name>-<version>.b3`) and absolute path.
 // `skipped` is true when skip-unchanged reused an existing .b3 (its fingerprint was unchanged) instead
-// of repacking; false on a fresh pack; undefined when skip-unchanged was off.
+// of repacking; false on a fresh pack; undefined when skip-unchanged was off. `fingerprint` is the
+// digest of the package's sources (see build/fingerprint.ts) that its packed manifest carries, returned
+// so the catalog entry can carry the same value.
 export interface PackedPackage {
   filename: string
   path: string
+  fingerprint: string
   skipped?: boolean
 }
 

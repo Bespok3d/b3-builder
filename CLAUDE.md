@@ -248,7 +248,7 @@ manifest (a zip's framing is non-deterministic, so the invariant is content, not
   (`npm run golden:refresh` in `Bespok3d-desktop`) and never hand-edited. Do not carry the
   no-recapture rule over to it, and do not carry its refresh command back here: this rail has no
   producer that could honestly rewrite it.
-- **One known divergence from legacy, and it is a security fix, not a port bug.** The legacy shell
+- **The first known divergence from legacy, and it is a security fix, not a port bug.** The legacy shell
   packers walked twice: `zip -qr` archived the `files/` tree as-is while `build_files_array` checksummed a
   filtered list, so `__pycache__` / `*.pyc` / `.DS_Store` rode inside the `.b3` absent from `files[]` and
   therefore uncovered by the manifest signature. The packer now uses ONE walk (`walkPackedFiles`), which
@@ -256,6 +256,12 @@ manifest (a zip's framing is non-deterministic, so the invariant is content, not
   unlisted members, all three by construction. The goldens contain no junk, so this changes nothing they
   pin and the rail stays green. Do not "restore legacy fidelity" by splitting the walk again;
   `test/archive.test.ts` fails if you do.
+- **A second known divergence: the build `fingerprint`.** Every packed manifest, plugin atom and
+  sub-list plugin entry (never a collection) carries `fingerprint` (the sha256 `pluginFingerprint` gives
+  over the builder version and the source), so a reader offers a same-version rebuild as an update. The legacy scripts never wrote
+  it and any builder release moves it, so a frozen fixture cannot carry it: `test/harness-fingerprint.ts`
+  drops that one field on the candidate side, exactly like `assembled_at`, and nothing else.
+  `test/package-fingerprint.test.ts` pins the value directly. Do not widen that exclusion past this field.
 - **The rail builds from the LIVE sibling plugin trees** (`../plugins/networking`, `../plugins/fluidd-plugin`),
   so a source change there (a version bump, an edited payload) turns it red. That is real information: the
   build output moved. Reconciling it against the frozen golden is a maintainer decision, never a quiet

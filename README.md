@@ -172,6 +172,13 @@ assembles `index.json`, a self-contained plugin list (with dependencies resolved
 plugins) that an index of lists can reference. Two plugins in one repo may not share the same
 name and version.
 
+Every packed manifest carries a `fingerprint`: a sha256 of the builder version, the source manifest,
+the `files/` payload and the `doc/` tree. A signed build's manifest signature covers it. Its catalog
+entry (the atom, and the plugin's entry in `index.json`) carries the same value. The app compares the
+installed fingerprint with the published one, so a rebuild at the same version is still offered as an
+update. A new builder version changes every fingerprint, so a package rebuilt with it is offered as an
+update even when its sources did not change. A collection ships no `.b3` and carries none.
+
 Exit behavior: success prints `Built N package(s) into <out>` and exits 0; any failure prints
 `b3-builder build failed: <reason>` and exits 1. Any subcommand other than `build` or `init` prints
 the usage line and exits 2.
@@ -452,8 +459,9 @@ node dist/action/version-main.js compare candidate.b3 live.b3 1.2.3-pre public-k
 
 `version-source.js` exports `verifyVersionOnlyCommit` for comparing separately recorded candidate
 and Live commits against explicit manifest/runtime version fields. Package comparison permits only
-the manifest version, its signature, and the exact daemon `DAEMON_VERSION` assignment (plus that
-file's manifest checksum). It preserves paths, modes and all other payload bytes; timestamps and
+the manifest version, its signature, the manifest `fingerprint` (it digests the version, so it differs
+by construction; both packages must carry one), and the exact daemon `DAEMON_VERSION` assignment
+(plus that file's manifest checksum). It preserves paths, modes and all other payload bytes; timestamps and
 compression framing are not payload identity.
 
 ### Pre-tag preparation and normal tag publication
@@ -463,7 +471,7 @@ publication. A preparation dispatch supplies `prospective-tag`, one `selected-id
 `expected-source-sha`, `release-kind`, and `publish: false`. The checkout must match that SHA.
 The consumer's unchanged tag guard checks the prospective tag even though it does not exist yet.
 Plugin source and baked payloads are staged into `dist/package`; the complete `dist` tree is retained
-in `verified-unit-outputs.tar.gz` so publication restores the exact modes and source fingerprints.
+in `verified-unit-outputs.tar.gz` so publication restores the exact modes and source digests.
 
 After uploading that artifact, the workflow creates `prepared-release-receipt.json` and
 `prepared-release-tag-message.txt`, retained together as the `verified-unit-receipt` artifact.

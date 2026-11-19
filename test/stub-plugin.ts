@@ -5,6 +5,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { JsonObject } from '../src/core/index.js'
 
+// A well-formed build fingerprint for a test that packs directly and does not care about its value.
+export const STUB_FINGERPRINT = 'f'.repeat(64)
+
 // A minimal plugin dir with one staged payload file, so a pack has a real files/ tree to checksum.
 // Shared by every test that needs a throwaway plugin to build rather than a real sibling plugin repo.
 // Given a repo dir, the plugin lands inside it under its own manifest name, because a repo build

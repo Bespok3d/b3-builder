@@ -48,4 +48,15 @@ describe('buildFilesArray', () => {
     const entries = buildFilesArray(pluginDir)
     expect(entries.map((entry) => entry.path)).toEqual(['files/extras/AFC.py'])
   })
+
+  it('orders the payload by code unit, so every build host folds the same sources into one fingerprint', () => {
+    const pluginDir = mkdtempSync(join(tmpdir(), 'b3-payload-'))
+    const filesDir = join(pluginDir, 'files')
+    mkdirSync(filesDir, { recursive: true })
+    writeFileSync(join(filesDir, 'a.cfg'), 'lower')
+    writeFileSync(join(filesDir, 'B.cfg'), 'upper')
+
+    const entries = buildFilesArray(pluginDir)
+    expect(entries.map((entry) => entry.path)).toEqual(['files/B.cfg', 'files/a.cfg'])
+  })
 })
