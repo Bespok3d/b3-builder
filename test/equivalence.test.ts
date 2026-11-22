@@ -56,7 +56,9 @@ import { subListWithoutBuildFingerprints, withoutBuildFingerprints } from './har
 // 0.2.0-pre (upstream 1.37.7 to 1.38.1). Only fluidd's own upstream bundle under files/fluidd/, its
 // version, sw_version, tagline, attributions text, updated_at and download_url moved. The rail pins for
 // networking, material-tags and fluidd moved to the trees the goldens were reconciled against; the
-// 2026-11-19 reconciliation had left them behind, which is what kept CI red.
+// 2026-11-19 reconciliation had left them behind, which is what kept CI red. The same change corrects
+// tailscale's ts-run hash: the 2026-11-19 reconciliation read it from a stale local bake, while a clean
+// bake copies tailscale/src/ts-run, which had gained the rejoin-at-boot fix.
 
 const NETWORKING_IDENTITY = {
   atomRepo: 'Bespok3d/networking',

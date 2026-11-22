@@ -15,7 +15,7 @@
       },
       {
         "path": "files/bin/ts-run",
-        "sha256": "b9a3d0eb4209960a49c5b302ede795ab000963e98a93feb46d695e05bee5abe3"
+        "sha256": "494bf652935669a9344bc73efbd0bdbe842d54c69e7fdab60ca45863957f4927"
       },
       {
         "path": "files/cfg/moonraker/tailscale-trusted.cfg",
@@ -159,7 +159,7 @@
         },
         {
           "path": "files/bin/ts-run",
-          "sha256": "b9a3d0eb4209960a49c5b302ede795ab000963e98a93feb46d695e05bee5abe3",
+          "sha256": "494bf652935669a9344bc73efbd0bdbe842d54c69e7fdab60ca45863957f4927",
           "mode": "755"
         },
         {
