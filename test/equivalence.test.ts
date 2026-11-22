@@ -51,6 +51,12 @@ import { subListWithoutBuildFingerprints, withoutBuildFingerprints } from './har
 // went to pre-release builds: tailscale 0.1.2 to 0.1.3-pre and fluidd 0.1.9 to 0.1.9-pre. Only the
 // version, the download_url filename, the packages.json key and the packed manifest version moved;
 // every payload hash is unchanged. zerotier and tun-module did not move.
+//
+// Reconciled again on 2026-11-22, on the maintainer's instruction ("fix it"): fluidd went 0.1.9-pre to
+// 0.2.0-pre (upstream 1.37.7 to 1.38.1). Only fluidd's own upstream bundle under files/fluidd/, its
+// version, sw_version, tagline, attributions text, updated_at and download_url moved. The rail pins for
+// networking, material-tags and fluidd moved to the trees the goldens were reconciled against; the
+// 2026-11-19 reconciliation had left them behind, which is what kept CI red.
 
 const NETWORKING_IDENTITY = {
   atomRepo: 'Bespok3d/networking',
